@@ -1,0 +1,23 @@
+[
+  {
+    "category": "Туристическое снаряжение",
+    "name": "Палатка 4-местная",
+    "price_per_day": 400,
+    "deposit": 6000,
+    "is_available": true
+  },
+  {
+    "category": "Туристическое снаряжение",
+    "name": "Спальник",
+    "price_per_day": 120,
+    "deposit": 1000,
+    "is_available": true
+  },
+  {
+    "category": "Туристическое снаряжение",
+    "name": "Рюкзак туристический",
+    "price_per_day": 150,
+    "deposit": 1500,
+    "is_available": false
+  }
+]
