@@ -1,16 +1,8 @@
 ﻿from urllib.parse import urljoin, urlparse
 
-import requests
 from bs4 import BeautifulSoup
 
-
-BASE_URL = "https://prokat24.com.ua/"
-
-
-def fetch_page(url: str) -> str:
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    return response.text
+from prokat24_client import BASE_URL, fetch_page
 
 
 def is_internal_link(url: str) -> bool:
