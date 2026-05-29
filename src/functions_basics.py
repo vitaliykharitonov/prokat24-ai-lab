@@ -17,7 +17,7 @@ products = [
     {
         "category": "Туристическое снаряжение",
         "name": "Рюкзак туристический",
-        "price_per_day": 120,
+        "price_per_day": 150,
         "deposit": 1500,
         "is_available": False,
     },
@@ -30,11 +30,15 @@ products = [
     },
 ]
 
-def is_suitable_product(product):
-    return product["is_available"] and product["price_per_day"] <= 150
 
-print("Подходящие товары:")
+def is_suitable_product(product, max_price):
+    return product["is_available"] and product["price_per_day"] <= max_price
+
+
+max_price = 400
+
+print(f"Подходящие товары до {max_price} грн/день:")
 
 for product in products:
-    if is_suitable_product(product):
+    if is_suitable_product(product, max_price):
         print(f"- {product['name']}: {product['price_per_day']} грн/день")
