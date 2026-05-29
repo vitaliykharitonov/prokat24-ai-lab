@@ -1,5 +1,14 @@
+from typing import TypedDict
 
-products = [
+
+class Product(TypedDict):
+    category: str
+    name: str
+    price_per_day: int
+    deposit: int
+    is_available: bool
+
+products: list[Product] = [
     {
         "category": "Туристическое снаряжение",
         "name": "Палатка 4-местная",
@@ -31,11 +40,11 @@ products = [
 ]
 
 
-def is_suitable_product(product, max_price):
+def is_suitable_product(product: Product, max_price: int) -> bool:
     return product["is_available"] and product["price_per_day"] <= max_price
 
 
-max_price = 400
+max_price: int = 400
 
 print(f"Подходящие товары до {max_price} грн/день:")
 
