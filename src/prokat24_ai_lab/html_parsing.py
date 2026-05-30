@@ -1,3 +1,4 @@
+from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 
 
@@ -8,3 +9,22 @@ def extract_title(html: str) -> str:
         return "No title found"
 
     return soup.title.string.strip()
+
+
+def is_internal_link(url: str, allowed_domain: str) -> bool:
+    parsed = urlparse(url)
+    return parsed.netloc in ("", allowed_domain)
+
+
+def extract_internal_links(html: str, base_url: str, allowed_domain: str) -> list[str]:
+    soup = BeautifulSoup(html, "html.parser")
+    links: list[str] = []
+
+    for tag in soup.find_all("a", href=True):
+        href = tag["href"]
+        absolute_url = urljoin(base_url, href)
+
+        if is_internal_link(absolute_url, allowed_domain):
+            links.append(absolute_url)
+
+    return sorted(set(links))
