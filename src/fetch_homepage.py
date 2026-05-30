@@ -1,7 +1,7 @@
 ﻿import requests
 from bs4 import BeautifulSoup
 
-from prokat24_client import BASE_URL, fetch_page
+from prokat24_ai_lab.prokat24_client import BASE_URL, fetch_page
 
 
 def extract_title(html: str) -> str:
