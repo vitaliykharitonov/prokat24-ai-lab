@@ -1,9 +1,8 @@
-from prokat24_ai_lab.site_config import BASE_URL
-from prokat24_ai_lab.knowledge_pages import build_knowledge_page_urls, KNOWLEDGE_PAGE_PATHS
+from prokat24_ai_lab.knowledge_pages import get_knowledge_page_urls
 
 
 def main() -> None:
-    knowledge_page_urls = build_knowledge_page_urls(base_url=BASE_URL, paths=KNOWLEDGE_PAGE_PATHS)
+    knowledge_page_urls = get_knowledge_page_urls()
 
     print("Knowledge base candidate pages:")
 
