@@ -27,7 +27,17 @@ products = [
     },
 ]
 
-project_root = Path(__file__).resolve().parent.parent
+def find_project_root(start_path: Path) -> Path:
+    current_path = start_path.resolve()
+
+    for parent in [current_path, *current_path.parents]:
+        if (parent / ".git").exists():
+            return parent
+
+    raise FileNotFoundError("Project root was not found")
+
+
+project_root = find_project_root(Path(__file__))
 output_file = project_root / "data" / "products_sample.json"
 
 with open(output_file, "w", encoding="utf-8") as file:
