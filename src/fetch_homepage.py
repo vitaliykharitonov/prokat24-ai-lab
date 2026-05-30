@@ -1,16 +1,5 @@
-﻿import requests
-from bs4 import BeautifulSoup
-
+﻿from prokat24_ai_lab.html_parsing import extract_title
 from prokat24_ai_lab.prokat24_client import BASE_URL, fetch_page
-
-
-def extract_title(html: str) -> str:
-    soup = BeautifulSoup(html, "html.parser")
-
-    if soup.title is None or soup.title.string is None:
-        return "No title found"
-
-    return soup.title.string.strip()
 
 
 def main() -> None:

@@ -1,5 +1,4 @@
 import json
-from os import name
 from pathlib import Path
 
 
@@ -29,6 +28,9 @@ products = [
 
 def find_project_root(start_path: Path) -> Path:
     current_path = start_path.resolve()
+
+    if current_path.is_file():
+        current_path = current_path.parent
 
     for parent in [current_path, *current_path.parents]:
         if (parent / ".git").exists():
