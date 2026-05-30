@@ -1,5 +1,6 @@
 ﻿from prokat24_ai_lab.html_parsing import extract_title
-from prokat24_ai_lab.prokat24_client import BASE_URL, fetch_page
+from prokat24_ai_lab.prokat24_client import fetch_page
+from prokat24_ai_lab.site_config import BASE_URL
 
 
 def main() -> None:
