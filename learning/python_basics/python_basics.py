@@ -1,4 +1,3 @@
-
 product_name = "Палатка 4-местная"
 price_per_day = 400
 days = 5

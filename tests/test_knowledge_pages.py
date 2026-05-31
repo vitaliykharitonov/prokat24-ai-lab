@@ -1,4 +1,8 @@
-from prokat24_ai_lab.knowledge_pages import build_knowledge_page_urls, get_knowledge_page_urls, KNOWLEDGE_PAGE_PATHS
+from prokat24_ai_lab.knowledge_pages import (
+    KNOWLEDGE_PAGE_PATHS,
+    build_knowledge_page_urls,
+    get_knowledge_page_urls,
+)
 from prokat24_ai_lab.site_config import BASE_URL
 
 EXPECTED_KNOWLEDGE_PAGE_URLS = [
@@ -14,6 +18,8 @@ def test_build_knowledge_page_urls_returns_absolute_urls() -> None:
         base_url=BASE_URL,
         paths=KNOWLEDGE_PAGE_PATHS,
     )
+
+    assert result == EXPECTED_KNOWLEDGE_PAGE_URLS
 
 
 def test_get_knowledge_page_urls_returns_expected_urls() -> None:

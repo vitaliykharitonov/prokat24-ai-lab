@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-
 products = [
     {
         "category": "Туристическое снаряжение",
@@ -26,6 +25,7 @@ products = [
     },
 ]
 
+
 def find_project_root(start_path: Path) -> Path:
     current_path = start_path.resolve()
 
@@ -47,7 +47,7 @@ with open(output_file, "w", encoding="utf-8") as file:
 
 print(f"Saved {len(products)} products to {output_file}")
 
-with open(output_file, "r", encoding="utf-8") as file:
+with open(output_file, encoding="utf-8") as file:
     loaded_products = json.load(file)
 
 print(f"Loaded {len(loaded_products)} products from {output_file}")

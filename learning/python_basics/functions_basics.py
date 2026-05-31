@@ -8,6 +8,7 @@ class Product(TypedDict):
     deposit: int
     is_available: bool
 
+
 products: list[Product] = [
     {
         "category": "Туристическое снаряжение",

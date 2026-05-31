@@ -1,3 +1,27 @@
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "learning"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes: unused imports, undefined names
+    "I",   # import sorting
+    "UP",  # pyupgrade: modern Python syntax
+    "B",   # flake8-bugbear: likely bugs
+    "SIM", # flake8-simplify
+    "RUF", # Ruff-specific rules
+]
+ignore = [
+	"RUF001", # Cyrillic text is expected in this project
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

@@ -2,7 +2,6 @@ from urllib.parse import urljoin
 
 from prokat24_ai_lab.site_config import BASE_URL
 
-
 KNOWLEDGE_PAGE_PATHS = [
     "/ua/pravila-prokata/",
     "/ua/dostavka/",

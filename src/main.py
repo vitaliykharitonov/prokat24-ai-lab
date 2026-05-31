@@ -1,4 +1,4 @@
-﻿def main() -> None:
+def main() -> None:
     print("Prokat24 AI Lab started")
 
 

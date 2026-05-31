@@ -1,4 +1,4 @@
-from prokat24_ai_lab.html_parsing import extract_title, extract_main_content_text
+from prokat24_ai_lab.html_parsing import extract_main_content_text, extract_title
 from prokat24_ai_lab.knowledge_pages import get_knowledge_page_urls
 from prokat24_ai_lab.prokat24_client import fetch_page
 

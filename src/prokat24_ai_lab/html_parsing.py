@@ -1,4 +1,5 @@
 from urllib.parse import urljoin, urlparse
+
 from bs4 import BeautifulSoup
 
 
@@ -49,7 +50,7 @@ def extract_main_content_text(html: str) -> str:
 
     content = soup.select_one("main.content .editor")
 
-    if not content:
+    if content is None:
         return "No main content found"
 
     text = content.get_text(separator="\n", strip=True)

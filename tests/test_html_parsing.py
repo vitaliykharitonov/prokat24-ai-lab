@@ -1,4 +1,10 @@
-from prokat24_ai_lab.html_parsing import extract_title, extract_internal_links, is_internal_link, extract_text, extract_main_content_text
+from prokat24_ai_lab.html_parsing import (
+    extract_internal_links,
+    extract_main_content_text,
+    extract_text,
+    extract_title,
+    is_internal_link,
+)
 
 
 def test_extract_title_returns_title_text() -> None:
