@@ -28,3 +28,17 @@ def extract_internal_links(html: str, base_url: str, allowed_domain: str) -> lis
             links.append(absolute_url)
 
     return sorted(set(links))
+
+
+def extract_text(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+
+    for tag in soup(["style", "script"]):
+        tag.decompose()
+        
+    text = soup.get_text(separator="\n", strip=True)
+
+    if not text:
+        return "No text found"
+
+    return text

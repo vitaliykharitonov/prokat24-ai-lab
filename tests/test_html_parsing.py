@@ -1,4 +1,4 @@
-from prokat24_ai_lab.html_parsing import extract_title, extract_internal_links, is_internal_link
+from prokat24_ai_lab.html_parsing import extract_title, extract_internal_links, is_internal_link, extract_text
 
 
 def test_extract_title_returns_title_text() -> None:
@@ -61,3 +61,41 @@ def test_extract_internal_links_returns_unique_absolute_internal_links() -> None
         "https://prokat24.com.ua/ua/contact-us/",
         "https://prokat24.com.ua/ua/dostavka/",
     ]
+
+
+def test_extract_text_returns_visible_text() -> None:
+    html = """
+    <html>
+        <body>
+            <h1>Правила проката</h1>
+            <p>Предоплата составляет 30%.</p>
+        </body>
+    </html>
+    """
+
+    result = extract_text(html)
+
+    assert "Правила проката" in result
+    assert "Предоплата составляет 30%" in result
+
+
+def test_extract_text_removes_script_and_style_content() -> None:
+    html = """
+    <html>
+        <head>
+            <style>.hidden { color: red; }</style>
+            <script>alert("x")</script>
+        </head>
+        <body>
+            <h1>Правила проката</h1>
+            <p>Предоплата составляет 30%.</p>
+        </body>
+    </html>
+    """
+
+    result = extract_text(html)
+
+    assert "Правила проката" in result
+    assert "Предоплата составляет 30%." in result
+    assert "alert" not in result
+    assert ".hidden" not in result
