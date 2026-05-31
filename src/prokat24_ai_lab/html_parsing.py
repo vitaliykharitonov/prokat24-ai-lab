@@ -35,10 +35,26 @@ def extract_text(html: str) -> str:
 
     for tag in soup(["style", "script"]):
         tag.decompose()
-        
+
     text = soup.get_text(separator="\n", strip=True)
 
     if not text:
         return "No text found"
+
+    return text
+
+
+def extract_main_content_text(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+
+    content = soup.select_one("main.content .editor")
+
+    if not content:
+        return "No main content found"
+
+    text = content.get_text(separator="\n", strip=True)
+
+    if not text:
+        return "No main content found"
 
     return text

@@ -1,4 +1,4 @@
-from prokat24_ai_lab.html_parsing import extract_title, extract_internal_links, is_internal_link, extract_text
+from prokat24_ai_lab.html_parsing import extract_title, extract_internal_links, is_internal_link, extract_text, extract_main_content_text
 
 
 def test_extract_title_returns_title_text() -> None:
@@ -99,3 +99,44 @@ def test_extract_text_removes_script_and_style_content() -> None:
     assert "Предоплата составляет 30%." in result
     assert "alert" not in result
     assert ".hidden" not in result
+
+
+def test_extract_main_content_text_returns_editor_text_only() -> None:
+    html = """
+    <html>
+        <body>
+            <header>Меню сайту</header>
+            <main class="content">
+                <div class="container">
+                    <h2 class="content__title">Про нас</h2>
+                    <div class="editor">
+                        <p>Прокат24 — комплексний сервіс.</p>
+                        <p>Ми надаємо повний спектр послуг.</p>
+                    </div>
+                </div>
+            </main>
+            <footer>Футер сайту</footer>
+        </body>
+    </html>
+    """
+
+    result = extract_main_content_text(html)
+
+    assert "Прокат24 — комплексний сервіс." in result
+    assert "Ми надаємо повний спектр послуг." in result
+    assert "Меню сайту" not in result
+    assert "Футер сайту" not in result
+
+
+def test_extract_main_content_text_returns_fallback_when_editor_is_missing() -> None:
+    html = """
+    <html>
+        <body>
+            <main class="content"></main>
+        </body>
+    </html>
+    """
+
+    result = extract_main_content_text(html)
+
+    assert result == "No main content found"
