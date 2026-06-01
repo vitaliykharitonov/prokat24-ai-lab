@@ -134,6 +134,38 @@ def test_extract_main_content_text_returns_editor_text_only() -> None:
     assert "Футер сайту" not in result
 
 
+def test_extract_main_content_text_returns_contacts_info_when_editor_is_missing() -> None:
+    html = """
+    <html>
+        <body>
+            <div class="contacts__info">
+                <address class="contacts__address">
+                    м. БЕРЕСТЕЙСЬКА
+                    <br>
+                    вул. Табірна, 42
+                </address>
+                <div class="contacts__numbers">
+                    (095) 66 06 181 (Viber)
+                    <br>
+                    (098) 66 06 181
+                </div>
+                <div class="contacts__info-text">
+                    <span>Підтримка покупців</span>
+                    <a href="mailto:info@prokat24.com.ua">info@prokat24.com.ua</a>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+
+    result = extract_main_content_text(html)
+
+    assert "м. БЕРЕСТЕЙСЬКА" in result
+    assert "вул. Табірна, 42" in result
+    assert "(095) 66 06 181" in result
+    assert "info@prokat24.com.ua" in result
+
+
 def test_extract_main_content_text_returns_fallback_when_editor_is_missing() -> None:
     html = """
     <html>

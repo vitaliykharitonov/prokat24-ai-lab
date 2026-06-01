@@ -2,6 +2,11 @@ from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
+MAIN_CONTENT_SELECTORS = [
+    "main.content .editor",
+    ".contacts__info",
+]
+
 
 def extract_title(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
@@ -48,14 +53,15 @@ def extract_text(html: str) -> str:
 def extract_main_content_text(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
 
-    content = soup.select_one("main.content .editor")
+    for selector in MAIN_CONTENT_SELECTORS:
+        content = soup.select_one(selector)
 
-    if content is None:
-        return "No main content found"
+        if content is None:
+            continue
 
-    text = content.get_text(separator="\n", strip=True)
+        text = content.get_text(separator="\n", strip=True)
 
-    if not text:
-        return "No main content found"
+        if text:
+            return text
 
-    return text
+    return "No main content found"
