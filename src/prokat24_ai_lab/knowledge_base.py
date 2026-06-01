@@ -16,15 +16,19 @@ class KnowledgePage(TypedDict):
 
 def build_knowledge_page(url: str) -> KnowledgePage:
     html = fetch_page(url)
+
+    return build_knowledge_page_from_html(url, html)
+
+
+def build_knowledge_page_from_html(url: str, html: str) -> KnowledgePage:
     title = extract_title(html)
     text = extract_main_content_text(html)
-    text_length = len(text)
 
     return {
         "url": url,
         "title": title,
         "text": text,
-        "text_length": text_length,
+        "text_length": len(text),
     }
 
 
