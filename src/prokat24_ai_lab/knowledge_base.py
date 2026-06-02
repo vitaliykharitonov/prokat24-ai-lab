@@ -48,3 +48,8 @@ def save_knowledge_base(pages: list[KnowledgePage], output_file: Path) -> None:
 
     with open(output_file, "w", encoding="utf-8") as file:
         json.dump(pages, file, ensure_ascii=False, indent=2)
+
+
+def load_knowledge_base(input_file: Path) -> list[KnowledgePage]:
+    with open(input_file, encoding="utf-8") as file:
+        return json.load(file)
