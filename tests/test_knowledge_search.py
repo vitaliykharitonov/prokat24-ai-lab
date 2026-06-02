@@ -31,6 +31,20 @@ def test_make_snippet_returns_text_near_query_word() -> None:
     assert "Доставка" in result
 
 
+def test_make_snippet_adds_trailing_ellipsis_when_text_is_cut() -> None:
+    text = (
+        "Доставка можлива за попередньою домовленістю. "
+        "По Києву — від 200 грн. "
+        "За межами Києва — від 200 грн + 10 грн/км. "
+        "Самовивіз доступний у пунктах Прокат24."
+    )
+
+    result = make_snippet(text, query="доставка", max_length=50)
+
+    assert result.startswith("Доставка")
+    assert result.endswith("...")
+
+
 def test_search_knowledge_base_returns_best_match_first() -> None:
     pages = [
         {

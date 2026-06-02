@@ -30,7 +30,7 @@ def calculate_keyword_score(query: str, text: str) -> int:
 
 
 def make_snippet(text: str, query: str, max_length: int = 300) -> str:
-    query_words = normalize_text(query)
+    query_words = normalize_text(query).split()
     lower_text = text.lower()
 
     first_position: int | None = None
@@ -45,12 +45,25 @@ def make_snippet(text: str, query: str, max_length: int = 300) -> str:
             first_position = position
 
     if first_position is None:
-        return text[:max_length]
+        snippet = text[:max_length].strip()
+
+        if len(text) > max_length:
+            return f"{snippet} ..."
+
+        return snippet
 
     start = max(0, first_position - max_length // 2)
-    end = start + max_length
+    end = min(len(text), start + max_length)
 
-    return text[start:end].strip()
+    snippet = text[start:end].strip()
+
+    if start > 0:
+        snippet = f"...{snippet}"
+
+    if end < len(text):
+        snippet = f"{snippet}..."
+
+    return snippet
 
 
 def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[KnowledgeSearchResult]:
