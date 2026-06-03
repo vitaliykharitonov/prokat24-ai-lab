@@ -1,0 +1,18 @@
+[
+  {
+    "query": "доставка київ",
+    "expected_url": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "застава паспорт",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "номер Viber",
+    "expected_url": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "прокат сервіс",
+    "expected_url": "https://prokat24.com.ua/ua/o-nas/"
+  }
+]
