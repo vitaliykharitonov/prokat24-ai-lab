@@ -90,6 +90,8 @@ def test_evaluate_search_case_is_correct() -> None:
     assert evaluated_search_case["actual_url"] == case["expected_url"]
     assert evaluated_search_case["query"] == case["query"]
     assert evaluated_search_case["expected_url"] == case["expected_url"]
+    assert evaluated_search_case["actual_title"] == "Доставка прокатного спорядження — Прокат24"
+    assert evaluated_search_case["actual_score"] == 3
 
 
 def test_evaluate_search_case_fails_when_no_results_found() -> None:
@@ -104,6 +106,8 @@ def test_evaluate_search_case_fails_when_no_results_found() -> None:
     assert result["actual_url"] is None
     assert result["query"] == case["query"]
     assert result["expected_url"] == case["expected_url"]
+    assert result["actual_url"] is None
+    assert result["actual_score"] is None
 
 
 def test_run_search_evals_is_correct() -> None:

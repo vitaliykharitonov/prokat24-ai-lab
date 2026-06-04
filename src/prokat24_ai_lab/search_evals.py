@@ -15,6 +15,8 @@ class SearchEvalResult(TypedDict):
     query: str
     expected_url: str
     actual_url: str | None
+    actual_title: str | None
+    actual_score: int | None
     passed: bool
 
 
@@ -35,11 +37,16 @@ def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> Se
     query = case["query"]
     expected_url = case["expected_url"]
     actual_url = None
+    actual_title = None
+    actual_score = None
 
     search_results = search_knowledge_base(query, pages)
 
     if search_results:
-        actual_url = search_results[0]["url"]
+        top_result = search_results[0]
+        actual_url = top_result["url"]
+        actual_title = top_result["title"]
+        actual_score = top_result["score"]
 
     passed = actual_url == expected_url
 
@@ -47,6 +54,8 @@ def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> Se
         "query": query,
         "expected_url": expected_url,
         "actual_url": actual_url,
+        "actual_title": actual_title,
+        "actual_score": actual_score,
         "passed": passed,
     }
 
