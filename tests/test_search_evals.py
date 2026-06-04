@@ -34,19 +34,49 @@ TEST_SEARCH_EVAL_RESULTS = [
         "query": "доставка київ",
         "expected_url": "https://prokat24.com.ua/ua/dostavka/",
         "actual_url": "https://prokat24.com.ua/ua/dostavka/",
+        "actual_title": "Доставка прокатного спорядження — Прокат24",
+        "actual_score": 2,
         "passed": True,
+        "top_results": [
+            {
+                "url": "https://prokat24.com.ua/ua/dostavka/",
+                "title": "Доставка прокатного спорядження — Прокат24",
+                "snippet": "Доставка можлива. По Києву — від 200 грн. Доставка товарів.",
+                "score": 2,
+            },
+        ],
     },
     {
         "query": "прокат сервіс",
         "expected_url": "https://prokat24.com.ua/ua/o-nas/",
         "actual_url": "https://prokat24.com.ua/ua/o-nas/",
+        "actual_title": "Про нас — Прокат24",
+        "actual_score": 2,
         "passed": True,
+        "top_results": [
+            {
+                "url": "https://prokat24.com.ua/ua/o-nas/",
+                "title": "Про нас — Прокат24",
+                "snippet": "Прокат спорядження та сервіс.",
+                "score": 2,
+            },
+        ],
     },
     {
         "query": "застава паспорт",
         "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
         "actual_url": "https://prokat24.com.ua/ua/o-nas/",
+        "actual_title": "Про нас — Прокат24",
+        "actual_score": 1,
         "passed": False,
+        "top_results": [
+            {
+                "url": "https://prokat24.com.ua/ua/o-nas/",
+                "title": "Про нас — Прокат24",
+                "snippet": "Прокат спорядження та сервіс.",
+                "score": 1,
+            },
+        ],
     },
 ]
 
@@ -56,8 +86,8 @@ TEST_SEARCH_EVAL_REPORT = {
     "created_at": TEST_CREATED_AT,
     "total_cases": 3,
     "passed_cases": 2,
-    "accuracy": 2/3,
-    "results": TEST_SEARCH_EVAL_RESULTS
+    "accuracy": 2 / 3,
+    "results": TEST_SEARCH_EVAL_RESULTS,
 }
 
 
@@ -85,6 +115,7 @@ def test_evaluate_search_case_is_correct() -> None:
     }
 
     evaluated_search_case = evaluate_search_case(case, TEST_PAGES)
+    top_results = evaluated_search_case["top_results"]
 
     assert evaluated_search_case["passed"] is True
     assert evaluated_search_case["actual_url"] == case["expected_url"]
@@ -92,6 +123,11 @@ def test_evaluate_search_case_is_correct() -> None:
     assert evaluated_search_case["expected_url"] == case["expected_url"]
     assert evaluated_search_case["actual_title"] == "Доставка прокатного спорядження — Прокат24"
     assert evaluated_search_case["actual_score"] == 3
+    assert len(top_results) == 1
+    assert top_results[0]["url"] == "https://prokat24.com.ua/ua/dostavka/"
+    assert top_results[0]["title"] == "Доставка прокатного спорядження — Прокат24"
+    assert top_results[0]["score"] == 3
+    assert "Доставка" in top_results[0]["snippet"]
 
 
 def test_evaluate_search_case_fails_when_no_results_found() -> None:
@@ -106,8 +142,9 @@ def test_evaluate_search_case_fails_when_no_results_found() -> None:
     assert result["actual_url"] is None
     assert result["query"] == case["query"]
     assert result["expected_url"] == case["expected_url"]
-    assert result["actual_url"] is None
+    assert result["actual_title"] is None
     assert result["actual_score"] is None
+    assert result["top_results"] == []
 
 
 def test_run_search_evals_is_correct() -> None:

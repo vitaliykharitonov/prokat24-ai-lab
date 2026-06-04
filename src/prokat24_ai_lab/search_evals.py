@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TypedDict
 
 from prokat24_ai_lab.knowledge_base import KnowledgePage
-from prokat24_ai_lab.knowledge_search import search_knowledge_base
+from prokat24_ai_lab.knowledge_search import KnowledgeSearchResult, search_knowledge_base
 
 
 class SearchEvalCase(TypedDict):
@@ -18,6 +18,7 @@ class SearchEvalResult(TypedDict):
     actual_title: str | None
     actual_score: int | None
     passed: bool
+    top_results: list[KnowledgeSearchResult]
 
 
 class SearchEvalReport(TypedDict):
@@ -41,6 +42,7 @@ def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> Se
     actual_score = None
 
     search_results = search_knowledge_base(query, pages)
+    top_results = search_results[:3]
 
     if search_results:
         top_result = search_results[0]
@@ -57,6 +59,7 @@ def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> Se
         "actual_title": actual_title,
         "actual_score": actual_score,
         "passed": passed,
+        "top_results": top_results,
     }
 
 
