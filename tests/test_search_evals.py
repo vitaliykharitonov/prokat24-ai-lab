@@ -3,11 +3,62 @@ from pathlib import Path
 
 from prokat24_ai_lab.search_evals import (
     SearchEvalCase,
+    build_search_eval_report,
     calculate_accuracy,
+    count_passed_results,
     evaluate_search_case,
     load_search_eval_cases,
     run_search_evals,
+    save_search_eval_report,
 )
+
+TEST_PAGES = [
+    {
+        "url": "https://prokat24.com.ua/ua/dostavka/",
+        "title": "Доставка прокатного спорядження — Прокат24",
+        "text": "Доставка можлива. По Києву — від 200 грн. Доставка великогабаритних товарів.",
+        "text_length": len(
+            "Доставка можлива. По Києву — від 200 грн. Доставка великогабаритних товарів."
+        ),
+    },
+    {
+        "url": "https://prokat24.com.ua/ua/o-nas/",
+        "title": "Про нас — Прокат24",
+        "text": "Прокат спорядження та сервіс.",
+        "text_length": len("Прокат спорядження та сервіс."),
+    },
+]
+
+TEST_SEARCH_EVAL_RESULTS = [
+    {
+        "query": "доставка київ",
+        "expected_url": "https://prokat24.com.ua/ua/dostavka/",
+        "actual_url": "https://prokat24.com.ua/ua/dostavka/",
+        "passed": True,
+    },
+    {
+        "query": "прокат сервіс",
+        "expected_url": "https://prokat24.com.ua/ua/o-nas/",
+        "actual_url": "https://prokat24.com.ua/ua/o-nas/",
+        "passed": True,
+    },
+    {
+        "query": "застава паспорт",
+        "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
+        "actual_url": "https://prokat24.com.ua/ua/o-nas/",
+        "passed": False,
+    },
+]
+
+TEST_CREATED_AT = "2026-06-04T17:45:08"
+
+TEST_SEARCH_EVAL_REPORT = {
+    "created_at": TEST_CREATED_AT,
+    "total_cases": 3,
+    "passed_cases": 2,
+    "accuracy": 2/3,
+    "results": TEST_SEARCH_EVAL_RESULTS
+}
 
 
 def test_load_search_eval_cases_reads_json_file(tmp_path: Path) -> None:
@@ -28,28 +79,12 @@ def test_load_search_eval_cases_reads_json_file(tmp_path: Path) -> None:
 
 
 def test_evaluate_search_case_is_correct() -> None:
-    delivery_text = "Доставка можлива. По Києву — від 200 грн. Доставка великогабаритних товарів."
-    pages = [
-        {
-            "url": "https://prokat24.com.ua/ua/dostavka/",
-            "title": "Доставка прокатного спорядження — Прокат24",
-            "text": delivery_text,
-            "text_length": len(delivery_text),
-        },
-        {
-            "url": "https://prokat24.com.ua/ua/o-nas/",
-            "title": "Про нас — Прокат24",
-            "text": "Прокат спорядження та сервіс.",
-            "text_length": len("Прокат спорядження та сервіс."),
-        },
-    ]
-
     case = {
         "query": "доставка київ",
         "expected_url": "https://prokat24.com.ua/ua/dostavka/",
     }
 
-    evaluated_search_case = evaluate_search_case(case, pages)
+    evaluated_search_case = evaluate_search_case(case, TEST_PAGES)
 
     assert evaluated_search_case["passed"] is True
     assert evaluated_search_case["actual_url"] == case["expected_url"]
@@ -58,21 +93,12 @@ def test_evaluate_search_case_is_correct() -> None:
 
 
 def test_evaluate_search_case_fails_when_no_results_found() -> None:
-    pages = [
-        {
-            "url": "https://prokat24.com.ua/ua/o-nas/",
-            "title": "Про нас — Прокат24",
-            "text": "Прокат спорядження та сервіс.",
-            "text_length": len("Прокат спорядження та сервіс."),
-        },
-    ]
-
     case = {
         "query": "абракадабра",
         "expected_url": "https://prokat24.com.ua/ua/dostavka/",
     }
 
-    result = evaluate_search_case(case, pages)
+    result = evaluate_search_case(case, TEST_PAGES)
 
     assert result["passed"] is False
     assert result["actual_url"] is None
@@ -81,22 +107,6 @@ def test_evaluate_search_case_fails_when_no_results_found() -> None:
 
 
 def test_run_search_evals_is_correct() -> None:
-    delivery_text = "Доставка можлива. По Києву — від 200 грн. Доставка великогабаритних товарів."
-    pages = [
-        {
-            "url": "https://prokat24.com.ua/ua/dostavka/",
-            "title": "Доставка прокатного спорядження — Прокат24",
-            "text": delivery_text,
-            "text_length": len(delivery_text),
-        },
-        {
-            "url": "https://prokat24.com.ua/ua/o-nas/",
-            "title": "Про нас — Прокат24",
-            "text": "Прокат спорядження та сервіс.",
-            "text_length": len("Прокат спорядження та сервіс."),
-        },
-    ]
-
     cases = [
         {
             "query": "доставка київ",
@@ -108,7 +118,7 @@ def test_run_search_evals_is_correct() -> None:
         },
     ]
 
-    results = run_search_evals(cases, pages)
+    results = run_search_evals(cases, TEST_PAGES)
 
     assert len(results) == len(cases)
     assert results[0]["passed"] is True
@@ -118,35 +128,39 @@ def test_run_search_evals_is_correct() -> None:
 
 
 def test_calculate_accuracy_returns_passed_ratio() -> None:
-    search_eval_results = [
-        {
-            "query": "доставка київ",
-            "expected_url": "https://prokat24.com.ua/ua/dostavka/",
-            "actual_url": "https://prokat24.com.ua/ua/dostavka/",
-            "passed": True,
-        },
-        {
-            "query": "прокат сервіс",
-            "expected_url": "https://prokat24.com.ua/ua/o-nas/",
-            "actual_url": "https://prokat24.com.ua/ua/o-nas/",
-            "passed": True,
-        },
-        {
-            "query": "застава паспорт",
-            "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
-            "actual_url": "https://prokat24.com.ua/ua/o-nas/",
-            "passed": False,
-        },
-    ]
-
-    result = calculate_accuracy(search_eval_results)
+    result = calculate_accuracy(TEST_SEARCH_EVAL_RESULTS)
 
     assert result == 2 / 3
 
 
 def test_calculate_accuracy_returns_zero_for_empty_results() -> None:
-    search_eval_results = []
+    empty_search_eval_results = []
 
-    result = calculate_accuracy(search_eval_results)
+    result = calculate_accuracy(empty_search_eval_results)
 
     assert result == 0.0
+
+
+def test_count_passed_results_returns_number_of_passed_results() -> None:
+    result = count_passed_results(TEST_SEARCH_EVAL_RESULTS)
+
+    assert result == 2
+
+
+def test_build_search_eval_report_returns_summary() -> None:
+    report = build_search_eval_report(TEST_SEARCH_EVAL_RESULTS, TEST_CREATED_AT)
+
+    assert report == TEST_SEARCH_EVAL_REPORT
+
+
+def test_save_search_eval_report_writes_json_file(tmp_path: Path) -> None:
+    output_file = tmp_path / "search_eval_report.json"
+
+    save_search_eval_report(TEST_SEARCH_EVAL_REPORT, output_file)
+
+    assert output_file.exists()
+
+    with open(output_file, encoding="utf-8") as file:
+        loaded_report = json.load(file)
+
+    assert loaded_report == TEST_SEARCH_EVAL_REPORT
