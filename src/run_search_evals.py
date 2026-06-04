@@ -1,9 +1,16 @@
+import datetime
+
 from prokat24_ai_lab.knowledge_base import load_knowledge_base
-from prokat24_ai_lab.project_paths import KNOWLEDGE_PAGES_FILE, SEARCH_EVAL_CASES_FILE
+from prokat24_ai_lab.project_paths import (
+    KNOWLEDGE_PAGES_FILE,
+    SEARCH_EVAL_CASES_FILE,
+    SEARCH_EVAL_REPORT_FILE,
+)
 from prokat24_ai_lab.search_evals import (
-    calculate_accuracy,
+    build_search_eval_report,
     load_search_eval_cases,
     run_search_evals,
+    save_search_eval_report,
 )
 
 
@@ -13,27 +20,13 @@ def main() -> None:
 
     search_results = run_search_evals(eval_cases, pages)
 
-    print("Search eval results:")
+    created_at = datetime.datetime.now().isoformat(timespec="seconds")
 
-    for search_result in search_results:
-        status = "PASSED" if search_result["passed"] else "FAILED"
+    report = build_search_eval_report(search_results, created_at)
 
-        print()
-        print(f"{status} | {search_result['query']}")
-        print(f"Expected: {search_result['expected_url']}")
-        print(f"Actual: {search_result['actual_url']}")
+    save_search_eval_report(report, SEARCH_EVAL_REPORT_FILE)
 
-    passed_count = 0
-
-    for result in search_results:
-        if result["passed"]:
-            passed_count += 1
-
-    accuracy = calculate_accuracy(search_results)
-    accuracy_percentage = accuracy * 100
-
-    print()
-    print(f"Accuracy: {passed_count}/{len(search_results)} = {accuracy_percentage:.2f}%")
+    print(f"Saved report to {SEARCH_EVAL_REPORT_FILE}")
 
 
 if __name__ == "__main__":

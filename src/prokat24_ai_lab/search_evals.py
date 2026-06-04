@@ -18,6 +18,14 @@ class SearchEvalResult(TypedDict):
     passed: bool
 
 
+class SearchEvalReport(TypedDict):
+    created_at: str
+    total_cases: int
+    passed_cases: int
+    accuracy: float
+    results: list[SearchEvalResult]
+
+
 def load_search_eval_cases(input_file: Path) -> list[SearchEvalCase]:
     with open(input_file, encoding="utf-8") as file:
         return json.load(file)
@@ -44,9 +52,9 @@ def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> Se
 
 
 def run_search_evals(
-        cases: list[SearchEvalCase],
-        pages: list[KnowledgePage],
-    ) -> list[SearchEvalResult]:
+    cases: list[SearchEvalCase],
+    pages: list[KnowledgePage],
+) -> list[SearchEvalResult]:
     results: list[SearchEvalResult] = []
 
     for case in cases:
@@ -60,12 +68,38 @@ def calculate_accuracy(results: list[SearchEvalResult]) -> float:
         return 0.0
 
     total_cases = len(results)
-    passed_count = 0
-
-    for result in results:
-        if result["passed"]:
-            passed_count += 1
+    passed_count = count_passed_results(results)
 
     return passed_count / total_cases
 
 
+def count_passed_results(results: list[SearchEvalResult]) -> int:
+    passed_count = 0
+    for result in results:
+        if result["passed"]:
+            passed_count += 1
+
+    return passed_count
+
+
+def build_search_eval_report(
+    results: list[SearchEvalResult],
+    created_at: str,
+) -> SearchEvalReport:
+    return {
+        "created_at": created_at,
+        "total_cases": len(results),
+        "passed_cases": count_passed_results(results),
+        "accuracy": calculate_accuracy(results),
+        "results": results,
+    }
+
+
+def save_search_eval_report(
+    report: SearchEvalReport,
+    output_file: Path,
+) -> None:
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_file, "w", encoding="utf-8") as file:
+        json.dump(report, file, ensure_ascii=False, indent=2)

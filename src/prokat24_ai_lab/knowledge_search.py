@@ -77,15 +77,12 @@ def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[Knowle
             continue
 
         result: KnowledgeSearchResult = {
-            "url": page['url'],
-            "title": page['title'],
-            "snippet": make_snippet(page['text'], query),
+            "url": page["url"],
+            "title": page["title"],
+            "snippet": make_snippet(page["text"], query),
             "score": score,
-
         }
 
         results.append(result)
 
     return sorted(results, key=lambda result: result["score"], reverse=True)
-
-
