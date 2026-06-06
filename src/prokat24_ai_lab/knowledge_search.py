@@ -3,6 +3,23 @@ from typing import TypedDict
 
 from prokat24_ai_lab.knowledge_base import KnowledgePage
 
+STOP_WORDS = {
+    # --Stop words
+    "чи",
+    "є",
+    "як",
+    "яка",
+    "який",
+    "що",
+    "в",
+    "на",
+    "при",
+    # --Domain stop words
+    "спорядження",
+    "прокат",
+    "прокату",
+}
+
 
 class KnowledgeSearchResult(TypedDict):
     url: str
@@ -17,8 +34,14 @@ def normalize_text(text: str) -> str:
     return " ".join(words)
 
 
-def calculate_keyword_score(query: str, text: str) -> int:
+def get_query_words(query: str) -> list[str]:
     query_words = normalize_text(query).split()
+
+    return [word for word in query_words if word not in STOP_WORDS]
+
+
+def calculate_keyword_score(query: str, text: str) -> int:
+    query_words = get_query_words(query)
     text_words = normalize_text(text).split()
 
     score = 0

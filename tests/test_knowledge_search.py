@@ -1,5 +1,6 @@
 from prokat24_ai_lab.knowledge_search import (
     calculate_keyword_score,
+    get_query_words,
     make_snippet,
     normalize_text,
     search_knowledge_base,
@@ -10,6 +11,23 @@ def test_normalize_text_returns_lowercase_words() -> None:
     result = normalize_text("Доставка: Київ — 200 грн!")
 
     assert result == "доставка київ 200 грн"
+
+
+def test_get_query_words_removes_stop_words() -> None:
+    result = get_query_words(
+        query="чи є сервіс спорядження",
+    )
+
+    assert result == ["сервіс"]
+
+
+def test_calculate_keyword_score_ignores_stop_words() -> None:
+    result = calculate_keyword_score(
+        query="чи є сервіс",
+        text="чи чи є є сервіс",
+    )
+
+    assert result == 1
 
 
 def test_calculate_keyword_score_counts_whole_words() -> None:
