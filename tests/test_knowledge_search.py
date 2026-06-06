@@ -1,5 +1,6 @@
 from prokat24_ai_lab.knowledge_search import (
     calculate_keyword_score,
+    get_page_search_text,
     get_query_words,
     make_snippet,
     normalize_text,
@@ -19,6 +20,36 @@ def test_get_query_words_removes_stop_words() -> None:
     )
 
     assert result == ["сервіс"]
+
+
+def test_get_page_search_text_adds_keywords() -> None:
+    page = {
+        "url": "https://prokat24.com.ua/ua/contact-us/",
+        "title": "Зв’язатися з нами",
+        "text": "м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\n",
+        "text_length": len("м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\n"),
+    }
+
+    result = get_page_search_text(page)
+
+    assert "телефон" in result
+    assert "адреса" in result
+    assert "viber" in result
+
+
+def test_get_page_search_text_works_without_keywords() -> None:
+    page = {
+        "url": "https://prokat24.com.ua/ua/dostavka/",
+        "title": "Доставка прокатного спорядження — Прокат24",
+        "text": "Доставка:\nПослуга доставки можлива",
+        "text_length": len("Доставка:\nПослуга доставки можлива"),
+    }
+
+    result = get_page_search_text(page)
+
+    assert page["url"] in result
+    assert page["title"] in result
+    assert page["text"] in result
 
 
 def test_calculate_keyword_score_ignores_stop_words() -> None:

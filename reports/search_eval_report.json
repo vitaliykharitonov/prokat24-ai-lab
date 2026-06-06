@@ -1,9 +1,9 @@
 {
-  "created_at": "2026-06-07T01:00:53",
+  "created_at": "2026-06-07T02:05:49",
   "total_cases": 16,
-  "passed_cases": 14,
-  "accuracy": 0.875,
-  "top_3_accuracy": 0.875,
+  "passed_cases": 16,
+  "accuracy": 1.0,
+  "top_3_accuracy": 1.0,
   "results": [
     {
       "query": "доставка київ",
@@ -42,14 +42,14 @@
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_title": "Зв’язатися з нами",
-      "actual_score": 2,
+      "actual_score": 3,
       "passed": true,
       "top_results": [
         {
           "url": "https://prokat24.com.ua/ua/contact-us/",
           "title": "Зв’язатися з нами",
           "snippet": "м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\nм. ГОЛОСІЇВСЬКА\nвул. Васильківська, 1\n(095) 66 06 181 (Viber)\n(098) 66 06 181\n(066) 88 73 747 (Viber)\n(067) 88 73 747\n(073) 88 73 747\nПідтримка покупців\ninfo@prokat24.com.ua",
-          "score": 2
+          "score": 3
         }
       ]
     },
@@ -250,20 +250,34 @@
     {
       "query": "телефон прокату",
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
-      "actual_url": null,
-      "actual_title": null,
-      "actual_score": null,
-      "passed": false,
-      "top_results": []
+      "actual_url": "https://prokat24.com.ua/ua/contact-us/",
+      "actual_title": "Зв’язатися з нами",
+      "actual_score": 1,
+      "passed": true,
+      "top_results": [
+        {
+          "url": "https://prokat24.com.ua/ua/contact-us/",
+          "title": "Зв’язатися з нами",
+          "snippet": "м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\nм. ГОЛОСІЇВСЬКА\nвул. Васильківська, 1\n(095) 66 06 181 (Viber)\n(098) 66 06 181\n(066) 88 73 747 (Viber)\n(067) 88 73 747\n(073) 88 73 747\nПідтримка покупців\ninfo@prokat24.com.ua",
+          "score": 1
+        }
+      ]
     },
     {
       "query": "адреса прокату",
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
-      "actual_url": null,
-      "actual_title": null,
-      "actual_score": null,
-      "passed": false,
-      "top_results": []
+      "actual_url": "https://prokat24.com.ua/ua/contact-us/",
+      "actual_title": "Зв’язатися з нами",
+      "actual_score": 1,
+      "passed": true,
+      "top_results": [
+        {
+          "url": "https://prokat24.com.ua/ua/contact-us/",
+          "title": "Зв’язатися з нами",
+          "snippet": "м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\nм. ГОЛОСІЇВСЬКА\nвул. Васильківська, 1\n(095) 66 06 181 (Viber)\n(098) 66 06 181\n(066) 88 73 747 (Viber)\n(067) 88 73 747\n(073) 88 73 747\nПідтримка покупців\ninfo@prokat24.com.ua",
+          "score": 1
+        }
+      ]
     }
   ]
 }

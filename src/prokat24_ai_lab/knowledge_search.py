@@ -20,6 +20,18 @@ STOP_WORDS = {
     "прокату",
 }
 
+PAGE_SEARCH_KEYWORDS = {
+    "https://prokat24.com.ua/ua/contact-us/": [
+        "телефон",
+        "телефони",
+        "адреса",
+        "адрес",
+        "контакти",
+        "viber",
+        "email",
+    ],
+}
+
 
 class KnowledgeSearchResult(TypedDict):
     url: str
@@ -38,6 +50,19 @@ def get_query_words(query: str) -> list[str]:
     query_words = normalize_text(query).split()
 
     return [word for word in query_words if word not in STOP_WORDS]
+
+
+def get_page_search_text(page: KnowledgePage) -> str:
+    keywords = PAGE_SEARCH_KEYWORDS.get(page["url"], [])
+
+    search_parts = [
+        page["url"],
+        page["title"],
+        page["text"],
+        *keywords,
+    ]
+
+    return " ".join(search_parts)
 
 
 def calculate_keyword_score(query: str, text: str) -> int:
@@ -93,7 +118,7 @@ def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[Knowle
     results: list[KnowledgeSearchResult] = []
 
     for page in pages:
-        searchable_text = f"{page['title']} {page['url']} {page['text']}"
+        searchable_text = get_page_search_text(page)
         score = calculate_keyword_score(query, searchable_text)
 
         if score == 0:
