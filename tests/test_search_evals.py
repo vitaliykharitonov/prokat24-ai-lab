@@ -87,6 +87,7 @@ TEST_SEARCH_EVAL_REPORT = {
     "total_cases": 3,
     "passed_cases": 2,
     "accuracy": 2 / 3,
+    "top_3_accuracy": 2 / 3,
     "results": TEST_SEARCH_EVAL_RESULTS,
 }
 

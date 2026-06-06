@@ -26,6 +26,7 @@ class SearchEvalReport(TypedDict):
     total_cases: int
     passed_cases: int
     accuracy: float
+    top_3_accuracy: float
     results: list[SearchEvalResult]
 
 
@@ -103,6 +104,7 @@ def build_search_eval_report(
         "total_cases": len(results),
         "passed_cases": count_passed_results(results),
         "accuracy": calculate_accuracy(results),
+        "top_3_accuracy": calculate_top_k_accuracy(results, k=3),
         "results": results,
     }
 
@@ -115,3 +117,23 @@ def save_search_eval_report(
 
     with open(output_file, "w", encoding="utf-8") as file:
         json.dump(report, file, ensure_ascii=False, indent=2)
+
+
+def calculate_top_k_accuracy(
+    results: list[SearchEvalResult],
+    k: int,
+) -> float:
+    if not results:
+        return 0.0
+
+    passed_count = 0
+
+    for result in results:
+        top_results = result["top_results"][:k]
+
+        for top_result in top_results:
+            if top_result["url"] == result["expected_url"]:
+                passed_count += 1
+                break
+
+    return passed_count / len(results)
