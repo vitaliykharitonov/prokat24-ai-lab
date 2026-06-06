@@ -14,5 +14,53 @@
   {
     "query": "прокат сервіс",
     "expected_url": "https://prokat24.com.ua/ua/o-nas/"
+  },
+  {
+    "query": "яка вартість прокату",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "як рахуються дні",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "як забронювати спорядження",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "яка передоплата при бронюванні",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "чи є сервіс спорядження",
+    "expected_url": "https://prokat24.com.ua/ua/o-nas/"
+  },
+  {
+    "query": "ремонт спорядження",
+    "expected_url": "https://prokat24.com.ua/ua/o-nas/"
+  },
+  {
+    "query": "ціна доставки",
+    "expected_url": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "самовивіз спорядження",
+    "expected_url": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "який штраф за просрочення",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "що залишити в заставу",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "телефон прокату",
+    "expected_url": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "адреса прокату",
+    "expected_url": "https://prokat24.com.ua/ua/contact-us/"
   }
 ]
