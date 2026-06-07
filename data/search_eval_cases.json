@@ -62,5 +62,45 @@
   {
     "query": "адреса прокату",
     "expected_url": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "де вас знайти",
+    "expected_url": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "як з вами зв'язатись",
+    "expected_url": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "чи можна залишити паспорт",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "скільки коштує привезти",
+    "expected_url": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "ремонт палатки",
+    "expected_url": "https://prokat24.com.ua/ua/o-nas/"
+  },
+  {
+    "query": "сервіс лиж",
+    "expected_url": "https://prokat24.com.ua/ua/o-nas/"
+  },
+  {
+    "query": "повернути пізніше",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "продовжити термін прокату",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "що можна залишити в заставу",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "як рахується довгострокова оренда",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
   }
 ]
