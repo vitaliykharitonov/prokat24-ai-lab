@@ -1,9 +1,9 @@
 {
-  "created_at": "2026-06-07T15:04:44",
+  "created_at": "2026-06-07T16:41:02",
   "total_cases": 26,
-  "passed_cases": 22,
-  "accuracy": 0.8461538461538461,
-  "top_3_accuracy": 0.8846153846153846,
+  "passed_cases": 26,
+  "accuracy": 1.0,
+  "top_3_accuracy": 1.0,
   "results": [
     {
       "query": "доставка київ",
@@ -282,31 +282,38 @@
     {
       "query": "де вас знайти",
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
-      "actual_url": null,
-      "actual_title": null,
-      "actual_score": null,
-      "passed": false,
-      "top_results": []
+      "actual_url": "https://prokat24.com.ua/ua/contact-us/",
+      "actual_title": "Зв’язатися з нами",
+      "actual_score": 2,
+      "passed": true,
+      "top_results": [
+        {
+          "url": "https://prokat24.com.ua/ua/contact-us/",
+          "title": "Зв’язатися з нами",
+          "snippet": "м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\nм. ГОЛОСІЇВСЬКА\nвул. Васильківська, 1\n(095) 66 06 181 (Viber)\n(098) 66 06 181\n(066) 88 73 747 (Viber)\n(067) 88 73 747\n(073) 88 73 747\nПідтримка покупців\ninfo@prokat24.com.ua",
+          "score": 2
+        }
+      ]
     },
     {
       "query": "як з вами зв'язатись",
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
-      "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
-      "actual_title": "Правила прокату — Прокат24",
-      "actual_score": 2,
-      "passed": false,
+      "actual_url": "https://prokat24.com.ua/ua/contact-us/",
+      "actual_title": "Зв’язатися з нами",
+      "actual_score": 3,
+      "passed": true,
       "top_results": [
+        {
+          "url": "https://prokat24.com.ua/ua/contact-us/",
+          "title": "Зв’язатися з нами",
+          "snippet": "м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\nм. ГОЛОСІЇВСЬКА\nвул. Васильківська, 1\n(095) 66 06 181 (Viber)\n(098) 66 06 181\n(066) 88 73 747 (Viber)\n(067) 88 73 747\n(073) 88 73 747\nПідтримка покупців\ninfo@prokat24.com.ua",
+          "score": 3
+        },
         {
           "url": "https://prokat24.com.ua/ua/pravila-prokata/",
           "title": "Правила прокату — Прокат24",
           "snippet": "Скільки коштує прокат?\nВартість прокату залежить від спорядження та кількості днів. У кожній категорії є таблиця вартості залежно від кількості днів, за допомогою якої Ви можете легко та швидко дізнатися ціну на потрібне спорядження на необхідний строк прокату.\nЗверніть увагу:\nчим більший строк прок...",
           "score": 2
-        },
-        {
-          "url": "https://prokat24.com.ua/ua/contact-us/",
-          "title": "Зв’язатися з нами",
-          "snippet": "м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\nм. ГОЛОСІЇВСЬКА\nвул. Васильківська, 1\n(095) 66 06 181 (Viber)\n(098) 66 06 181\n(066) 88 73 747 (Viber)\n(067) 88 73 747\n(073) 88 73 747\nПідтримка покупців\ninfo@prokat24.com.ua",
-          "score": 1
         }
       ]
     },
@@ -329,11 +336,17 @@
     {
       "query": "скільки коштує привезти",
       "expected_url": "https://prokat24.com.ua/ua/dostavka/",
-      "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
-      "actual_title": "Правила прокату — Прокат24",
-      "actual_score": 2,
-      "passed": false,
+      "actual_url": "https://prokat24.com.ua/ua/dostavka/",
+      "actual_title": "Доставка прокатного спорядження — Прокат24",
+      "actual_score": 3,
+      "passed": true,
       "top_results": [
+        {
+          "url": "https://prokat24.com.ua/ua/dostavka/",
+          "title": "Доставка прокатного спорядження — Прокат24",
+          "snippet": "Доставка:\nПослуга доставки можлива тільки за попередньою домовленістю заздалегідь.\nПо Києву — від 200 грн.\nЗа межами Києва — від 200 грн + 10 грн/км\nДоставка\nвеликогабаритних товарів\n— шатри, столи, стільці — узгоджується\nіндивідуально\n.\nСамовивіз:\nВи можете забрати орендоване спорядження самостійно ...",
+          "score": 3
+        },
         {
           "url": "https://prokat24.com.ua/ua/pravila-prokata/",
           "title": "Правила прокату — Прокат24",
@@ -393,11 +406,18 @@
     {
       "query": "продовжити термін прокату",
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
-      "actual_url": null,
-      "actual_title": null,
-      "actual_score": null,
-      "passed": false,
-      "top_results": []
+      "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
+      "actual_title": "Правила прокату — Прокат24",
+      "actual_score": 6,
+      "passed": true,
+      "top_results": [
+        {
+          "url": "https://prokat24.com.ua/ua/pravila-prokata/",
+          "title": "Правила прокату — Прокат24",
+          "snippet": "Скільки коштує прокат?\nВартість прокату залежить від спорядження та кількості днів. У кожній категорії є таблиця вартості залежно від кількості днів, за допомогою якої Ви можете легко та швидко дізнатися ціну на потрібне спорядження на необхідний строк прокату.\nЗверніть увагу:\nчим більший строк прок...",
+          "score": 6
+        }
+      ]
     },
     {
       "query": "що можна залишити в заставу",

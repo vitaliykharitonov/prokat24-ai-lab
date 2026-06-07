@@ -32,6 +32,13 @@ PAGE_SEARCH_KEYWORDS = {
     ],
 }
 
+QUERY_ALIASES = {
+    "привезти": ["доставка"],
+    "знайти": ["адреса", "контакти"],
+    "зв'язатись": ["контакти", "телефон"],
+    "продовжити": ["прострочення", "строк", "термін"],
+}
+
 
 class KnowledgeSearchResult(TypedDict):
     url: str
@@ -46,10 +53,23 @@ def normalize_text(text: str) -> str:
     return " ".join(words)
 
 
+def expand_query_words(words: list[str]) -> list[str]:
+    expanded_words = []
+
+    for word in words:
+        expanded_words.append(word)
+        aliases = QUERY_ALIASES.get(word, [])
+        expanded_words.extend(aliases)
+
+    return expanded_words
+
+
 def get_query_words(query: str) -> list[str]:
     query_words = normalize_text(query).split()
+    filtred_words = [word for word in query_words if word not in STOP_WORDS]
+    expanded_query_words = expand_query_words(filtred_words)
 
-    return [word for word in query_words if word not in STOP_WORDS]
+    return expanded_query_words
 
 
 def get_page_search_text(page: KnowledgePage) -> str:

@@ -1,5 +1,6 @@
 from prokat24_ai_lab.knowledge_search import (
     calculate_keyword_score,
+    expand_query_words,
     get_page_search_text,
     get_query_words,
     make_snippet,
@@ -14,12 +15,38 @@ def test_normalize_text_returns_lowercase_words() -> None:
     assert result == "доставка київ 200 грн"
 
 
+def test_expand_query_words_adds_aliases_and_keeps_words_without_aliases() -> None:
+    query_words = ["скільки", "коштує", "привезти"]
+    expanded_query_words = expand_query_words(query_words)
+
+    assert "доставка" in expanded_query_words
+
+    query_words = ["де", "вас", "знайти"]
+    expanded_query_words = expand_query_words(query_words)
+
+    assert "адреса" in expanded_query_words
+    assert "контакти" in expanded_query_words
+
+    query_words = ["ремонт", "палатки"]
+    expanded_query_words = expand_query_words(query_words)
+
+    assert expanded_query_words == ["ремонт", "палатки"]
+
+
 def test_get_query_words_removes_stop_words() -> None:
     result = get_query_words(
         query="чи є сервіс спорядження",
     )
 
     assert result == ["сервіс"]
+
+
+def test_get_query_words_adds_aliases() -> None:
+    query = "скільки коштує привезти"
+
+    result = get_query_words(query)
+
+    assert "доставка" in result
 
 
 def test_get_page_search_text_adds_keywords() -> None:
