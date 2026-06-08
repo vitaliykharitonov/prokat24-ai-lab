@@ -3,6 +3,7 @@ from prokat24_ai_lab.knowledge_search import (
     count_query_word_matches,
     deduplicate_words,
     expand_query_words,
+    expand_word_forms,
     get_page_search_text,
     get_query_words,
     make_snippet,
@@ -35,6 +36,22 @@ def test_expand_query_words_adds_aliases_and_keeps_words_without_aliases() -> No
     assert expanded_query_words == ["ремонт", "палатки"]
 
 
+def test_expand_word_forms_adds_grammatical_forms() -> None:
+    words = ["доставка", "київ"]
+    expanded_words = expand_word_forms(words)
+
+    assert expanded_words == [
+        "доставка",
+        "доставку",
+        "доставки",
+        "доставкою",
+        "київ",
+        "києву",
+        "києва",
+        "києві",
+    ]
+
+
 def test_deduplicate_words_removes_duplicates_and_keeps_order() -> None:
     query_words = ["a", "b", "a", "c", "b"]
 
@@ -57,6 +74,18 @@ def test_get_query_words_adds_aliases() -> None:
     result = get_query_words(query)
 
     assert "доставка" in result
+
+
+def test_get_query_words_expands_query_aliases_and_word_forms() -> None:
+    query = "скільки коштує привезти"
+
+    result = get_query_words(query)
+
+    assert "привезти" in result
+    assert "доставка" in result
+    assert "доставку" in result
+    assert "доставки" in result
+    assert "доставкою" in result
 
 
 def test_get_query_words_removes_duplicates() -> None:
@@ -106,13 +135,13 @@ def test_calculate_keyword_score_ignores_stop_words() -> None:
     assert result == 1
 
 
-def test_calculate_keyword_score_counts_whole_words() -> None:
+def test_calculate_keyword_score_counts_expanded_query_words() -> None:
     result = calculate_keyword_score(
         query="доставка київ",
         text="Доставка можлива. Доставка по Києву.",
     )
 
-    assert result == 2
+    assert result == 3
 
 
 def test_count_query_word_matches_returns_counts_for_matched_words() -> None:
@@ -123,6 +152,7 @@ def test_count_query_word_matches_returns_counts_for_matched_words() -> None:
 
     assert result == {
         "доставка": 2,
+        "києву": 1,
     }
 
 
@@ -175,8 +205,9 @@ def test_search_knowledge_base_returns_best_match_first() -> None:
 
     assert len(result) == 1
     assert result[0]["title"] == "Доставка прокатного спорядження — Прокат24"
-    assert result[0]["score"] == 3
+    assert result[0]["score"] == 4
     assert result[0]["matched_words"] == {
         "доставка": 3,
+        "києву": 1,
     }
     assert "Доставка" in result[0]["snippet"]

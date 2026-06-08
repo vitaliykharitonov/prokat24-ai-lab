@@ -42,6 +42,13 @@ QUERY_ALIASES = {
 }
 
 
+WORD_ALIASES = {
+    "київ": ["києву", "києва", "києві"],
+    "доставка": ["доставку", "доставки", "доставкою"],
+    "застава": ["заставу", "застави", "заставою"],
+}
+
+
 class KnowledgeSearchResult(TypedDict):
     url: str
     title: str
@@ -67,6 +74,17 @@ def expand_query_words(words: list[str]) -> list[str]:
     return expanded_words
 
 
+def expand_word_forms(words: list[str]) -> list[str]:
+    expanded_words = []
+
+    for word in words:
+        expanded_words.append(word)
+        aliases = WORD_ALIASES.get(word, [])
+        expanded_words.extend(aliases)
+
+    return expanded_words
+
+
 def deduplicate_words(words: list[str]) -> list[str]:
     seen_words = set()
     unique_words = []
@@ -84,9 +102,10 @@ def deduplicate_words(words: list[str]) -> list[str]:
 
 def get_query_words(query: str) -> list[str]:
     query_words = normalize_text(query).split()
-    filtred_words = [word for word in query_words if word not in STOP_WORDS]
-    expanded_query_words = expand_query_words(filtred_words)
-    deduplicated_words = deduplicate_words(expanded_query_words)
+    filtered_words = [word for word in query_words if word not in STOP_WORDS]
+    expanded_query_words = expand_query_words(filtered_words)
+    expanded_word_forms = expand_word_forms(expanded_query_words)
+    deduplicated_words = deduplicate_words(expanded_word_forms)
 
     return deduplicated_words
 
