@@ -1,5 +1,6 @@
 from prokat24_ai_lab.knowledge_search import (
     calculate_keyword_score,
+    count_query_word_matches,
     deduplicate_words,
     expand_query_words,
     get_page_search_text,
@@ -65,6 +66,7 @@ def test_get_query_words_removes_duplicates() -> None:
 
     assert result.count("термін") == 1
 
+
 def test_get_page_search_text_adds_keywords() -> None:
     page = {
         "url": "https://prokat24.com.ua/ua/contact-us/",
@@ -111,6 +113,17 @@ def test_calculate_keyword_score_counts_whole_words() -> None:
     )
 
     assert result == 2
+
+
+def test_count_query_word_matches_returns_counts_for_matched_words() -> None:
+    query = "доставка київ"
+    text = "Доставка по Києву. Доставка можлива."
+
+    result = count_query_word_matches(query, text)
+
+    assert result == {
+        "доставка": 2,
+    }
 
 
 def test_make_snippet_returns_text_near_query_word() -> None:
@@ -163,4 +176,7 @@ def test_search_knowledge_base_returns_best_match_first() -> None:
     assert len(result) == 1
     assert result[0]["title"] == "Доставка прокатного спорядження — Прокат24"
     assert result[0]["score"] == 3
+    assert result[0]["matched_words"] == {
+        "доставка": 3,
+    }
     assert "Доставка" in result[0]["snippet"]

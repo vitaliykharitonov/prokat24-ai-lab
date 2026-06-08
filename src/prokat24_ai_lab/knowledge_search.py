@@ -47,6 +47,7 @@ class KnowledgeSearchResult(TypedDict):
     title: str
     snippet: str
     score: int
+    matched_words: dict[str, int]
 
 
 def normalize_text(text: str) -> str:
@@ -104,15 +105,23 @@ def get_page_search_text(page: KnowledgePage) -> str:
 
 
 def calculate_keyword_score(query: str, text: str) -> int:
-    query_words = get_query_words(query)
-    text_words = normalize_text(text).split()
-
-    score = 0
-
-    for word in query_words:
-        score += text_words.count(word)
+    matches = count_query_word_matches(query, text)
+    score = sum(matches.values())
 
     return score
+
+
+def count_query_word_matches(query: str, text: str) -> dict[str, int]:
+    query_words = get_query_words(query)
+    text_words = normalize_text(text).split()
+    matches = {}
+
+    for word in query_words:
+        count = text_words.count(word)
+        if count > 0:
+            matches[word] = count
+
+    return matches
 
 
 def make_snippet(text: str, query: str, max_length: int = 300) -> str:
@@ -157,7 +166,8 @@ def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[Knowle
 
     for page in pages:
         searchable_text = get_page_search_text(page)
-        score = calculate_keyword_score(query, searchable_text)
+        matched_words = count_query_word_matches(query, searchable_text)
+        score = sum(matched_words.values())
 
         if score == 0:
             continue
@@ -167,6 +177,7 @@ def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[Knowle
             "title": page["title"],
             "snippet": make_snippet(page["text"], query),
             "score": score,
+            "matched_words": matched_words,
         }
 
         results.append(result)
