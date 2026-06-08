@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-06-07T16:41:02",
+  "created_at": "2026-06-08T15:57:16",
   "total_cases": 26,
   "passed_cases": 26,
   "accuracy": 1.0,
@@ -7,6 +7,10 @@
   "results": [
     {
       "query": "доставка київ",
+      "query_words": [
+        "доставка",
+        "київ"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/dostavka/",
       "actual_url": "https://prokat24.com.ua/ua/dostavka/",
       "actual_title": "Доставка прокатного спорядження — Прокат24",
@@ -23,6 +27,10 @@
     },
     {
       "query": "застава паспорт",
+      "query_words": [
+        "застава",
+        "паспорт"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -39,6 +47,10 @@
     },
     {
       "query": "номер Viber",
+      "query_words": [
+        "номер",
+        "viber"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_title": "Зв’язатися з нами",
@@ -55,6 +67,9 @@
     },
     {
       "query": "прокат сервіс",
+      "query_words": [
+        "сервіс"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_title": "Про нас — Прокат24",
@@ -71,6 +86,9 @@
     },
     {
       "query": "яка вартість прокату",
+      "query_words": [
+        "вартість"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -87,6 +105,10 @@
     },
     {
       "query": "як рахуються дні",
+      "query_words": [
+        "рахуються",
+        "дні"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -103,6 +125,9 @@
     },
     {
       "query": "як забронювати спорядження",
+      "query_words": [
+        "забронювати"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -119,6 +144,10 @@
     },
     {
       "query": "яка передоплата при бронюванні",
+      "query_words": [
+        "передоплата",
+        "бронюванні"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -135,6 +164,9 @@
     },
     {
       "query": "чи є сервіс спорядження",
+      "query_words": [
+        "сервіс"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_title": "Про нас — Прокат24",
@@ -151,6 +183,9 @@
     },
     {
       "query": "ремонт спорядження",
+      "query_words": [
+        "ремонт"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_title": "Про нас — Прокат24",
@@ -167,6 +202,10 @@
     },
     {
       "query": "ціна доставки",
+      "query_words": [
+        "ціна",
+        "доставки"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/dostavka/",
       "actual_url": "https://prokat24.com.ua/ua/dostavka/",
       "actual_title": "Доставка прокатного спорядження — Прокат24",
@@ -189,6 +228,9 @@
     },
     {
       "query": "самовивіз спорядження",
+      "query_words": [
+        "самовивіз"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/dostavka/",
       "actual_url": "https://prokat24.com.ua/ua/dostavka/",
       "actual_title": "Доставка прокатного спорядження — Прокат24",
@@ -205,34 +247,30 @@
     },
     {
       "query": "який штраф за просрочення",
+      "query_words": [
+        "штраф",
+        "просрочення"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
-      "actual_score": 7,
+      "actual_score": 1,
       "passed": true,
       "top_results": [
         {
           "url": "https://prokat24.com.ua/ua/pravila-prokata/",
           "title": "Правила прокату — Прокат24",
           "snippet": "Скільки коштує прокат?\nВартість прокату залежить від спорядження та кількості днів. У кожній категорії є таблиця вартості залежно від кількості днів, за допомогою якої Ви можете легко та швидко дізнатися ціну на потрібне спорядження на необхідний строк прокату.\nЗверніть увагу:\nчим більший строк прок...",
-          "score": 7
-        },
-        {
-          "url": "https://prokat24.com.ua/ua/o-nas/",
-          "title": "Про нас — Прокат24",
-          "snippet": "Прокат24 — комплексний сервіс за найнижчими цінами!\nМи надаємо повний спектр послуг, пов’язаних із туристичним, гірськолижним, рибальським, кемпінговим та іншим спорядженням.\nПрокат спорядження\nУ наших пунктах прокату Ви можете взяти в оренду все необхідне для якісного відпочинку на природі, туристи...",
-          "score": 4
-        },
-        {
-          "url": "https://prokat24.com.ua/ua/dostavka/",
-          "title": "Доставка прокатного спорядження — Прокат24",
-          "snippet": "Доставка:\nПослуга доставки можлива тільки за попередньою домовленістю заздалегідь.\nПо Києву — від 200 грн.\nЗа межами Києва — від 200 грн + 10 грн/км\nДоставка\nвеликогабаритних товарів\n— шатри, столи, стільці — узгоджується\nіндивідуально\n.\nСамовивіз:\nВи можете забрати орендоване спорядження самостійно...",
-          "score": 2
+          "score": 1
         }
       ]
     },
     {
       "query": "що залишити в заставу",
+      "query_words": [
+        "залишити",
+        "заставу"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -249,6 +287,9 @@
     },
     {
       "query": "телефон прокату",
+      "query_words": [
+        "телефон"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_title": "Зв’язатися з нами",
@@ -265,6 +306,9 @@
     },
     {
       "query": "адреса прокату",
+      "query_words": [
+        "адреса"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_title": "Зв’язатися з нами",
@@ -281,6 +325,13 @@
     },
     {
       "query": "де вас знайти",
+      "query_words": [
+        "де",
+        "вас",
+        "знайти",
+        "адреса",
+        "контакти"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_title": "Зв’язатися з нами",
@@ -297,28 +348,33 @@
     },
     {
       "query": "як з вами зв'язатись",
+      "query_words": [
+        "вами",
+        "зв'язатись",
+        "контакти",
+        "телефон"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_url": "https://prokat24.com.ua/ua/contact-us/",
       "actual_title": "Зв’язатися з нами",
-      "actual_score": 3,
+      "actual_score": 2,
       "passed": true,
       "top_results": [
         {
           "url": "https://prokat24.com.ua/ua/contact-us/",
           "title": "Зв’язатися з нами",
           "snippet": "м. БЕРЕСТЕЙСЬКА\nвул. Табірна, 42\nм. ГОЛОСІЇВСЬКА\nвул. Васильківська, 1\n(095) 66 06 181 (Viber)\n(098) 66 06 181\n(066) 88 73 747 (Viber)\n(067) 88 73 747\n(073) 88 73 747\nПідтримка покупців\ninfo@prokat24.com.ua",
-          "score": 3
-        },
-        {
-          "url": "https://prokat24.com.ua/ua/pravila-prokata/",
-          "title": "Правила прокату — Прокат24",
-          "snippet": "Скільки коштує прокат?\nВартість прокату залежить від спорядження та кількості днів. У кожній категорії є таблиця вартості залежно від кількості днів, за допомогою якої Ви можете легко та швидко дізнатися ціну на потрібне спорядження на необхідний строк прокату.\nЗверніть увагу:\nчим більший строк прок...",
           "score": 2
         }
       ]
     },
     {
       "query": "чи можна залишити паспорт",
+      "query_words": [
+        "можна",
+        "залишити",
+        "паспорт"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -335,6 +391,12 @@
     },
     {
       "query": "скільки коштує привезти",
+      "query_words": [
+        "скільки",
+        "коштує",
+        "привезти",
+        "доставка"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/dostavka/",
       "actual_url": "https://prokat24.com.ua/ua/dostavka/",
       "actual_title": "Доставка прокатного спорядження — Прокат24",
@@ -357,6 +419,10 @@
     },
     {
       "query": "ремонт палатки",
+      "query_words": [
+        "ремонт",
+        "палатки"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_title": "Про нас — Прокат24",
@@ -373,6 +439,10 @@
     },
     {
       "query": "сервіс лиж",
+      "query_words": [
+        "сервіс",
+        "лиж"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_url": "https://prokat24.com.ua/ua/o-nas/",
       "actual_title": "Про нас — Прокат24",
@@ -389,6 +459,10 @@
     },
     {
       "query": "повернути пізніше",
+      "query_words": [
+        "повернути",
+        "пізніше"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -405,6 +479,12 @@
     },
     {
       "query": "продовжити термін прокату",
+      "query_words": [
+        "продовжити",
+        "прострочення",
+        "строк",
+        "термін"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -421,6 +501,11 @@
     },
     {
       "query": "що можна залишити в заставу",
+      "query_words": [
+        "можна",
+        "залишити",
+        "заставу"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",
@@ -437,6 +522,11 @@
     },
     {
       "query": "як рахується довгострокова оренда",
+      "query_words": [
+        "рахується",
+        "довгострокова",
+        "оренда"
+      ],
       "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_url": "https://prokat24.com.ua/ua/pravila-prokata/",
       "actual_title": "Правила прокату — Прокат24",

@@ -3,7 +3,11 @@ from pathlib import Path
 from typing import TypedDict
 
 from prokat24_ai_lab.knowledge_base import KnowledgePage
-from prokat24_ai_lab.knowledge_search import KnowledgeSearchResult, search_knowledge_base
+from prokat24_ai_lab.knowledge_search import (
+    KnowledgeSearchResult,
+    get_query_words,
+    search_knowledge_base,
+)
 
 
 class SearchEvalCase(TypedDict):
@@ -13,6 +17,7 @@ class SearchEvalCase(TypedDict):
 
 class SearchEvalResult(TypedDict):
     query: str
+    query_words: list[str]
     expected_url: str
     actual_url: str | None
     actual_title: str | None
@@ -37,6 +42,7 @@ def load_search_eval_cases(input_file: Path) -> list[SearchEvalCase]:
 
 def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> SearchEvalResult:
     query = case["query"]
+    query_words = get_query_words(query)
     expected_url = case["expected_url"]
     actual_url = None
     actual_title = None
@@ -55,6 +61,7 @@ def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> Se
 
     return {
         "query": query,
+        "query_words": query_words,
         "expected_url": expected_url,
         "actual_url": actual_url,
         "actual_title": actual_title,

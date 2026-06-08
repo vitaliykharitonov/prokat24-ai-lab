@@ -111,7 +111,7 @@ def test_load_search_eval_cases_reads_json_file(tmp_path: Path) -> None:
 
 def test_evaluate_search_case_is_correct() -> None:
     case = {
-        "query": "доставка київ",
+        "query": "скільки коштує привезти",
         "expected_url": "https://prokat24.com.ua/ua/dostavka/",
     }
 
@@ -121,6 +121,8 @@ def test_evaluate_search_case_is_correct() -> None:
     assert evaluated_search_case["passed"] is True
     assert evaluated_search_case["actual_url"] == case["expected_url"]
     assert evaluated_search_case["query"] == case["query"]
+    assert "доставка" in evaluated_search_case["query_words"]
+    assert "привезти" in evaluated_search_case["query_words"]
     assert evaluated_search_case["expected_url"] == case["expected_url"]
     assert evaluated_search_case["actual_title"] == "Доставка прокатного спорядження — Прокат24"
     assert evaluated_search_case["actual_score"] == 3

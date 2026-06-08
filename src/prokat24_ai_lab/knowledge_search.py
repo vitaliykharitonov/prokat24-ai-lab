@@ -14,6 +14,8 @@ STOP_WORDS = {
     "в",
     "на",
     "при",
+    "з",
+    "за",
     # --Domain stop words
     "спорядження",
     "прокат",
@@ -64,12 +66,28 @@ def expand_query_words(words: list[str]) -> list[str]:
     return expanded_words
 
 
+def deduplicate_words(words: list[str]) -> list[str]:
+    seen_words = set()
+    unique_words = []
+
+    for word in words:
+        if word in seen_words:
+            continue
+
+        else:
+            seen_words.add(word)
+            unique_words.append(word)
+
+    return unique_words
+
+
 def get_query_words(query: str) -> list[str]:
     query_words = normalize_text(query).split()
     filtred_words = [word for word in query_words if word not in STOP_WORDS]
     expanded_query_words = expand_query_words(filtred_words)
+    deduplicated_words = deduplicate_words(expanded_query_words)
 
-    return expanded_query_words
+    return deduplicated_words
 
 
 def get_page_search_text(page: KnowledgePage) -> str:

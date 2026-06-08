@@ -1,5 +1,6 @@
 from prokat24_ai_lab.knowledge_search import (
     calculate_keyword_score,
+    deduplicate_words,
     expand_query_words,
     get_page_search_text,
     get_query_words,
@@ -33,6 +34,14 @@ def test_expand_query_words_adds_aliases_and_keeps_words_without_aliases() -> No
     assert expanded_query_words == ["ремонт", "палатки"]
 
 
+def test_deduplicate_words_removes_duplicates_and_keeps_order() -> None:
+    query_words = ["a", "b", "a", "c", "b"]
+
+    result = deduplicate_words(query_words)
+
+    assert result == ["a", "b", "c"]
+
+
 def test_get_query_words_removes_stop_words() -> None:
     result = get_query_words(
         query="чи є сервіс спорядження",
@@ -48,6 +57,13 @@ def test_get_query_words_adds_aliases() -> None:
 
     assert "доставка" in result
 
+
+def test_get_query_words_removes_duplicates() -> None:
+    query_words = "продовжити термін прокату"
+
+    result = get_query_words(query_words)
+
+    assert result.count("термін") == 1
 
 def test_get_page_search_text_adds_keywords() -> None:
     page = {
