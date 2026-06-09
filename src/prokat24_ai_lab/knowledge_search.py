@@ -58,12 +58,18 @@ WORD_WEIGHTS = {
 }
 
 
+class ScoreDetail(TypedDict):
+    count: int
+    weight: float
+    contribution: float
+
+
 class KnowledgeSearchResult(TypedDict):
     url: str
     title: str
     snippet: str
     score: float
-    score_details: dict[str, dict[str, float]]
+    score_details: dict[str, ScoreDetail]
     matched_words: dict[str, int]
 
 
@@ -154,11 +160,7 @@ def count_query_word_matches(query: str, text: str) -> dict[str, int]:
 
 
 def calculate_weighted_score(matched_words: dict[str, int]) -> float:
-    score = 0.0
-
-    for word, count in matched_words.items():
-        weight = WORD_WEIGHTS.get(word, 1.0)
-        score += weight * count
+    score = calculate_score_from_details(build_score_details(matched_words))
 
     return score
 
@@ -200,7 +202,7 @@ def make_snippet(text: str, query: str, max_length: int = 300) -> str:
     return snippet
 
 
-def build_score_details(matched_words: dict[str, int]) -> dict[str, dict[str, float]]:
+def build_score_details(matched_words: dict[str, int]) -> dict[str, ScoreDetail]:
     score_details = {}
 
     for word, count in matched_words.items():
@@ -215,13 +217,23 @@ def build_score_details(matched_words: dict[str, int]) -> dict[str, dict[str, fl
     return score_details
 
 
+def calculate_score_from_details(score_details: dict[str, ScoreDetail]) -> float:
+    score = 0.0
+
+    for detail in score_details.values():
+        score += detail["contribution"]
+
+    return score
+
+
 def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[KnowledgeSearchResult]:
     results: list[KnowledgeSearchResult] = []
 
     for page in pages:
         searchable_text = get_page_search_text(page)
         matched_words = count_query_word_matches(query, searchable_text)
-        score = calculate_weighted_score(matched_words)
+        score_details = build_score_details(matched_words)
+        score = calculate_score_from_details(score_details)
 
         if score == 0.0:
             continue
@@ -231,7 +243,7 @@ def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[Knowle
             "title": page["title"],
             "snippet": make_snippet(page["text"], query),
             "score": score,
-            "score_details": build_score_details(matched_words),
+            "score_details": score_details,
             "matched_words": matched_words,
         }
 

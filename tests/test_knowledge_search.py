@@ -1,6 +1,7 @@
 from prokat24_ai_lab.knowledge_search import (
     build_score_details,
     calculate_keyword_score,
+    calculate_score_from_details,
     calculate_weighted_score,
     count_query_word_matches,
     deduplicate_words,
@@ -207,19 +208,43 @@ def test_build_score_details_returns_count_weight_and_contribution() -> None:
         "можна": {
             "count": 2,
             "weight": 0.5,
-            "contribution": 1,
+            "contribution": 1.0,
         },
         "паспорт": {
             "count": 2,
-            "weight": 2,
-            "contribution": 4,
+            "weight": 2.0,
+            "contribution": 4.0,
         },
         "залишити": {
             "count": 1,
-            "weight": 1,
-            "contribution": 1,
+            "weight": 1.0,
+            "contribution": 1.0,
         },
     }
+
+
+def test_calculate_score_from_details_sums_contributions() -> None:
+    details = {
+        "можна": {
+            "count": 2,
+            "weight": 0.5,
+            "contribution": 1.0,
+        },
+        "паспорт": {
+            "count": 2,
+            "weight": 2.0,
+            "contribution": 4.0,
+        },
+        "залишити": {
+            "count": 1,
+            "weight": 1.0,
+            "contribution": 1.0,
+        },
+    }
+
+    result = calculate_score_from_details(details)
+
+    assert result == 6.0
 
 
 def test_search_knowledge_base_returns_best_match_first() -> None:
