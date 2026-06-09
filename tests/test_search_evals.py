@@ -35,14 +35,14 @@ TEST_SEARCH_EVAL_RESULTS = [
         "expected_url": "https://prokat24.com.ua/ua/dostavka/",
         "actual_url": "https://prokat24.com.ua/ua/dostavka/",
         "actual_title": "Доставка прокатного спорядження — Прокат24",
-        "actual_score": 2,
+        "actual_score": 2.0,
         "passed": True,
         "top_results": [
             {
                 "url": "https://prokat24.com.ua/ua/dostavka/",
                 "title": "Доставка прокатного спорядження — Прокат24",
                 "snippet": "Доставка можлива. По Києву — від 200 грн. Доставка товарів.",
-                "score": 2,
+                "score": 2.0,
             },
         ],
     },
@@ -51,14 +51,14 @@ TEST_SEARCH_EVAL_RESULTS = [
         "expected_url": "https://prokat24.com.ua/ua/o-nas/",
         "actual_url": "https://prokat24.com.ua/ua/o-nas/",
         "actual_title": "Про нас — Прокат24",
-        "actual_score": 2,
+        "actual_score": 2.0,
         "passed": True,
         "top_results": [
             {
                 "url": "https://prokat24.com.ua/ua/o-nas/",
                 "title": "Про нас — Прокат24",
                 "snippet": "Прокат спорядження та сервіс.",
-                "score": 2,
+                "score": 2.0,
             },
         ],
     },
@@ -67,14 +67,14 @@ TEST_SEARCH_EVAL_RESULTS = [
         "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/",
         "actual_url": "https://prokat24.com.ua/ua/o-nas/",
         "actual_title": "Про нас — Прокат24",
-        "actual_score": 1,
+        "actual_score": 1.0,
         "passed": False,
         "top_results": [
             {
                 "url": "https://prokat24.com.ua/ua/o-nas/",
                 "title": "Про нас — Прокат24",
                 "snippet": "Прокат спорядження та сервіс.",
-                "score": 1,
+                "score": 1.0,
             },
         ],
     },
@@ -125,11 +125,11 @@ def test_evaluate_search_case_is_correct() -> None:
     assert "привезти" in evaluated_search_case["query_words"]
     assert evaluated_search_case["expected_url"] == case["expected_url"]
     assert evaluated_search_case["actual_title"] == "Доставка прокатного спорядження — Прокат24"
-    assert evaluated_search_case["actual_score"] == 3
+    assert evaluated_search_case["actual_score"] == 3.0
     assert len(top_results) == 1
     assert top_results[0]["url"] == "https://prokat24.com.ua/ua/dostavka/"
     assert top_results[0]["title"] == "Доставка прокатного спорядження — Прокат24"
-    assert top_results[0]["score"] == 3
+    assert top_results[0]["score"] == 3.0
     assert "Доставка" in top_results[0]["snippet"]
 
 

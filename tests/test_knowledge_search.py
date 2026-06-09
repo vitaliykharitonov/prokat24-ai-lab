@@ -1,5 +1,6 @@
 from prokat24_ai_lab.knowledge_search import (
     calculate_keyword_score,
+    calculate_weighted_score,
     count_query_word_matches,
     deduplicate_words,
     expand_query_words,
@@ -154,6 +155,18 @@ def test_count_query_word_matches_returns_counts_for_matched_words() -> None:
         "доставка": 2,
         "києву": 1,
     }
+
+
+def test_calculate_weighted_score_uses_word_weights() -> None:
+    matched_words = {
+        "можна": 2,
+        "паспорт": 2,
+        "залишити": 1,
+    }
+
+    result = calculate_weighted_score(matched_words)
+
+    assert result == 6.0
 
 
 def test_make_snippet_returns_text_near_query_word() -> None:

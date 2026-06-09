@@ -49,11 +49,20 @@ WORD_ALIASES = {
 }
 
 
+WORD_WEIGHTS = {
+    "можна": 0.5,
+    "паспорт": 2.0,
+    "застава": 2.0,
+    "телефон": 2.0,
+    "адреса": 2.0,
+}
+
+
 class KnowledgeSearchResult(TypedDict):
     url: str
     title: str
     snippet: str
-    score: int
+    score: float
     matched_words: dict[str, int]
 
 
@@ -143,6 +152,16 @@ def count_query_word_matches(query: str, text: str) -> dict[str, int]:
     return matches
 
 
+def calculate_weighted_score(matched_words: dict[str, int]) -> float:
+    score = 0.0
+
+    for word, count in matched_words.items():
+        weight = WORD_WEIGHTS.get(word, 1.0)
+        score += weight * count
+
+    return score
+
+
 def make_snippet(text: str, query: str, max_length: int = 300) -> str:
     query_words = normalize_text(query).split()
     lower_text = text.lower()
@@ -186,9 +205,9 @@ def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[Knowle
     for page in pages:
         searchable_text = get_page_search_text(page)
         matched_words = count_query_word_matches(query, searchable_text)
-        score = sum(matched_words.values())
+        score = calculate_weighted_score(matched_words)
 
-        if score == 0:
+        if score == 0.0:
             continue
 
         result: KnowledgeSearchResult = {

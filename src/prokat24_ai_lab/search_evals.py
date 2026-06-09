@@ -21,7 +21,7 @@ class SearchEvalResult(TypedDict):
     expected_url: str
     actual_url: str | None
     actual_title: str | None
-    actual_score: int | None
+    actual_score: float | None
     passed: bool
     top_results: list[KnowledgeSearchResult]
 
