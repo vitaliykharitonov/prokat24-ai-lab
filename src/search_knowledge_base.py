@@ -39,6 +39,7 @@ def main() -> None:
     for index, result in enumerate(results[: args.limit], start=1):
         print(f"{index}. {result['title']}")
         print(f"Score: {result['score']}")
+        print(f"Matched words: {result['matched_words']}")
         print(f"URL: {result['url']}")
         print("Snippet:")
         print(result["snippet"])
