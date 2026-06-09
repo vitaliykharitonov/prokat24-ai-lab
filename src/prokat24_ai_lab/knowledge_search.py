@@ -63,6 +63,7 @@ class KnowledgeSearchResult(TypedDict):
     title: str
     snippet: str
     score: float
+    score_details: dict[str, dict[str, float]]
     matched_words: dict[str, int]
 
 
@@ -199,6 +200,21 @@ def make_snippet(text: str, query: str, max_length: int = 300) -> str:
     return snippet
 
 
+def build_score_details(matched_words: dict[str, int]) -> dict[str, dict[str, float]]:
+    score_details = {}
+
+    for word, count in matched_words.items():
+        weight = WORD_WEIGHTS.get(word, 1.0)
+        contribution = count * weight
+        score_details[word] = {
+            "count": count,
+            "weight": weight,
+            "contribution": contribution,
+        }
+
+    return score_details
+
+
 def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[KnowledgeSearchResult]:
     results: list[KnowledgeSearchResult] = []
 
@@ -215,6 +231,7 @@ def search_knowledge_base(query: str, pages: list[KnowledgePage]) -> list[Knowle
             "title": page["title"],
             "snippet": make_snippet(page["text"], query),
             "score": score,
+            "score_details": build_score_details(matched_words),
             "matched_words": matched_words,
         }
 

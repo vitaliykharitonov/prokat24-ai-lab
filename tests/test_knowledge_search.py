@@ -1,4 +1,5 @@
 from prokat24_ai_lab.knowledge_search import (
+    build_score_details,
     calculate_keyword_score,
     calculate_weighted_score,
     count_query_word_matches,
@@ -193,6 +194,34 @@ def test_make_snippet_adds_trailing_ellipsis_when_text_is_cut() -> None:
     assert result.endswith("...")
 
 
+def test_build_score_details_returns_count_weight_and_contribution() -> None:
+    matched_words = {
+        "можна": 2,
+        "паспорт": 2,
+        "залишити": 1,
+    }
+
+    result = build_score_details(matched_words)
+
+    assert result == {
+        "можна": {
+            "count": 2,
+            "weight": 0.5,
+            "contribution": 1,
+        },
+        "паспорт": {
+            "count": 2,
+            "weight": 2,
+            "contribution": 4,
+        },
+        "залишити": {
+            "count": 1,
+            "weight": 1,
+            "contribution": 1,
+        },
+    }
+
+
 def test_search_knowledge_base_returns_best_match_first() -> None:
     pages = [
         {
@@ -219,6 +248,18 @@ def test_search_knowledge_base_returns_best_match_first() -> None:
     assert len(result) == 1
     assert result[0]["title"] == "Доставка прокатного спорядження — Прокат24"
     assert result[0]["score"] == 4
+    assert result[0]["score_details"] == {
+        "доставка": {
+            "count": 3,
+            "weight": 1.0,
+            "contribution": 3.0,
+        },
+        "києву": {
+            "count": 1,
+            "weight": 1.0,
+            "contribution": 1.0,
+        },
+    }
     assert result[0]["matched_words"] == {
         "доставка": 3,
         "києву": 1,
