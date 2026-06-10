@@ -9,6 +9,7 @@ from prokat24_ai_lab.knowledge_search import (
     deduplicate_words,
     expand_query_words,
     expand_word_forms,
+    find_best_snippet_position,
     get_page_search_text,
     get_query_words,
     make_snippet,
@@ -38,11 +39,11 @@ def test_normalize_text_returns_lowercase_words() -> None:
             ["ремонт", "палатки"],
             ["ремонт", "палатки"],
         ),
-    ]
+    ],
 )
 def test_expand_query_words_adds_aliases_and_keeps_words_without_aliases(
-        words: list[str],
-        expected: list[str],
+    words: list[str],
+    expected: list[str],
 ) -> None:
 
     result = expand_query_words(words)
@@ -100,6 +101,17 @@ def test_get_query_words_expands_query_aliases_and_word_forms() -> None:
     assert "доставку" in result
     assert "доставки" in result
     assert "доставкою" in result
+
+
+def test_get_query_words_expands_reverse_word_forms() -> None:
+    query = "що залишити в заставу"
+
+    result = get_query_words(query)
+
+    assert "заставу" in result
+    assert "застава" in result
+    assert "застави" in result
+    assert "заставою" in result
 
 
 def test_get_query_words_removes_duplicates() -> None:
@@ -182,6 +194,21 @@ def test_calculate_weighted_score_uses_word_weights() -> None:
     assert result == 6.0
 
 
+def test_find_best_snippet_position_prefers_window_with_more_query_matches() -> None:
+    text = (
+        "Залишити передоплату можна під час бронювання. "
+        "Далі багато тексту. Що є заставою при оренді? "
+        "Можна залишити паспорт або грошову заставу."
+    )
+
+    query = "що залишити в заставу"
+
+    position = find_best_snippet_position(text, query, 80)
+
+    assert position is not None
+    assert position > text.find("Далі багато тексту")
+
+
 def test_make_snippet_returns_text_near_query_word() -> None:
     result = make_snippet(
         text="Початок тексту. Доставка можлива за попередньою домовленістю. Кінець тексту.",
@@ -204,6 +231,19 @@ def test_make_snippet_adds_trailing_ellipsis_when_text_is_cut() -> None:
 
     assert result.startswith("Доставка")
     assert result.endswith("...")
+
+
+def test_make_snippet_uses_filtered_query_words() -> None:
+    text = (
+        "Вартість прокату залежить від кількості днів. "
+        "Що є заставою при оренді? "
+        "Можна залишити паспорт або грошову заставу."
+    )
+
+    result = make_snippet(text, query="що залишити в заставу", max_length=100)
+
+    assert "застав" in result
+    assert "передоплату" not in result
 
 
 def test_build_score_details_returns_count_weight_and_contribution() -> None:

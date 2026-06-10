@@ -46,6 +46,9 @@ WORD_ALIASES = {
     "київ": ["києву", "києва", "києві"],
     "доставка": ["доставку", "доставки", "доставкою"],
     "застава": ["заставу", "застави", "заставою"],
+    "заставу": ["застава", "застави", "заставою"],
+    "застави": ["застава", "заставу", "заставою"],
+    "заставою": ["застава", "заставу", "застави"],
 }
 
 
@@ -165,22 +168,43 @@ def calculate_weighted_score(matched_words: dict[str, int]) -> float:
     return score
 
 
-def make_snippet(text: str, query: str, max_length: int = 300) -> str:
-    query_words = normalize_text(query).split()
+def find_best_snippet_position(text: str, query: str, max_length: int) -> int | None:
+    query_words = get_query_words(query)
     lower_text = text.lower()
-
-    first_position: int | None = None
+    best_position: int | None = None
+    best_score = 0
 
     for word in query_words:
-        position = lower_text.find(word)
+        start_search_position = 0
 
-        if position == -1:
-            continue
+        while start_search_position >= 0:
+            position = lower_text.find(word, start_search_position)
 
-        if first_position is None or position < first_position:
-            first_position = position
+            if position == -1:
+                break
 
-    if first_position is None:
+            start = max(0, position - max_length // 2)
+            end = min(len(text), start + max_length)
+
+            window_text = lower_text[start:end]
+            window_score = 0
+
+            for query_word in query_words:
+                window_score += window_text.count(query_word)
+
+            if window_score > best_score:
+                best_score = window_score
+                best_position = position
+
+            start_search_position = position + len(word)
+
+    return best_position
+
+
+def make_snippet(text: str, query: str, max_length: int = 300) -> str:
+    best_position = find_best_snippet_position(text, query, max_length)
+
+    if best_position is None:
         snippet = text[:max_length].strip()
 
         if len(text) > max_length:
@@ -188,7 +212,7 @@ def make_snippet(text: str, query: str, max_length: int = 300) -> str:
 
         return snippet
 
-    start = max(0, first_position - max_length // 2)
+    start = max(0, best_position - max_length // 2)
     end = min(len(text), start + max_length)
 
     snippet = text[start:end].strip()

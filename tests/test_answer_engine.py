@@ -1,6 +1,5 @@
 from prokat24_ai_lab.answer_engine import answer_question
 
-
 TEST_PAGES = [
     {
         "url": "https://prokat24.com.ua/ua/dostavka/",
