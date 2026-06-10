@@ -1,3 +1,5 @@
+import pytest
+
 from prokat24_ai_lab.knowledge_search import (
     build_score_details,
     calculate_keyword_score,
@@ -21,22 +23,31 @@ def test_normalize_text_returns_lowercase_words() -> None:
     assert result == "доставка київ 200 грн"
 
 
-def test_expand_query_words_adds_aliases_and_keeps_words_without_aliases() -> None:
-    query_words = ["скільки", "коштує", "привезти"]
-    expanded_query_words = expand_query_words(query_words)
+@pytest.mark.parametrize(
+    ("words", "expected"),
+    [
+        (
+            ["скільки", "коштує", "привезти"],
+            ["скільки", "коштує", "привезти", "доставка"],
+        ),
+        (
+            ["де", "вас", "знайти"],
+            ["де", "вас", "знайти", "адреса", "контакти"],
+        ),
+        (
+            ["ремонт", "палатки"],
+            ["ремонт", "палатки"],
+        ),
+    ]
+)
+def test_expand_query_words_adds_aliases_and_keeps_words_without_aliases(
+        words: list[str],
+        expected: list[str],
+) -> None:
 
-    assert "доставка" in expanded_query_words
+    result = expand_query_words(words)
 
-    query_words = ["де", "вас", "знайти"]
-    expanded_query_words = expand_query_words(query_words)
-
-    assert "адреса" in expanded_query_words
-    assert "контакти" in expanded_query_words
-
-    query_words = ["ремонт", "палатки"]
-    expanded_query_words = expand_query_words(query_words)
-
-    assert expanded_query_words == ["ремонт", "палатки"]
+    assert result == expected
 
 
 def test_expand_word_forms_adds_grammatical_forms() -> None:
