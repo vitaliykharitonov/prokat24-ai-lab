@@ -23,6 +23,7 @@ def test_answer_question_returns_snippet_and_source_when_result_found() -> None:
     answer = answer_question(question, TEST_PAGES)
 
     assert answer["question"] == question
+    assert answer["answer_type"] == "extractive_snippet"
     assert "Доставка" in answer["answer"]
     assert len(answer["sources"]) == 1
     assert answer["sources"][0]["title"] == TEST_PAGES[0]["title"]
@@ -35,6 +36,7 @@ def test_answer_question_returns_low_confidence_when_no_result_found() -> None:
     answer = answer_question(question, TEST_PAGES)
 
     assert answer["question"] == question
+    assert answer["answer_type"] == "not_found"
     assert answer["answer"] == "Не знайшов відповідь у базі знань."
     assert answer["sources"] == []
     assert answer["confidence"] == "low"

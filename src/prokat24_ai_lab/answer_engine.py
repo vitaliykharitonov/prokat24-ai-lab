@@ -11,6 +11,10 @@ class AnswerSource(TypedDict):
 
 class KnowledgeAnswer(TypedDict):
     question: str
+    answer_type: str
+    answer: str
+    sources: list[AnswerSource]
+    confidence: str
     answer: str
     sources: list[AnswerSource]
     confidence: str
@@ -23,6 +27,7 @@ def answer_question(question: str, pages: list[KnowledgePage]) -> KnowledgeAnswe
         answer = "Не знайшов відповідь у базі знань."
         return {
             "question": question,
+            "answer_type": "not_found",
             "answer": answer,
             "sources": [],
             "confidence": "low",
@@ -31,6 +36,7 @@ def answer_question(question: str, pages: list[KnowledgePage]) -> KnowledgeAnswe
     top_result = search_results[0]
     return {
         "question": question,
+        "answer_type": "extractive_snippet",
         "answer": top_result["snippet"],
         "sources": [{"title": top_result["title"], "url": top_result["url"]}],
         "confidence": "medium",

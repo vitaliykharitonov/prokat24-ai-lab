@@ -23,6 +23,7 @@ def main() -> None:
 
     print(f"Question: {args.question}")
     print(f"Confidence: {answer['confidence']}")
+    print(f"Answer type: {answer['answer_type']}")
     print()
     print("Answer:")
     print(f"{answer['answer']}")
