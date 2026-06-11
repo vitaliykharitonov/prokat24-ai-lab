@@ -15,9 +15,6 @@ class KnowledgeAnswer(TypedDict):
     answer: str
     sources: list[AnswerSource]
     confidence: str
-    answer: str
-    sources: list[AnswerSource]
-    confidence: str
 
 
 def answer_question(question: str, pages: list[KnowledgePage]) -> KnowledgeAnswer:

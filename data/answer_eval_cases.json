@@ -1,0 +1,55 @@
+[
+  {
+    "question": "що залишити в заставу",
+    "expected_answer_type": "extractive_snippet",
+    "expected_source_url": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "expected_answer_contains": [
+      "Грошова застава",
+      "паспорт"
+    ]
+  },
+  {
+    "question": "скільки коштує доставка по Києву",
+    "expected_answer_type": "extractive_snippet",
+    "expected_source_url": "https://prokat24.com.ua/ua/dostavka/",
+    "expected_answer_contains": [
+      "від 200 грн",
+      "по Києву"
+    ]
+  },
+  {
+    "question": "де вас знайти",
+    "expected_answer_type": "extractive_snippet",
+    "expected_source_url": "https://prokat24.com.ua/ua/contact-us/",
+    "expected_answer_contains": [
+      "вул. Табірна",
+      "вул. Васильківська"
+    ]
+  },
+  {
+    "question": "як з вами зв'язатись",
+    "expected_answer_type": "extractive_snippet",
+    "expected_source_url": "https://prokat24.com.ua/ua/contact-us/",
+    "expected_answer_contains": [
+      "(098)",
+      "info@prokat24.com.ua"
+    ]
+  },
+  {
+    "question": "як рахується довгострокова оренда",
+    "expected_answer_type": "extractive_snippet",
+    "expected_source_url": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "expected_answer_contains": [
+      "довгостроковій оренді",
+      "понад 3 дні"
+    ]
+  },
+  {
+    "question": "абракадабра невідомеслово",
+    "expected_answer_type": "not_found",
+    "expected_source_url": null,
+    "expected_answer_contains": [
+      "Не знайшов відповідь"
+    ]
+  }
+]
