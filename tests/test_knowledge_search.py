@@ -91,16 +91,40 @@ def test_get_query_words_adds_aliases() -> None:
     assert "доставка" in result
 
 
-def test_get_query_words_expands_query_aliases_and_word_forms() -> None:
-    query = "скільки коштує привезти"
+@pytest.mark.parametrize(
+    ("query", "expected_words"),
+    [
+        (
+            "скільки коштує привезти",
+            [
+                "привезти",
+                "доставка",
+                "доставку",
+                "доставки",
+                "доставкою",
+            ],
+        ),
+        (
+            "як рахується довгострокова оренда",
+            [
+                "рахується",
+                "рахуються",
+                "довгострокова",
+                "довгостроковій",
+                "оренда",
+                "оренді",
+            ],
+        ),
+    ],
+)
+def test_get_query_words_expands_query_aliases_and_word_forms(
+    query: str, expected_words: list[str]
+) -> None:
 
     result = get_query_words(query)
 
-    assert "привезти" in result
-    assert "доставка" in result
-    assert "доставку" in result
-    assert "доставки" in result
-    assert "доставкою" in result
+    for expected_word in expected_words:
+        assert expected_word in result
 
 
 def test_get_query_words_expands_reverse_word_forms() -> None:
