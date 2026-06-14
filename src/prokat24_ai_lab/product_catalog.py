@@ -22,3 +22,13 @@ def is_product_category_url(url: str) -> bool:
         return False
 
     return not path_parts & NON_PRODUCT_PATH_PARTS
+
+
+def filter_product_category_urls(urls: list[str]) -> list[str]:
+    filtered_urls = []
+
+    for url in urls:
+        if is_product_category_url(url):
+            filtered_urls.append(url)
+
+    return sorted(set(filtered_urls))
