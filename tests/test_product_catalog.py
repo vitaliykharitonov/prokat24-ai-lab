@@ -1,10 +1,15 @@
 import pytest
 
 from prokat24_ai_lab.product_catalog import (
+    extract_product_description,
+    extract_product_info_lines,
+    extract_product_name,
+    extract_section_lines,
     filter_product_category_urls,
     filter_product_urls,
     is_product_category_url,
     is_product_url,
+    parse_key_value_lines,
 )
 
 CATEGORY_URL = "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/"
@@ -74,8 +79,7 @@ def test_filter_product_urls_keeps_only_unique_sorted_product_urls() -> None:
         CATEGORY_URL + "prokat-palatki-2-mestnaya/",
         CATEGORY_URL + "prokat-palatki-2-mestnaya/",
         CATEGORY_URL + "prokat-palatki-3-mestnaya/",
-        "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/"
-        "prokat-spalnikov/prokat-spalnik/",
+        "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-spalnikov/prokat-spalnik/",
         "https://example.com/ua/turisticheskoe-snaryazhenie/prokat-palatok/x/",
     ]
 
@@ -85,3 +89,193 @@ def test_filter_product_urls_keeps_only_unique_sorted_product_urls() -> None:
         CATEGORY_URL + "prokat-palatki-2-mestnaya/",
         CATEGORY_URL + "prokat-palatki-3-mestnaya/",
     ]
+
+
+def test_extract_product_name_returns_product_name() -> None:
+    html = """
+    <span class="catalogue__product-name">
+        Прокат 2-місних наметів
+    </span>
+    """
+
+    result = extract_product_name(html)
+
+    assert result == "Прокат 2-місних наметів"
+
+
+def test_extract_product_name_returns_fallback_when_name_is_missing() -> None:
+    html = """
+    <span>
+        Прокат 2-місних наметів
+    </span>
+    """
+
+    result = extract_product_name(html)
+
+    assert result == "No product name found"
+
+
+def test_extract_product_name_returns_fallback_when_name_is_empty() -> None:
+    html = """
+    <span class="catalogue__product-name">
+    </span>
+    """
+
+    result = extract_product_name(html)
+
+    assert result == "No product name found"
+
+
+def test_extract_product_description_returns_description() -> None:
+    html = """
+    <div class="short-descr">
+        Прокат легких двомісних наметів Terra Incognita Alfa2.
+    </div>
+    """
+
+    result = extract_product_description(html)
+
+    assert result == "Прокат легких двомісних наметів Terra Incognita Alfa2."
+
+
+def test_extract_product_description_returns_fallback_when_description_is_missing() -> None:
+    html = """
+    <div>
+        Прокат легких двомісних наметів Terra Incognita Alfa2.
+    </div>
+    """
+
+    result = extract_product_description(html)
+
+    assert result == "No product description found"
+
+
+def test_extract_product_description_returns_fallback_when_description_is_empty() -> None:
+    html = """
+    <div class="short-descr">
+    </div>
+    """
+
+    result = extract_product_description(html)
+
+    assert result == "No product description found"
+
+
+def test_extract_product_info_lines_returns_table_lines() -> None:
+    html = """
+    <div class="product-info__table-v2">
+    <table>
+        <tr><td>Вартість прокату</td></tr>
+        <tr><td>1-й день</td><td>250 грн</td></tr>
+        <tr><td>Застава</td></tr>
+        <tr><td>4000 грн або Закордонний паспорт/права</td></tr>
+    </table>
+    </div>
+    """
+
+    result = extract_product_info_lines(html)
+
+    assert result == [
+        "Вартість прокату",
+        "1-й день",
+        "250 грн",
+        "Застава",
+        "4000 грн або Закордонний паспорт/права",
+    ]
+
+
+def test_extract_product_info_lines_returns_empty_list_when_table_is_missing() -> None:
+    html = """
+        <div>
+        <table>
+            <tr><td>Вартість прокату</td></tr>
+            <tr><td>1-й день</td><td>250 грн</td></tr>
+            <tr><td>Застава</td></tr>
+            <tr><td>4000 грн або Закордонний паспорт/права</td></tr>
+        </table>
+        </div>
+        """
+
+    result = extract_product_info_lines(html)
+
+    assert result == []
+
+
+def test_extract_section_lines_returns_lines_between_start_and_stop_markers() -> None:
+    lines = [
+        "Вартість прокату",
+        "1-й день",
+        "250 грн",
+        "Застава",
+        "4000 грн",
+    ]
+
+    result = extract_section_lines(
+        lines,
+        start_marker="Вартість прокату",
+        stop_markers={"Застава"},
+    )
+
+    assert result == ["1-й день", "250 грн"]
+
+
+def test_extract_section_lines_returns_lines_until_end_when_no_stop_marker_found() -> None:
+    lines = [
+        "Характеристики",
+        "Розмір",
+        "205 х 240 см",
+    ]
+
+    result = extract_section_lines(
+        lines,
+        start_marker="Характеристики",
+        stop_markers=set(),
+    )
+
+    assert result == ["Розмір", "205 х 240 см"]
+
+
+def test_extract_section_lines_returns_empty_list_when_start_marker_is_missing() -> None:
+    lines = [
+        "Вартість прокату",
+        "1-й день",
+        "250 грн",
+    ]
+
+    result = extract_section_lines(
+        lines,
+        start_marker="Характеристики",
+        stop_markers=set(),
+    )
+
+    assert result == []
+
+
+def test_parse_key_value_lines_returns_dict_from_pairs() -> None:
+    lines = [
+        "1-й день",
+        "250 грн",
+        "2-й день",
+        "220 грн",
+    ]
+
+    result = parse_key_value_lines(lines)
+
+    assert result == {
+        "1-й день": "250 грн",
+        "2-й день": "220 грн",
+    }
+
+
+def test_parse_key_value_lines_ignores_unpaired_last_key() -> None:
+    lines = [
+        "1-й день",
+        "250 грн",
+        "2-й день",
+    ]
+
+    result = parse_key_value_lines(lines)
+
+    assert result == {
+        "1-й день": "250 грн",
+    }

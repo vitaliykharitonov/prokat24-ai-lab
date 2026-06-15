@@ -1,5 +1,7 @@
 from urllib.parse import urlparse
 
+from bs4 import BeautifulSoup
+
 PRODUCT_CATEGORY_ROOT_PATHS = {
     "/ua/gornolyzhnoe-snaryazhenie/",
     "/ua/prokat-mebeli/",
@@ -54,3 +56,84 @@ def filter_product_urls(category_url: str, urls: list[str]) -> list[str]:
             filtered_urls.append(url)
 
     return sorted(set(filtered_urls))
+
+
+def extract_text_by_selector(html: str, selector: str, fallback: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+    tag = soup.select_one(selector)
+
+    if tag is None:
+        return fallback
+
+    text = tag.get_text(strip=True)
+
+    if not text:
+        return fallback
+
+    return text
+
+
+def extract_product_name(html: str) -> str:
+    return extract_text_by_selector(
+        html,
+        selector=".catalogue__product-name",
+        fallback="No product name found",
+    )
+
+
+def extract_product_description(html: str) -> str:
+    return extract_text_by_selector(
+        html,
+        selector=".short-descr",
+        fallback="No product description found",
+    )
+
+
+def extract_product_info_lines(html: str) -> list[str]:
+    soup = BeautifulSoup(html, "html.parser")
+    table = soup.select_one(".product-info__table-v2")
+
+    if table is None:
+        return []
+
+    text = table.get_text(separator="\n", strip=True)
+
+    return text.splitlines()
+
+
+def extract_section_lines(
+    lines: list[str],
+    start_marker: str,
+    stop_markers: set[str],
+) -> list[str]:
+    section_lines = []
+    is_collecting = False
+
+    for line in lines:
+        if line == start_marker:
+            is_collecting = True
+            continue
+
+        if is_collecting and line in stop_markers:
+            break
+
+        if is_collecting:
+            section_lines.append(line)
+
+    return section_lines
+
+
+def parse_key_value_lines(lines: list[str]) -> dict[str, str]:
+    results = {}
+
+    for index in range(0, len(lines), 2):
+        key = lines[index]
+
+        if index + 1 >= len(lines):
+            break
+
+        value = lines[index + 1]
+
+        results[key] = value
+
+    return results
