@@ -1,6 +1,7 @@
 import pytest
 
 from prokat24_ai_lab.product_catalog import (
+    build_product_from_html,
     extract_attributes_from_lines,
     extract_deposit_from_lines,
     extract_product_attributes,
@@ -392,4 +393,69 @@ def test_extract_product_attributes_returns_attributes_from_html() -> None:
     assert result == {
         "Розмір": "205 х 240 см",
         "Висота": "115 см",
+    }
+
+
+def test_build_product_from_html_returns_product() -> None:
+    url = "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/prokat-palatki-2-mestnaya/"
+    html = """
+    <html>
+        <body>
+            <h1 class="catalogue__product-name">
+                Прокат 2-місних наметів
+            </h1>
+            <div class="short-descr">
+                Прокат легких двомісних наметів Terra Incognita Alfa2.
+            </div>
+            <div class="product-info__table-v2">
+                <table>
+                    <tr>
+                        <td>Вартість прокату</td>
+                    </tr>
+                    <tr>
+                        <td>1-й день</td>
+                        <td>250 грн</td>
+                    </tr>
+                    <tr>
+                        <td>2-й день</td>
+                        <td>220 грн</td>
+                    </tr>
+                    <tr>
+                        <td>Застава</td>
+                    </tr>
+                    <tr>
+                        <td>4000 грн або Закордонний паспорт/права</td>
+                    </tr>
+                    <tr>
+                        <td>Характеристики</td>
+                    </tr>
+                    <tr>
+                        <td>Розмір</td>
+                        <td>205 х 240 см</td>
+                    </tr>
+                    <tr>
+                        <td>Висота</td>
+                        <td>115 см</td>
+                    </tr>
+                </table>
+            </div>
+        </body>
+    </html>
+    """
+
+    result = build_product_from_html(url, html)
+
+    assert result == {
+        "url": url,
+        "name": "Прокат 2-місних наметів",
+        "description": "Прокат легких двомісних наметів Terra Incognita Alfa2.",
+        "rental_prices": {
+            "1-й день": "250 грн",
+            "2-й день": "220 грн",
+        },
+        "deposit": "4000 грн або Закордонний паспорт/права",
+        "attributes": {
+            "Розмір": "205 х 240 см",
+            "Висота": "115 см",
+        },
     }

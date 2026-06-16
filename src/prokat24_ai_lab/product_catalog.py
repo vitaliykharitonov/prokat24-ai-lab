@@ -1,3 +1,4 @@
+from typing import TypedDict
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
@@ -10,6 +11,15 @@ PRODUCT_CATEGORY_ROOT_PATHS = {
     "/ua/turisticheskoe-snaryazhenie/",
     "/ua/velosipedy-i-roliki/",
 }
+
+
+class Product(TypedDict):
+    url: str
+    name: str
+    description: str
+    rental_price: dict[str, str]
+    deposit: str
+    attributes: dict[str, str]
 
 
 def is_product_category_url(url: str) -> bool:
@@ -194,3 +204,22 @@ def extract_product_attributes(html: str) -> dict[str, str]:
     lines = extract_product_info_lines(html)
 
     return extract_attributes_from_lines(lines)
+
+
+def build_product_from_html(url: str, html: str) -> Product:
+    name = extract_product_name(html)
+    description = extract_product_description(html)
+    rental_prices = extract_product_rental_prices(html)
+    deposit = extract_product_deposit(html)
+    attributes = extract_product_attributes(html)
+
+    product: Product = {
+        "url": url,
+        "name": name,
+        "description": description,
+        "rental_prices": rental_prices,
+        "deposit": deposit,
+        "attributes": attributes,
+    }
+
+    return product

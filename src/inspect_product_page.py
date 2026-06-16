@@ -1,14 +1,9 @@
 from argparse import ArgumentParser, Namespace
 
-from bs4 import BeautifulSoup
-
 from prokat24_ai_lab.html_parsing import (
     extract_title,
 )
-from prokat24_ai_lab.product_catalog import (
-    extract_product_description,
-    extract_product_name,
-)
+from prokat24_ai_lab.product_catalog import build_product_from_html
 from prokat24_ai_lab.prokat24_client import fetch_page
 
 
@@ -26,23 +21,27 @@ def main() -> None:
     args = parse_args()
     html = fetch_page(args.product_url)
     title = extract_title(html)
-    product_name = extract_product_name(html)
-    product_description = extract_product_description(html)
 
-    soup = BeautifulSoup(html, "html.parser")
-    tables = soup.select(".product-info__table-v2, .product-info__table")
+    product = build_product_from_html(args.product_url, html)
 
     print(f"Title: {title}")
-    print(f"Product name: {product_name}")
-    print("Product description: ")
-    print(f"{product_description}")
+    print(f"Product name: {product['name']}")
+    print("Product description:")
+    print(f"{product['description']}")
+    print()
+    print("Rental prices:")
 
-    print(f"Found {len(tables)} product info table blocks")
+    for label, price in product["rental_prices"].items():
+        print(f"{label}: {price}")
 
-    for index, table in enumerate(tables, start=1):
-        print(f"--- TABLE {index} ---")
-        table_text = table.get_text(separator="\n", strip=True)
-        print(table_text)
+    print()
+    print("Deposit:")
+    print(f"{product['deposit']}")
+    print()
+    print("Attributes:")
+
+    for label, value in product["attributes"].items():
+        print(f"{label}: {value}")
 
 
 if __name__ == "__main__":
