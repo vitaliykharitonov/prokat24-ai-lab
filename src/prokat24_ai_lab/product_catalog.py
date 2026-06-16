@@ -137,3 +137,60 @@ def parse_key_value_lines(lines: list[str]) -> dict[str, str]:
         results[key] = value
 
     return results
+
+
+def extract_rental_prices_from_lines(lines: list[str]) -> dict[str, str]:
+    extracted_section = extract_section_lines(
+        lines,
+        start_marker="Вартість прокату",
+        stop_markers={"Застава", "Характеристики"},
+    )
+
+    if not extracted_section:
+        return "No product prices found"
+
+    return parse_key_value_lines(extracted_section)
+
+
+def extract_deposit_from_lines(lines: list[str]) -> str:
+    extracted_section = extract_section_lines(
+        lines,
+        start_marker="Застава",
+        stop_markers={"Характеристики"},
+    )
+
+    if not extracted_section:
+        return "No product deposit found"
+
+    return extracted_section[0]
+
+
+def extract_attributes_from_lines(lines: list[str]) -> dict[str, str]:
+    extracted_section = extract_section_lines(
+        lines,
+        start_marker="Характеристики",
+        stop_markers=set(),
+    )
+
+    if not extracted_section:
+        return "No product attributes found"
+
+    return parse_key_value_lines(extracted_section)
+
+
+def extract_product_rental_prices(html: str) -> dict[str, str]:
+    lines = extract_product_info_lines(html)
+
+    return extract_rental_prices_from_lines(lines)
+
+
+def extract_product_deposit(html: str) -> str:
+    lines = extract_product_info_lines(html)
+
+    return extract_deposit_from_lines(lines)
+
+
+def extract_product_attributes(html: str) -> dict[str, str]:
+    lines = extract_product_info_lines(html)
+
+    return extract_attributes_from_lines(lines)

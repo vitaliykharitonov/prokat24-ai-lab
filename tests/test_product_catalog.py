@@ -1,9 +1,15 @@
 import pytest
 
 from prokat24_ai_lab.product_catalog import (
+    extract_attributes_from_lines,
+    extract_deposit_from_lines,
+    extract_product_attributes,
+    extract_product_deposit,
     extract_product_description,
     extract_product_info_lines,
     extract_product_name,
+    extract_product_rental_prices,
+    extract_rental_prices_from_lines,
     extract_section_lines,
     filter_product_category_urls,
     filter_product_urls,
@@ -13,6 +19,40 @@ from prokat24_ai_lab.product_catalog import (
 )
 
 CATEGORY_URL = "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/"
+
+PRODUCT_INFO_HTML = """
+<div class="product-info__table-v2">
+    <table>
+        <tr><td>Вартість прокату</td></tr>
+        <tr><td>1-й день</td><td>250 грн</td></tr>
+        <tr><td>2-й день</td><td>220 грн</td></tr>
+        <tr><td>Застава</td></tr>
+        <tr><td>4000 грн або Закордонний паспорт/права</td></tr>
+        <tr><td>Характеристики</td></tr>
+        <tr><td>Розмір</td><td>205 х 240 см</td></tr>
+        <tr><td>Висота</td><td>115 см</td></tr>
+    </table>
+</div>
+"""
+
+PRODUCT_INFO_LINES = [
+    "Вартість прокату",
+    "1-й день",
+    "250 грн",
+    "2-й день",
+    "220 грн",
+    "3-й день",
+    "190 грн",
+    "Застава",
+    "4000 грн або Закордонний паспорт/права",
+    "Характеристики",
+    "Розмір",
+    "205 х 240 см",
+    "Висота",
+    "115 см",
+    "Вага",
+    "3.31 кг",
+]
 
 
 @pytest.mark.parametrize(
@@ -278,4 +318,78 @@ def test_parse_key_value_lines_ignores_unpaired_last_key() -> None:
 
     assert result == {
         "1-й день": "250 грн",
+    }
+
+
+def test_extract_rental_prices_from_lines_returns_rental_prices() -> None:
+    lines = PRODUCT_INFO_LINES
+
+    result = extract_rental_prices_from_lines(lines)
+
+    assert result == {
+        "1-й день": "250 грн",
+        "2-й день": "220 грн",
+        "3-й день": "190 грн",
+    }
+
+
+def test_extract_deposit_from_lines_returns_deposit() -> None:
+    lines = PRODUCT_INFO_LINES
+
+    result = extract_deposit_from_lines(lines)
+
+    assert result == "4000 грн або Закордонний паспорт/права"
+
+
+def test_extract_deposit_from_lines_returns_fallback_when_deposit_is_missing() -> None:
+    lines = [
+        "Вартість прокату",
+        "1-й день",
+        "250 грн",
+    ]
+
+    result = extract_deposit_from_lines(lines)
+
+    assert result == "No product deposit found"
+
+
+def test_extract_attributes_from_lines_returns_attributes() -> None:
+    lines = PRODUCT_INFO_LINES
+
+    result = extract_attributes_from_lines(lines)
+
+    assert result == {
+        "Розмір": "205 х 240 см",
+        "Висота": "115 см",
+        "Вага": "3.31 кг",
+    }
+
+
+def test_extract_product_rental_prices_returns_rental_prices_from_html() -> None:
+    html = PRODUCT_INFO_HTML
+
+    result = extract_product_rental_prices(html)
+
+    assert result == {
+        "1-й день": "250 грн",
+        "2-й день": "220 грн",
+    }
+
+
+def test_extract_product_deposit_returns_deposit_from_html() -> None:
+    html = PRODUCT_INFO_HTML
+
+    result = extract_product_deposit(html)
+
+    assert result == "4000 грн або Закордонний паспорт/права"
+
+
+def test_extract_product_attributes_returns_attributes_from_html() -> None:
+    html = PRODUCT_INFO_HTML
+
+    result = extract_product_attributes(html)
+
+    assert result == {
+        "Розмір": "205 х 240 см",
+        "Висота": "115 см",
     }
