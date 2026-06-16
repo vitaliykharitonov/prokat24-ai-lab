@@ -21,7 +21,7 @@ class Product(TypedDict):
     url: str
     name: str
     description: str
-    rental_price: dict[str, str]
+    rental_prices: dict[str, str]
     deposit: str
     attributes: dict[str, str]
 

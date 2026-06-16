@@ -2,8 +2,8 @@ import pytest
 
 from prokat24_ai_lab.product_catalog import (
     build_product,
-    build_products_from_category,
     build_product_from_html,
+    build_products_from_category,
     extract_attributes_from_lines,
     extract_deposit_from_lines,
     extract_product_attributes,
@@ -574,7 +574,7 @@ def test_extract_product_urls_from_category_html_returns_product_urls() -> None:
     ]
 
 
-def test_extract_product_urls_from_category_html_returns_empty_without_products() -> (None):
+def test_extract_product_urls_from_category_html_returns_empty_without_products() -> None:
     html = """
         <a href="#popup-navigation">popup</a>
         <a href="/ua/dostavka/">delivery</a>
