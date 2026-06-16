@@ -3,6 +3,8 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
+from prokat24_ai_lab.prokat24_client import fetch_page
+
 PRODUCT_CATEGORY_ROOT_PATHS = {
     "/ua/gornolyzhnoe-snaryazhenie/",
     "/ua/prokat-mebeli/",
@@ -221,5 +223,12 @@ def build_product_from_html(url: str, html: str) -> Product:
         "deposit": deposit,
         "attributes": attributes,
     }
+
+    return product
+
+
+def build_product(url: str) -> Product:
+    html = fetch_page(url)
+    product = build_product_from_html(url, html)
 
     return product

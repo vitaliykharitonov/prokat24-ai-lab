@@ -1,6 +1,7 @@
 import pytest
 
 from prokat24_ai_lab.product_catalog import (
+    build_product,
     build_product_from_html,
     extract_attributes_from_lines,
     extract_deposit_from_lines,
@@ -21,20 +22,65 @@ from prokat24_ai_lab.product_catalog import (
 
 CATEGORY_URL = "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/"
 
+PRODUCT_HTML = """
+    <html>
+        <body>
+            <h1 class="catalogue__product-name">
+                Прокат 2-місних наметів
+            </h1>
+            <div class="short-descr">
+                Прокат легких двомісних наметів Terra Incognita Alfa2.
+            </div>
+            <div class="product-info__table-v2">
+                <table>
+                    <tr>
+                        <td>Вартість прокату</td>
+                    </tr>
+                    <tr>
+                        <td>1-й день</td>
+                        <td>250 грн</td>
+                    </tr>
+                    <tr>
+                        <td>2-й день</td>
+                        <td>220 грн</td>
+                    </tr>
+                    <tr>
+                        <td>Застава</td>
+                    </tr>
+                    <tr>
+                        <td>4000 грн або Закордонний паспорт/права</td>
+                    </tr>
+                    <tr>
+                        <td>Характеристики</td>
+                    </tr>
+                    <tr>
+                        <td>Розмір</td>
+                        <td>205 х 240 см</td>
+                    </tr>
+                    <tr>
+                        <td>Висота</td>
+                        <td>115 см</td>
+                    </tr>
+                </table>
+            </div>
+        </body>
+    </html>
+    """
+
 PRODUCT_INFO_HTML = """
-<div class="product-info__table-v2">
-    <table>
-        <tr><td>Вартість прокату</td></tr>
-        <tr><td>1-й день</td><td>250 грн</td></tr>
-        <tr><td>2-й день</td><td>220 грн</td></tr>
-        <tr><td>Застава</td></tr>
-        <tr><td>4000 грн або Закордонний паспорт/права</td></tr>
-        <tr><td>Характеристики</td></tr>
-        <tr><td>Розмір</td><td>205 х 240 см</td></tr>
-        <tr><td>Висота</td><td>115 см</td></tr>
-    </table>
-</div>
-"""
+    <div class="product-info__table-v2">
+        <table>
+            <tr><td>Вартість прокату</td></tr>
+            <tr><td>1-й день</td><td>250 грн</td></tr>
+            <tr><td>2-й день</td><td>220 грн</td></tr>
+            <tr><td>Застава</td></tr>
+            <tr><td>4000 грн або Закордонний паспорт/права</td></tr>
+            <tr><td>Характеристики</td></tr>
+            <tr><td>Розмір</td><td>205 х 240 см</td></tr>
+            <tr><td>Висота</td><td>115 см</td></tr>
+        </table>
+    </div>
+    """
 
 PRODUCT_INFO_LINES = [
     "Вартість прокату",
@@ -398,50 +444,7 @@ def test_extract_product_attributes_returns_attributes_from_html() -> None:
 
 def test_build_product_from_html_returns_product() -> None:
     url = "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/prokat-palatki-2-mestnaya/"
-    html = """
-    <html>
-        <body>
-            <h1 class="catalogue__product-name">
-                Прокат 2-місних наметів
-            </h1>
-            <div class="short-descr">
-                Прокат легких двомісних наметів Terra Incognita Alfa2.
-            </div>
-            <div class="product-info__table-v2">
-                <table>
-                    <tr>
-                        <td>Вартість прокату</td>
-                    </tr>
-                    <tr>
-                        <td>1-й день</td>
-                        <td>250 грн</td>
-                    </tr>
-                    <tr>
-                        <td>2-й день</td>
-                        <td>220 грн</td>
-                    </tr>
-                    <tr>
-                        <td>Застава</td>
-                    </tr>
-                    <tr>
-                        <td>4000 грн або Закордонний паспорт/права</td>
-                    </tr>
-                    <tr>
-                        <td>Характеристики</td>
-                    </tr>
-                    <tr>
-                        <td>Розмір</td>
-                        <td>205 х 240 см</td>
-                    </tr>
-                    <tr>
-                        <td>Висота</td>
-                        <td>115 см</td>
-                    </tr>
-                </table>
-            </div>
-        </body>
-    </html>
-    """
+    html = PRODUCT_HTML
 
     result = build_product_from_html(url, html)
 
@@ -459,3 +462,28 @@ def test_build_product_from_html_returns_product() -> None:
             "Висота": "115 см",
         },
     }
+
+
+def test_build_product_fetches_html_and_returns_product(monkeypatch) -> None:
+    url = (
+        "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/"
+        "prokat-palatok/prokat-palatki-2-mestnaya/"
+    )
+
+    fetched_urls = []
+
+    def fake_fetch_page(requested_url: str) -> str:
+        fetched_urls.append(requested_url)
+        return PRODUCT_HTML
+
+    monkeypatch.setattr(
+        "prokat24_ai_lab.product_catalog.fetch_page",
+        fake_fetch_page,
+    )
+
+    result = build_product(url)
+
+    assert fetched_urls == [url]
+    assert result["url"] == url
+    assert result["name"] == "Прокат 2-місних наметів"
+    assert result["deposit"] == "4000 грн або Закордонний паспорт/права"
