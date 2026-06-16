@@ -3,7 +3,9 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
+from prokat24_ai_lab.html_parsing import extract_internal_links
 from prokat24_ai_lab.prokat24_client import fetch_page
+from prokat24_ai_lab.site_config import ALLOWED_DOMAIN
 
 PRODUCT_CATEGORY_ROOT_PATHS = {
     "/ua/gornolyzhnoe-snaryazhenie/",
@@ -232,3 +234,21 @@ def build_product(url: str) -> Product:
     product = build_product_from_html(url, html)
 
     return product
+
+
+def extract_product_urls_from_category_html(category_url: str, html: str) -> list[str]:
+    links = extract_internal_links(html, category_url, ALLOWED_DOMAIN)
+
+    return filter_product_urls(category_url, links)
+
+
+def build_products_from_category(category_url: str) -> list[Product]:
+    html = fetch_page(category_url)
+    product_urls = extract_product_urls_from_category_html(category_url, html)
+    products = []
+
+    for product_url in product_urls:
+        product = build_product(product_url)
+        products.append(product)
+
+    return products

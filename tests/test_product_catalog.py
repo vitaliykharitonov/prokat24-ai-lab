@@ -2,6 +2,7 @@ import pytest
 
 from prokat24_ai_lab.product_catalog import (
     build_product,
+    build_products_from_category,
     build_product_from_html,
     extract_attributes_from_lines,
     extract_deposit_from_lines,
@@ -11,6 +12,7 @@ from prokat24_ai_lab.product_catalog import (
     extract_product_info_lines,
     extract_product_name,
     extract_product_rental_prices,
+    extract_product_urls_from_category_html,
     extract_rental_prices_from_lines,
     extract_section_lines,
     filter_product_category_urls,
@@ -21,6 +23,17 @@ from prokat24_ai_lab.product_catalog import (
 )
 
 CATEGORY_URL = "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/"
+
+CATEGORY_HTML = """
+    <html>
+        <body>
+            <a href="prokat-palatki-2-mestnaya/">2-місний</a>
+            <a href="prokat-palatki-3-mestnaya/">3-місний</a>
+            <a href="#popup-navigation">popup</a>
+            <a href="/ua/dostavka/">delivery</a>
+        </body>
+    </html>
+    """
 
 PRODUCT_HTML = """
     <html>
@@ -66,6 +79,60 @@ PRODUCT_HTML = """
         </body>
     </html>
     """
+
+PRODUCT_1_HTML = """
+<html>
+    <body>
+        <h1 class="catalogue__product-name">
+            Прокат 2-місних наметів
+        </h1>
+
+        <div class="short-descr">
+            Опис 2-місного намету.
+        </div>
+
+        <div class="product-info__table-v2">
+            <table>
+                <tr><td>Вартість прокату</td></tr>
+                <tr><td>1-й день</td><td>250 грн</td></tr>
+                <tr><td>2-й день</td><td>220 грн</td></tr>
+                <tr><td>Застава</td></tr>
+                <tr><td>4000 грн або Закордонний паспорт/права</td></tr>
+                <tr><td>Характеристики</td></tr>
+                <tr><td>Розмір</td><td>205 х 240 см</td></tr>
+                <tr><td>К-сть осіб</td><td>2 - 3</td></tr>
+            </table>
+        </div>
+    </body>
+</html>
+"""
+
+PRODUCT_2_HTML = """
+<html>
+    <body>
+        <h1 class="catalogue__product-name">
+            Прокат 3-місних наметів
+        </h1>
+
+        <div class="short-descr">
+            Опис 3-місного намету.
+        </div>
+
+        <div class="product-info__table-v2">
+            <table>
+                <tr><td>Вартість прокату</td></tr>
+                <tr><td>1-й день</td><td>300 грн</td></tr>
+                <tr><td>2-й день</td><td>260 грн</td></tr>
+                <tr><td>Застава</td></tr>
+                <tr><td>5000 грн або Закордонний паспорт/права</td></tr>
+                <tr><td>Характеристики</td></tr>
+                <tr><td>Розмір</td><td>220 х 250 см</td></tr>
+                <tr><td>К-сть осіб</td><td>3 - 4</td></tr>
+            </table>
+        </div>
+    </body>
+</html>
+"""
 
 PRODUCT_INFO_HTML = """
     <div class="product-info__table-v2">
@@ -487,3 +554,71 @@ def test_build_product_fetches_html_and_returns_product(monkeypatch) -> None:
     assert result["url"] == url
     assert result["name"] == "Прокат 2-місних наметів"
     assert result["deposit"] == "4000 грн або Закордонний паспорт/права"
+
+
+def test_extract_product_urls_from_category_html_returns_product_urls() -> None:
+    html = """
+        <a href="prokat-palatki-2-mestnaya/">2-місний</a>
+        <a href="prokat-palatki-3-mestnaya/">3-місний</a>
+        <a href="#popup-navigation">popup</a>
+        <a href="https://example.com/product/">external</a>
+        """
+
+    category_url = CATEGORY_URL
+
+    result = extract_product_urls_from_category_html(category_url, html)
+
+    assert result == [
+        category_url + "prokat-palatki-2-mestnaya/",
+        category_url + "prokat-palatki-3-mestnaya/",
+    ]
+
+
+def test_extract_product_urls_from_category_html_returns_empty_without_products() -> (None):
+    html = """
+        <a href="#popup-navigation">popup</a>
+        <a href="/ua/dostavka/">delivery</a>
+        """
+
+    category_url = CATEGORY_URL
+
+    result = extract_product_urls_from_category_html(category_url, html)
+
+    assert result == []
+
+
+def test_build_products_from_category_returns_products(monkeypatch) -> None:
+    fetched_urls = []
+
+    def fake_fetch_page(requested_url: str) -> str:
+        fetched_urls.append(requested_url)
+
+        if requested_url == CATEGORY_URL:
+            return CATEGORY_HTML
+
+        if requested_url == CATEGORY_URL + "prokat-palatki-2-mestnaya/":
+            return PRODUCT_1_HTML
+
+        if requested_url == CATEGORY_URL + "prokat-palatki-3-mestnaya/":
+            return PRODUCT_2_HTML
+
+        raise AssertionError(f"Unexpected URL: {requested_url}")
+
+    monkeypatch.setattr(
+        "prokat24_ai_lab.product_catalog.fetch_page",
+        fake_fetch_page,
+    )
+
+    result = build_products_from_category(CATEGORY_URL)
+
+    assert fetched_urls == [
+        CATEGORY_URL,
+        CATEGORY_URL + "prokat-palatki-2-mestnaya/",
+        CATEGORY_URL + "prokat-palatki-3-mestnaya/",
+    ]
+    assert [product["name"] for product in result] == [
+        "Прокат 2-місних наметів",
+        "Прокат 3-місних наметів",
+    ]
+    assert result[0]["rental_prices"]["1-й день"] == "250 грн"
+    assert result[1]["deposit"] == "5000 грн або Закордонний паспорт/права"
