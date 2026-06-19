@@ -1,4 +1,6 @@
-from typing import TypedDict
+import json
+from pathlib import Path
+from typing import TypedDict, cast
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
@@ -276,3 +278,17 @@ def build_product_catalog(category_urls: list[str]) -> list[Product]:
         all_products.extend(products)
 
     return all_products
+
+
+def save_products(products: list[Product], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(products, file, ensure_ascii=False, indent=2)
+
+
+def load_products(path: Path) -> list[Product]:
+    with open(path, encoding="utf-8") as file:
+        products = json.load(file)
+
+    return cast(list[Product], products)
