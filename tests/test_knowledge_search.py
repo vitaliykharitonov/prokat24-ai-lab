@@ -13,15 +13,8 @@ from prokat24_ai_lab.knowledge_search import (
     get_page_search_text,
     get_query_words,
     make_snippet,
-    normalize_text,
     search_knowledge_base,
 )
-
-
-def test_normalize_text_returns_lowercase_words() -> None:
-    result = normalize_text("Доставка: Київ — 200 грн!")
-
-    assert result == "доставка київ 200 грн"
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
-import re
 from typing import TypedDict
 
 from prokat24_ai_lab.knowledge_base import KnowledgePage
+from prokat24_ai_lab.text_normalization import normalize_text
 
 STOP_WORDS = {
     # --Stop words
@@ -79,12 +79,6 @@ class KnowledgeSearchResult(TypedDict):
     score: float
     score_details: dict[str, ScoreDetail]
     matched_words: dict[str, int]
-
-
-def normalize_text(text: str) -> str:
-    words = re.findall(r"[0-9a-zа-яіїєґʼ']+", text.lower())
-
-    return " ".join(words)
 
 
 def expand_query_words(words: list[str]) -> list[str]:
