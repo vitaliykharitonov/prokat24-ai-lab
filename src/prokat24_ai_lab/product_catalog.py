@@ -252,3 +252,12 @@ def build_products_from_category(category_url: str) -> list[Product]:
         products.append(product)
 
     return products
+
+
+def build_product_catalog(category_urls: list[str]) -> list[Product]:
+    all_products = []
+    for category_url in category_urls:
+        products = build_products_from_category(category_url)
+        all_products.extend(products)
+
+    return all_products

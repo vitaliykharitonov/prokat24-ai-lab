@@ -1,7 +1,9 @@
 import pytest
 
 from prokat24_ai_lab.product_catalog import (
+    Product,
     build_product,
+    build_product_catalog,
     build_product_from_html,
     build_products_from_category,
     extract_attributes_from_lines,
@@ -23,6 +25,10 @@ from prokat24_ai_lab.product_catalog import (
 )
 
 CATEGORY_URL = "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/"
+CATEGORY_URLS = (
+    "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/",
+    "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-spalnikov/",
+)
 
 CATEGORY_HTML = """
     <html>
@@ -622,3 +628,86 @@ def test_build_products_from_category_returns_products(monkeypatch) -> None:
     ]
     assert result[0]["rental_prices"]["1-й день"] == "250 грн"
     assert result[1]["deposit"] == "5000 грн або Закордонний паспорт/права"
+
+
+def test_build_product_catalog_returns_products_from_all_categories(monkeypatch) -> None:
+    tents_category_url = CATEGORY_URLS[0]
+    sleeping_bags_category_url = CATEGORY_URLS[1]
+
+    product_1: Product = {
+        "url": (
+            "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/"
+            "prokat-palatok/prokat-palatki-2-mestnaya/"
+        ),
+        "name": "Прокат 2-місних наметів",
+        "description": "Опис 2-місного намету.",
+        "rental_prices": {
+            "1-й день": "250 грн",
+        },
+        "deposit": "4000 грн або Закордонний паспорт/права",
+        "attributes": {
+            "К-сть осіб": "2 - 3",
+        },
+    }
+
+    product_2: Product = {
+        "url": (
+            "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/"
+            "prokat-palatok/prokat-palatki-3-mestnaya/"
+        ),
+        "name": "Прокат 3-місних наметів",
+        "description": "Опис 3-місного намету.",
+        "rental_prices": {
+            "1-й день": "300 грн",
+        },
+        "deposit": "4500 грн або закордонний паспорт/права + 1000 грн",
+        "attributes": {
+            "К-сть осіб": "3 - 4",
+        },
+    }
+
+    product_3: Product = {
+        "url": (
+            "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/"
+            "prokat-spalnikov/prokat-spalnik-litniy/"
+        ),
+        "name": "Прокат літнього спальника",
+        "description": "Опис літнього спальника.",
+        "rental_prices": {
+            "1-й день": "100 грн",
+        },
+        "deposit": "1000 грн",
+        "attributes": {
+            "Температура комфорту": "+10°C",
+        },
+    }
+
+    called_category_urls = []
+
+    def fake_build_products_from_category(category_url: str) -> list[Product]:
+        called_category_urls.append(category_url)
+
+        if category_url == tents_category_url:
+            return [product_1, product_2]
+
+        if category_url == sleeping_bags_category_url:
+            return [product_3]
+
+        raise AssertionError(f"Unexpected category URL: {category_url}")
+
+    monkeypatch.setattr(
+        "prokat24_ai_lab.product_catalog.build_products_from_category",
+        fake_build_products_from_category,
+    )
+
+    result = build_product_catalog(CATEGORY_URLS)
+
+    assert called_category_urls == [
+        tents_category_url,
+        sleeping_bags_category_url,
+    ]
+    assert result == [
+        product_1,
+        product_2,
+        product_3,
+    ]
