@@ -17,6 +17,7 @@ from prokat24_ai_lab.product_catalog import (
     extract_product_urls_from_category_html,
     extract_rental_prices_from_lines,
     extract_section_lines,
+    filter_leaf_product_category_urls,
     filter_product_category_urls,
     filter_product_urls,
     is_product_category_url,
@@ -210,6 +211,24 @@ def test_filter_product_category_urls_keeps_only_unique_sorted_category_urls() -
     assert result == [
         "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/",
         "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/",
+    ]
+
+
+def test_filter_leaf_product_category_urls_returns_only_leaf_categories() -> None:
+    category_urls = [
+        "https://prokat24.com.ua/ua/gornolyzhnoe-snaryazhenie/",
+        "https://prokat24.com.ua/ua/gornolyzhnoe-snaryazhenie/prokat-aksessuarov/",
+        "https://prokat24.com.ua/ua/gornolyzhnoe-snaryazhenie/prokat-lyzh/",
+        "https://prokat24.com.ua/ua/prokat-mebeli/",
+        "https://prokat24.com.ua/ua/prokat-mebeli/prokat-stolov/",
+    ]
+
+    result = filter_leaf_product_category_urls(category_urls)
+
+    assert result == [
+        "https://prokat24.com.ua/ua/gornolyzhnoe-snaryazhenie/prokat-aksessuarov/",
+        "https://prokat24.com.ua/ua/gornolyzhnoe-snaryazhenie/prokat-lyzh/",
+        "https://prokat24.com.ua/ua/prokat-mebeli/prokat-stolov/",
     ]
 
 

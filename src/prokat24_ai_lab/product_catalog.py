@@ -48,6 +48,21 @@ def filter_product_category_urls(urls: list[str]) -> list[str]:
     return sorted(set(filtered_urls))
 
 
+def filter_leaf_product_category_urls(category_urls: list[str]) -> list[str]:
+    leaf_category_urls = []
+
+    for url in category_urls:
+        has_child_category = any(
+            other_url != url and other_url.startswith(url) for other_url in category_urls
+        )
+        if has_child_category:
+            continue
+
+        leaf_category_urls.append(url)
+
+    return sorted(set(leaf_category_urls))
+
+
 def is_product_url(url: str, category_url: str) -> bool:
     parsed = urlparse(url)
 
