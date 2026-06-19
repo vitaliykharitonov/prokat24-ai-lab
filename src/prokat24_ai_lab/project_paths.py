@@ -21,6 +21,7 @@ REPORTS_DIR = PROJECT_ROOT / "reports"
 KNOWLEDGE_PAGES_FILE = DATA_DIR / "knowledge_pages.json"
 SEARCH_EVAL_CASES_FILE = DATA_DIR / "search_eval_cases.json"
 ANSWER_EVAL_CASES_FILE = DATA_DIR / "answer_eval_cases.json"
+PRODUCTS_FILE = DATA_DIR / "products.json"
 
 SEARCH_EVAL_REPORT_FILE = REPORTS_DIR / "search_eval_report.json"
 ANSWER_EVAL_REPORT_FILE = REPORTS_DIR / "answer_eval_report.json"
