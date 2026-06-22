@@ -18,16 +18,27 @@ def build_product_search_text(product: Product) -> str:
     return " ".join(parts)
 
 
-def build_product_match_text(product: Product) -> str:
-    parts = [
-        product["name"],
-        product["description"],
-    ]
+def contains_all_words(text: str, query_words: list[str]) -> bool:
+    words = set(normalize_text(text).split())
+
+    return all(word in words for word in query_words)
+
+
+def product_matches_query(product: Product, query_words: list[str]) -> bool:
+    if contains_all_words(product["name"], query_words):
+        return True
+
+    if contains_all_words(product["description"], query_words):
+        return True
+
+    attributes_parts = []
 
     for label, value in product["attributes"].items():
-        parts.append(f"{label}: {value}")
+        attributes_parts.append(f"{label}: {value}")
 
-    return " ".join(parts)
+    attributes_text = " ".join(attributes_parts)
+
+    return contains_all_words(attributes_text, query_words)
 
 
 def score_product(product: Product, query_words: list[str]) -> int:
@@ -85,10 +96,7 @@ def search_products(
     scored_results: list[tuple[int, int, Product]] = []
 
     for index, product in enumerate(products, start=1):
-        match_text = normalize_text(build_product_match_text(product))
-        product_words = set(match_text.split())
-
-        if all(word in product_words for word in query_words):
+        if product_matches_query(product, query_words):
             score = score_product(product, query_words)
             scored_results.append((score, index, product))
 
