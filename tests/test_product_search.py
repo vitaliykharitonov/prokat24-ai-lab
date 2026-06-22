@@ -3,6 +3,8 @@ import pytest
 from prokat24_ai_lab.product_catalog import Product
 from prokat24_ai_lab.product_search import (
     build_product_search_text,
+    build_query_word_groups,
+    contains_all_word_groups,
     search_products,
 )
 
@@ -48,6 +50,17 @@ PRODUCT_3 = {
 }
 
 
+def test_build_query_word_groups_adds_aliases() -> None:
+    query_words = ["прокат", "палатка"]
+
+    result = build_query_word_groups(query_words)
+
+    assert result == [
+        {"прокат"},
+        {"палатка", "палатки", "намет", "наметів", "намети"},
+    ]
+
+
 def test_build_product_search_text_contains_product_fields() -> None:
     result = build_product_search_text(PRODUCT)
 
@@ -58,6 +71,12 @@ def test_build_product_search_text_contains_product_fields() -> None:
     assert "К-сть осіб" in result
     assert "4000 грн" in result
     assert "2 - 3" in result
+
+
+def test_contains_all_words_matches_alias_group() -> None:
+    text = "Прокат 2-місних наметів"
+
+    assert contains_all_word_groups(text, ["прокат", "палатка"])
 
 
 @pytest.mark.parametrize(
@@ -77,6 +96,12 @@ def test_search_products_returns_products_matching_query_words(
     result = search_products(product_list, query)
 
     assert result == expected_result
+
+
+def test_search_products_matches_product_by_query_alias() -> None:
+    result = search_products([PRODUCT], "палатка")
+
+    assert result == [PRODUCT]
 
 
 @pytest.mark.parametrize(

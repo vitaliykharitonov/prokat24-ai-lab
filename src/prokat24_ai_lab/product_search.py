@@ -1,6 +1,25 @@
 from prokat24_ai_lab.product_catalog import Product
 from prokat24_ai_lab.text_normalization import normalize_text
 
+PRODUCT_QUERY_ALIASES: dict[str, set[str]] = {
+    "палатка": {"палатки", "намет", "наметів", "намети"},
+    "спальника": {"спальник", "спальників", "спальники"},
+    "черевики": {"черевиків", "ботинки", "ботинок"},
+    "човен": {"човна", "човну", "човни"},
+}
+
+
+def build_query_word_groups(query_words: list[str]) -> list[set[str]]:
+    query_word_groups = []
+
+    for word in query_words:
+        group = {word}
+        aliases = PRODUCT_QUERY_ALIASES.get(word, set())
+        group.update(aliases)
+        query_word_groups.append(group)
+
+    return query_word_groups
+
 
 def build_product_search_text(product: Product) -> str:
     parts = [
@@ -18,17 +37,18 @@ def build_product_search_text(product: Product) -> str:
     return " ".join(parts)
 
 
-def contains_all_words(text: str, query_words: list[str]) -> bool:
+def contains_all_word_groups(text: str, query_words: list[str]) -> bool:
     words = set(normalize_text(text).split())
+    groups = build_query_word_groups(query_words)
 
-    return all(word in words for word in query_words)
+    return all(bool(group & words) for group in groups)
 
 
 def product_matches_query(product: Product, query_words: list[str]) -> bool:
-    if contains_all_words(product["name"], query_words):
+    if contains_all_word_groups(product["name"], query_words):
         return True
 
-    if contains_all_words(product["description"], query_words):
+    if contains_all_word_groups(product["description"], query_words):
         return True
 
     attributes_parts = []
@@ -38,7 +58,7 @@ def product_matches_query(product: Product, query_words: list[str]) -> bool:
 
     attributes_text = " ".join(attributes_parts)
 
-    return contains_all_words(attributes_text, query_words)
+    return contains_all_word_groups(attributes_text, query_words)
 
 
 def score_product(product: Product, query_words: list[str]) -> int:
