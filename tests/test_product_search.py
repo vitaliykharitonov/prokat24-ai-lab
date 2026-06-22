@@ -35,6 +35,18 @@ PRODUCT_2 = {
     },
 }
 
+PRODUCT_3 = {
+    "url": "https://prokat24.com.ua/ua/test-boat/",
+    "name": "Прокат 3-місних човнів",
+    "description": "Опис човна.",
+    "rental_prices": {
+        "1-й день": "500 грн",
+        "2-й день": "450 грн",
+    },
+    "deposit": "10000 грн",
+    "attributes": {},
+}
+
 
 def test_build_product_search_text_contains_product_fields() -> None:
     result = build_product_search_text(PRODUCT)
@@ -86,7 +98,27 @@ def test_search_products_respects_limit(
     assert result == expected_result
 
 
-def test_search_products_ranks_name_matches_above_price_matches() -> None:
+def test_search_products_orders_results_by_score() -> None:
+    two_person_boat: Product = {
+        "url": "https://prokat24.com.ua/ua/test-boat/",
+        "name": "Прокат 2-місних човнів",
+        "description": "Опис човна.",
+        "rental_prices": {
+            "1-й день": "500 грн",
+            "2-й день": "450 грн",
+        },
+        "deposit": "10000 грн",
+        "attributes": {},
+    }
+    query = "2 місних"
+    product_list = [two_person_boat, PRODUCT]
+
+    result = search_products(product_list, query, limit=2)
+
+    assert result == [PRODUCT, two_person_boat]
+
+
+def test_search_products_does_not_match_query_number_only_from_price_label() -> None:
     three_person_boat: Product = {
         "url": "https://prokat24.com.ua/ua/test-boat/",
         "name": "Прокат 3-місних човнів",
@@ -98,9 +130,9 @@ def test_search_products_ranks_name_matches_above_price_matches() -> None:
         "deposit": "10000 грн",
         "attributes": {},
     }
+
     query = "2 місних"
-    product_list = [three_person_boat, PRODUCT]
 
-    result = search_products(product_list, query, limit=2)
+    result = search_products([three_person_boat], query)
 
-    assert result == [PRODUCT, three_person_boat]
+    assert result == []

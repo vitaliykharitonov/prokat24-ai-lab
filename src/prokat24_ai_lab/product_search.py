@@ -18,6 +18,18 @@ def build_product_search_text(product: Product) -> str:
     return " ".join(parts)
 
 
+def build_product_match_text(product: Product) -> str:
+    parts = [
+        product["name"],
+        product["description"],
+    ]
+
+    for label, value in product["attributes"].items():
+        parts.append(f"{label}: {value}")
+
+    return " ".join(parts)
+
+
 def score_product(product: Product, query_words: list[str]) -> int:
     name_text = normalize_text(product["name"])
     name_words = set(name_text.split())
@@ -73,8 +85,8 @@ def search_products(
     scored_results: list[tuple[int, int, Product]] = []
 
     for index, product in enumerate(products, start=1):
-        product_text = normalize_text(build_product_search_text(product))
-        product_words = set(product_text.split())
+        match_text = normalize_text(build_product_match_text(product))
+        product_words = set(match_text.split())
 
         if all(word in product_words for word in query_words):
             score = score_product(product, query_words)
