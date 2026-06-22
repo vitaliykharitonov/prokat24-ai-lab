@@ -3,9 +3,23 @@ from prokat24_ai_lab.text_normalization import normalize_text
 
 PRODUCT_QUERY_ALIASES: dict[str, set[str]] = {
     "палатка": {"палатки", "намет", "наметів", "намети"},
+    "палатки": {"палатка", "намет", "наметів", "намети"},
+    "намет": {"палатка", "палатки", "наметів", "намети"},
+    "наметів": {"палатка", "палатки", "намет", "намети"},
     "спальника": {"спальник", "спальників", "спальники"},
+    "спальник": {"спальника", "спальників", "спальники"},
+    "спальники": {"спальник", "спальника", "спальників"},
+    "спальників": {"спальник", "спальника", "спальники"},
     "черевики": {"черевиків", "ботинки", "ботинок"},
-    "човен": {"човна", "човну", "човни"},
+    "черевиків": {"черевики", "ботинки", "ботинок"},
+    "ботинки": {"ботинок", "черевики", "черевиків"},
+    "ботинок": {"ботинки", "черевики", "черевиків"},
+    "лижні": {"лижних", "лыжные", "лыжных"},
+    "лижних": {"лижні", "лыжные", "лыжных"},
+    "човен": {"човна", "човну", "човни", "човнів"},
+    "човна": {"човен", "човну", "човни", "човнів"},
+    "човни": {"човен", "човна", "човну", "човнів"},
+    "човнів": {"човен", "човна", "човну", "човни"},
 }
 
 
@@ -61,9 +75,18 @@ def product_matches_query(product: Product, query_words: list[str]) -> bool:
     return contains_all_word_groups(attributes_text, query_words)
 
 
-def score_product(product: Product, query_words: list[str]) -> int:
+def score_word_group_position(words: list[str], group: set[str]) -> int:
+    for index, word in enumerate(words, start=1):
+        if word in group:
+            return max(1, 6 - index)
+
+    return 0
+
+
+def score_product(product: Product, query_word_groups: list[set[str]]) -> int:
     name_text = normalize_text(product["name"])
     name_words = set(name_text.split())
+    name_words_list = name_text.split()
     description_text = normalize_text(product["description"])
     description_words = set(description_text.split())
     attributes_parts = []
@@ -84,20 +107,21 @@ def score_product(product: Product, query_words: list[str]) -> int:
     deposit_words = set(deposit_text.split())
     score = 0
 
-    for word in query_words:
-        if word in name_words:
+    for group in query_word_groups:
+        if group & name_words:
             score += 10
+            score += score_word_group_position(name_words_list, group)
 
-        if word in description_words:
+        if group & description_words:
             score += 4
 
-        if word in attributes_words:
+        if group & attributes_words:
             score += 3
 
-        if word in prices_words:
+        if group & prices_words:
             score += 1
 
-        if word in deposit_words:
+        if group & deposit_words:
             score += 1
 
     return score
@@ -109,6 +133,7 @@ def search_products(
     limit: int = 5,
 ) -> list[Product]:
     query_words = normalize_text(query).split()
+    query_word_groups = build_query_word_groups(query_words)
 
     if not query_words or limit <= 0:
         return []
@@ -117,7 +142,7 @@ def search_products(
 
     for index, product in enumerate(products, start=1):
         if product_matches_query(product, query_words):
-            score = score_product(product, query_words)
+            score = score_product(product, query_word_groups)
             scored_results.append((score, index, product))
 
     scored_results.sort(key=lambda item: (-item[0], item[1]))

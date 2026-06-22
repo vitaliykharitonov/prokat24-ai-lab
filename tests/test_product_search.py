@@ -49,6 +49,39 @@ PRODUCT_3 = {
     "attributes": {},
 }
 
+SLEEPING_BAG_PRODUCT: Product = {
+    "url": "https://prokat24.com.ua/ua/test-sleeping-bag/",
+    "name": "Прокат літніх спальників",
+    "description": "Опис літнього спальника.",
+    "rental_prices": {
+        "1-й день": "100 грн",
+    },
+    "deposit": "1000 грн",
+    "attributes": {},
+}
+
+SKI_BOOTS_PRODUCT: Product = {
+    "url": "https://prokat24.com.ua/ua/test-ski-boots/",
+    "name": "Прокат лижних черевиків",
+    "description": "Опис лижних черевиків.",
+    "rental_prices": {
+        "1-й день": "150 грн",
+    },
+    "deposit": "1500 грн",
+    "attributes": {},
+}
+
+BOAT_PRODUCT: Product = {
+    "url": "https://prokat24.com.ua/ua/test-boat/",
+    "name": "Прокат човнів",
+    "description": "Опис човна.",
+    "rental_prices": {
+        "1-й день": "400 грн",
+    },
+    "deposit": "8000 грн",
+    "attributes": {},
+}
+
 
 def test_build_query_word_groups_adds_aliases() -> None:
     query_words = ["прокат", "палатка"]
@@ -163,3 +196,86 @@ def test_search_products_does_not_match_query_words_split_across_fields() -> Non
     result = search_products([three_person_boat], query)
 
     assert result == []
+
+
+@pytest.mark.parametrize(
+    ("query", "expected_result"),
+    [
+        ("палатка", [PRODUCT]),
+        ("прокат спальника", [SLEEPING_BAG_PRODUCT]),
+        ("лижні черевики", [SKI_BOOTS_PRODUCT]),
+        ("ботинки", [SKI_BOOTS_PRODUCT]),
+        ("човен", [BOAT_PRODUCT]),
+    ],
+)
+def test_search_products_matches_product_aliases(
+    query: str,
+    expected_result: list[Product],
+) -> None:
+    products = [
+        PRODUCT,
+        SLEEPING_BAG_PRODUCT,
+        SKI_BOOTS_PRODUCT,
+        BOAT_PRODUCT,
+    ]
+
+    result = search_products(products, query)
+
+    assert result == expected_result
+
+
+def test_search_products_ranks_alias_match_in_name_above_alias_match_in_description() -> None:
+    ski_boots: Product = {
+        "url": "https://prokat24.com.ua/ua/test-ski-boots/",
+        "name": "Прокат лижних черевиків",
+        "description": "Опис спорядження.",
+        "rental_prices": {"1-й день": "150 грн"},
+        "deposit": "1500 грн",
+        "attributes": {},
+    }
+    description_match: Product = {
+        "url": "https://prokat24.com.ua/ua/test-cover/",
+        "name": "Прокат зимового спорядження",
+        "description": "Підходить для черевиків.",
+        "rental_prices": {"1-й день": "50 грн"},
+        "deposit": "500 грн",
+        "attributes": {},
+    }
+
+    query = "ботинки"
+    product_list = [description_match, ski_boots]
+
+    result = search_products(product_list, query, limit=2)
+
+    assert result == [
+        ski_boots,
+        description_match,
+    ]
+
+
+def test_search_products_ranks_primary_name_match_above_secondary_name_match() -> None:
+    boot_cover: Product = {
+        "url": "https://prokat24.com.ua/ua/test-boot-cover/",
+        "name": "Прокат чохлів для черевиків",
+        "description": "Опис чохлів.",
+        "rental_prices": {"1-й день": "50 грн"},
+        "deposit": "500 грн",
+        "attributes": {},
+    }
+    ski_boots: Product = {
+        "url": "https://prokat24.com.ua/ua/test-ski-boots/",
+        "name": "Прокат лижних черевиків",
+        "description": "Опис лижних черевиків.",
+        "rental_prices": {"1-й день": "150 грн"},
+        "deposit": "1500 грн",
+        "attributes": {},
+    }
+    query = "ботинки"
+    product_list = [boot_cover, ski_boots]
+
+    result = search_products(product_list, query, limit=2)
+
+    assert result == [
+        ski_boots,
+        boot_cover,
+    ]
