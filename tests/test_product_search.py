@@ -84,3 +84,23 @@ def test_search_products_respects_limit(
     result = search_products(product_list, query, limit)
 
     assert result == expected_result
+
+
+def test_search_products_ranks_name_matches_above_price_matches() -> None:
+    three_person_boat: Product = {
+        "url": "https://prokat24.com.ua/ua/test-boat/",
+        "name": "Прокат 3-місних човнів",
+        "description": "Опис човна.",
+        "rental_prices": {
+            "1-й день": "500 грн",
+            "2-й день": "450 грн",
+        },
+        "deposit": "10000 грн",
+        "attributes": {},
+    }
+    query = "2 місних"
+    product_list = [three_person_boat, PRODUCT]
+
+    result = search_products(product_list, query, limit=2)
+
+    assert result == [PRODUCT, three_person_boat]
