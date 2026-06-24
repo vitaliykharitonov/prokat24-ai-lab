@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, Namespace
 
+from prokat24_ai_lab.product_answers import format_product_search_result
 from prokat24_ai_lab.product_catalog import load_products
 from prokat24_ai_lab.product_search import search_products
 from prokat24_ai_lab.project_paths import PRODUCTS_FILE
@@ -24,14 +25,7 @@ def main() -> None:
     results = search_products(products, args.query, args.limit)
 
     for product in results:
-        print(f"Name: {product['name']}")
-        print(f"URL: {product['url']}")
-        print(f"Deposit: {product['deposit']}")
-        print("Prices:")
-
-        for lable, price in product["rental_prices"].items():
-            print(f"{lable}: {price}")
-
+        print(format_product_search_result(product))
         print()
 
 
