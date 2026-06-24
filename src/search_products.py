@@ -1,10 +1,9 @@
 from argparse import ArgumentParser, Namespace
 
 from prokat24_ai_lab.product_answers import (
-    format_product_search_results,
+    answer_product_query,
 )
 from prokat24_ai_lab.product_catalog import load_products
-from prokat24_ai_lab.product_search import search_products
 from prokat24_ai_lab.project_paths import PRODUCTS_FILE
 
 
@@ -24,9 +23,10 @@ def parse_args() -> Namespace:
 def main() -> None:
     args = parse_args()
     products = load_products(PRODUCTS_FILE)
-    results = search_products(products, args.query, args.limit)
 
-    print(format_product_search_results(results))
+    answer = answer_product_query(products, args.query, limit=args.limit)
+
+    print(answer)
 
 
 if __name__ == "__main__":

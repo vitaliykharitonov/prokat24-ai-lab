@@ -1,4 +1,5 @@
 from prokat24_ai_lab.product_answers import (
+    answer_product_query,
     format_product_search_result,
     format_product_search_results,
 )
@@ -54,3 +55,22 @@ def test_format_product_search_results_formats_multiple_products() -> None:
 
 def test_format_product_search_results_returns_message_when_empty() -> None:
     assert format_product_search_results([]) == "Products not found"
+
+
+def test_answer_product_query_returns_formatted_search_results() -> None:
+    product_list = [PRODUCT_1, PRODUCT_2]
+    query = "2 місних"
+
+    result = answer_product_query(product_list, query, limit=5)
+
+    assert "Прокат 2-місних наметів" in result
+    assert "Прокат 3-місних наметів" not in result
+
+
+def test_answer_product_query_returns_not_found_message_when_no_products_match() -> None:
+    product_list = [PRODUCT_1]
+    query = "абракадабра"
+
+    result = answer_product_query(product_list, query)
+
+    assert result == "Products not found"

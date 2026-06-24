@@ -1,4 +1,5 @@
 from prokat24_ai_lab.product_catalog import Product
+from prokat24_ai_lab.product_search import search_products
 
 
 def format_product_search_result(product: Product) -> str:
@@ -26,3 +27,9 @@ def format_product_search_results(products: list[Product]) -> str:
         formatted_products.append(format_product_search_result(product))
 
     return "\n\n".join(formatted_products)
+
+
+def answer_product_query(products: list[Product], query: str, limit: int = 5) -> str:
+    search_results = search_products(products, query, limit=limit)
+
+    return format_product_search_results(search_results)
