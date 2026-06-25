@@ -1,5 +1,8 @@
+import pytest
+
 from prokat24_ai_lab.product_answers import (
     answer_product_query,
+    detect_rental_period,
     format_product_search_result,
     format_product_search_results,
 )
@@ -74,3 +77,19 @@ def test_answer_product_query_returns_not_found_message_when_no_products_match()
     result = answer_product_query(product_list, query)
 
     assert result == "Products not found"
+
+
+@pytest.mark.parametrize(
+    ("query", "expected_period"),
+    [
+        ("сколько стоит на тиждень", "Тиждень"),
+        ("цена за неделю", "Тиждень"),
+        ("на 2 тижні", "2 тижні"),
+        ("на 2 недели", "2 тижні"),
+        ("на первый день", "1-й день"),
+        ("на 1 день", "1-й день"),
+        ("сколько залог", None),
+    ],
+)
+def test_detect_rental_period(query: str, expected_period: str | None) -> None:
+    assert detect_rental_period(query) == expected_period
