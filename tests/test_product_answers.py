@@ -2,7 +2,9 @@ import pytest
 
 from prokat24_ai_lab.product_answers import (
     answer_product_query,
+    build_product_search_query,
     detect_rental_period,
+    format_product_rental_price_answer,
     format_product_search_result,
     format_product_search_results,
 )
@@ -34,6 +36,14 @@ PRODUCT_2 = {
         "К-сть осіб": "3 - 4",
     },
 }
+
+
+def test_build_product_search_query_removes_question_and_period_words() -> None:
+    query = "скільки коштує 2 місний намет на тиждень"
+
+    result = build_product_search_query(query)
+
+    assert result == "2 місний намет"
 
 
 def test_format_product_search_result_includes_product_fields():
@@ -79,6 +89,18 @@ def test_answer_product_query_returns_not_found_message_when_no_products_match()
     assert result == "Products not found"
 
 
+def test_answer_product_query_returns_specific_period_price_when_period_detected() -> None:
+    product_list = [PRODUCT_1, PRODUCT_2]
+    query = "скільки коштує 2 місний намет на тиждень"
+
+    result = answer_product_query(product_list, query)
+
+    assert "Прокат 2-місних наметів" in result
+    assert "Тиждень: 1200 грн" in result
+    assert "Deposit:" in result
+    assert PRODUCT_1["url"] in result
+
+
 @pytest.mark.parametrize(
     ("query", "expected_period"),
     [
@@ -93,3 +115,22 @@ def test_answer_product_query_returns_not_found_message_when_no_products_match()
 )
 def test_detect_rental_period(query: str, expected_period: str | None) -> None:
     assert detect_rental_period(query) == expected_period
+
+
+def test_format_product_rental_price_answer_includes_period_price() -> None:
+    period = "Тиждень"
+
+    result = format_product_rental_price_answer(PRODUCT_1, period)
+
+    assert "Прокат 2-місних наметів" in result
+    assert "Тиждень: 1200 грн" in result
+    assert "4000 грн" in result
+    assert PRODUCT_1["url"] in result
+
+
+def test_format_product_rental_price_answer_returns_message_when_period_missing() -> None:
+    period = "Місяць"
+
+    result = format_product_rental_price_answer(PRODUCT_1, period)
+
+    assert result == "Price for Місяць not found"

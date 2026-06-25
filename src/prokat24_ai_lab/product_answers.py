@@ -20,6 +20,38 @@ RENTAL_PERIOD_ALIASES = {
     ],
 }
 
+PRODUCT_QUERY_STOP_WORDS = {
+    "скільки",
+    "коштує",
+    "стоит",
+    "сколько",
+    "цена",
+    "за",
+    "на",
+    "в",
+    "оренда",
+    "аренда",
+    "прокат",
+    "тиждень",
+    "тижні",
+    "неделю",
+    "недели",
+    "неделя",
+}
+
+
+def build_product_search_query(query: str) -> str:
+    words = normalize_text(query).split()
+    product_words = []
+
+    for word in words:
+        if word in PRODUCT_QUERY_STOP_WORDS:
+            continue
+
+        product_words.append(word)
+
+    return " ".join(product_words)
+
 
 def format_product_search_result(product: Product) -> str:
     lines = [
@@ -49,7 +81,15 @@ def format_product_search_results(products: list[Product]) -> str:
 
 
 def answer_product_query(products: list[Product], query: str, limit: int = 5) -> str:
-    search_results = search_products(products, query, limit=limit)
+    period = detect_rental_period(query)
+    search_query = build_product_search_query(query)
+    search_results = search_products(products, search_query, limit=limit)
+
+    if not search_results:
+        return format_product_search_results(search_results)
+
+    if period is not None:
+        return format_product_rental_price_answer(search_results[0], period)
 
     return format_product_search_results(search_results)
 
@@ -61,3 +101,21 @@ def detect_rental_period(query: str) -> str | None:
         for alias in aliases:
             if normalize_text(alias) in normalized_query:
                 return period
+
+    return None
+
+
+def format_product_rental_price_answer(product: Product, period: str) -> str:
+    price = product["rental_prices"].get(period)
+
+    if price is None:
+        return f"Price for {period} not found"
+
+    lines = [
+        product["name"],
+        f"{period}: {price}",
+        f"Deposit: {product['deposit']}",
+        f"URL: {product['url']}",
+    ]
+
+    return "\n".join(lines)

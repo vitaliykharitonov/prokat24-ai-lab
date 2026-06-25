@@ -2,6 +2,7 @@ from prokat24_ai_lab.product_catalog import Product
 from prokat24_ai_lab.text_normalization import normalize_text
 
 PRODUCT_QUERY_ALIASES: dict[str, set[str]] = {
+    "місний": {"місних", "місна", "місне"},
     "палатка": {"палатки", "намет", "наметів", "намети"},
     "палатки": {"палатка", "намет", "наметів", "намети"},
     "намет": {"палатка", "палатки", "наметів", "намети"},
