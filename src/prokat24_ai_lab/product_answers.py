@@ -40,8 +40,23 @@ PRODUCT_QUERY_STOP_WORDS = {
 }
 
 
+def remove_word_sequence(words: list[str], sequence: list[str]) -> list[str]:
+    sequence_length = len(sequence)
+
+    for start_index in range(len(words)):
+        end_index = start_index + sequence_length
+
+        if words[start_index:end_index] == sequence:
+            return words[:start_index] + words[end_index:]
+
+    return words
+
+
 def build_product_search_query(query: str) -> str:
     words = normalize_text(query).split()
+    period = detect_rental_period(query)
+    words = remove_rental_period_words(words, period)
+
     product_words = []
 
     for word in words:
@@ -103,6 +118,22 @@ def detect_rental_period(query: str) -> str | None:
                 return period
 
     return None
+
+
+def remove_rental_period_words(words: list[str], period: str | None) -> list[str]:
+    if period is None:
+        return words
+
+    aliases = RENTAL_PERIOD_ALIASES[period]
+
+    for alias in aliases:
+        alias_words = normalize_text(alias).split()
+        updated_words = remove_word_sequence(words, alias_words)
+
+        if updated_words != words:
+            return updated_words
+
+    return words
 
 
 def format_product_rental_price_answer(product: Product, period: str) -> str:

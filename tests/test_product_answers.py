@@ -7,6 +7,7 @@ from prokat24_ai_lab.product_answers import (
     format_product_rental_price_answer,
     format_product_search_result,
     format_product_search_results,
+    remove_word_sequence,
 )
 
 PRODUCT_1 = {
@@ -36,6 +37,33 @@ PRODUCT_2 = {
         "К-сть осіб": "3 - 4",
     },
 }
+
+
+def test_remove_word_sequence_removes_existing_sequence() -> None:
+    words = ["прокат", "спальника", "на", "2", "недели"]
+    sequence = ["2", "недели"]
+
+    result = remove_word_sequence(words, sequence)
+
+    assert result == ["прокат", "спальника", "на"]
+
+
+def test_remove_word_sequence_keeps_product_number_when_sequence_is_later() -> None:
+    words = ["скільки", "коштує", "2", "місний", "намет", "на", "2", "недели"]
+    sequence = ["2", "недели"]
+
+    result = remove_word_sequence(words, sequence)
+
+    assert result == ["скільки", "коштує", "2", "місний", "намет", "на"]
+
+
+def test_remove_word_sequence_returns_original_words_when_sequence_missing() -> None:
+    words = ["прокат", "спальника"]
+    sequence = ["2", "недели"]
+
+    result = remove_word_sequence(words, sequence)
+
+    assert result == words
 
 
 def test_build_product_search_query_removes_question_and_period_words() -> None:
