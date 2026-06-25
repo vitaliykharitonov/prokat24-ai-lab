@@ -3,7 +3,9 @@ import pytest
 from prokat24_ai_lab.product_answers import (
     answer_product_query,
     build_product_search_query,
+    detect_deposit_intent,
     detect_rental_period,
+    format_product_deposit_answer,
     format_product_rental_price_answer,
     format_product_search_result,
     format_product_search_results,
@@ -40,8 +42,8 @@ PRODUCT_2 = {
 
 
 def test_remove_word_sequence_removes_existing_sequence() -> None:
-    words = ["прокат", "спальника", "на", "2", "недели"]
-    sequence = ["2", "недели"]
+    words = ["прокат", "спальника", "на", "2", "тижні"]
+    sequence = ["2", "тижні"]
 
     result = remove_word_sequence(words, sequence)
 
@@ -49,8 +51,8 @@ def test_remove_word_sequence_removes_existing_sequence() -> None:
 
 
 def test_remove_word_sequence_keeps_product_number_when_sequence_is_later() -> None:
-    words = ["скільки", "коштує", "2", "місний", "намет", "на", "2", "недели"]
-    sequence = ["2", "недели"]
+    words = ["скільки", "коштує", "2", "місний", "намет", "на", "2", "тижні"]
+    sequence = ["2", "тижні"]
 
     result = remove_word_sequence(words, sequence)
 
@@ -59,7 +61,7 @@ def test_remove_word_sequence_keeps_product_number_when_sequence_is_later() -> N
 
 def test_remove_word_sequence_returns_original_words_when_sequence_missing() -> None:
     words = ["прокат", "спальника"]
-    sequence = ["2", "недели"]
+    sequence = ["2", "тижні"]
 
     result = remove_word_sequence(words, sequence)
 
@@ -129,16 +131,27 @@ def test_answer_product_query_returns_specific_period_price_when_period_detected
     assert PRODUCT_1["url"] in result
 
 
+def test_answer_product_query_returns_deposit_when_deposit_intent_detected() -> None:
+    product_list = [PRODUCT_1, PRODUCT_2]
+    query = "яка застава за 2 місний намет"
+
+    result = answer_product_query(product_list, query)
+
+    assert "Прокат 2-місних наметів" in result
+    assert "Deposit: 4000 грн або Закордонний паспорт/права" in result
+    assert PRODUCT_1["url"] in result
+
+
 @pytest.mark.parametrize(
     ("query", "expected_period"),
     [
-        ("сколько стоит на тиждень", "Тиждень"),
-        ("цена за неделю", "Тиждень"),
+        ("яка вартість на тиждень", "Тиждень"),
+        ("ціна за тиждень", "Тиждень"),
         ("на 2 тижні", "2 тижні"),
-        ("на 2 недели", "2 тижні"),
-        ("на первый день", "1-й день"),
+        ("на два тижні", "2 тижні"),
+        ("на один день", "1-й день"),
         ("на 1 день", "1-й день"),
-        ("сколько залог", None),
+        ("скільки застава", None),
     ],
 )
 def test_detect_rental_period(query: str, expected_period: str | None) -> None:
@@ -162,3 +175,26 @@ def test_format_product_rental_price_answer_returns_message_when_period_missing(
     result = format_product_rental_price_answer(PRODUCT_1, period)
 
     assert result == "Price for Місяць not found"
+
+
+@pytest.mark.parametrize(
+    ("query", "expected_result"),
+    [
+        ("яка застава за 2 місний намет", True),
+        ("застава за чоботи", True),
+        ("скільки застава за спальник", True),
+        ("яка застава за човен", True),
+        ("скільки коштує на тиждень", False),
+        ("прокат спальника", False),
+    ],
+)
+def test_detect_deposit_intent(query: str, expected_result: bool) -> None:
+    assert detect_deposit_intent(query) is expected_result
+
+
+def test_format_product_deposit_answer_includes_deposit() -> None:
+    result = format_product_deposit_answer(PRODUCT_1)
+
+    assert "Прокат 2-місних наметів" in result
+    assert "Deposit: 4000 грн або Закордонний паспорт/права" in result
+    assert PRODUCT_1["url"] in result

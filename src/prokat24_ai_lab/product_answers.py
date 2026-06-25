@@ -5,38 +5,42 @@ from prokat24_ai_lab.text_normalization import normalize_text
 RENTAL_PERIOD_ALIASES = {
     "2 тижні": [
         "2 тижні",
-        "2 недели",
-        "две недели",
+        "два тижні",
     ],
     "Тиждень": [
+        "на тиждень",
         "тиждень",
-        "неделю",
-        "неделя",
     ],
     "1-й день": [
         "1 день",
-        "первый день",
-        "перший день",
+        "один день",
     ],
 }
 
 PRODUCT_QUERY_STOP_WORDS = {
     "скільки",
     "коштує",
-    "стоит",
-    "сколько",
-    "цена",
+    "вартість",
+    "ціна",
     "за",
+    "що",
     "на",
     "в",
     "оренда",
-    "аренда",
     "прокат",
     "тиждень",
     "тижні",
-    "неделю",
-    "недели",
-    "неделя",
+    "застава",
+    "заставу",
+    "який",
+    "яка",
+    "яку",
+    "яке",
+}
+
+DEPOSIT_INTENT_WORDS = {
+    "застава",
+    "заставу",
 }
 
 
@@ -103,6 +107,9 @@ def answer_product_query(products: list[Product], query: str, limit: int = 5) ->
     if not search_results:
         return format_product_search_results(search_results)
 
+    if detect_deposit_intent(query):
+        return format_product_deposit_answer(search_results[0])
+
     if period is not None:
         return format_product_rental_price_answer(search_results[0], period)
 
@@ -145,6 +152,22 @@ def format_product_rental_price_answer(product: Product, period: str) -> str:
     lines = [
         product["name"],
         f"{period}: {price}",
+        f"Deposit: {product['deposit']}",
+        f"URL: {product['url']}",
+    ]
+
+    return "\n".join(lines)
+
+
+def detect_deposit_intent(query: str) -> bool:
+    query_words = set(normalize_text(query).split())
+
+    return bool(query_words & DEPOSIT_INTENT_WORDS)
+
+
+def format_product_deposit_answer(product: Product) -> str:
+    lines = [
+        product["name"],
         f"Deposit: {product['deposit']}",
         f"URL: {product['url']}",
     ]

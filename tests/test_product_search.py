@@ -204,7 +204,7 @@ def test_search_products_does_not_match_query_words_split_across_fields() -> Non
         ("палатка", [PRODUCT]),
         ("прокат спальника", [SLEEPING_BAG_PRODUCT]),
         ("лижні черевики", [SKI_BOOTS_PRODUCT]),
-        ("ботинки", [SKI_BOOTS_PRODUCT]),
+        ("черевики", [SKI_BOOTS_PRODUCT]),
         ("човен", [BOAT_PRODUCT]),
     ],
 )
@@ -242,7 +242,7 @@ def test_search_products_ranks_alias_match_in_name_above_alias_match_in_descript
         "attributes": {},
     }
 
-    query = "ботинки"
+    query = "чоботи"
     product_list = [description_match, ski_boots]
 
     result = search_products(product_list, query, limit=2)
@@ -270,7 +270,7 @@ def test_search_products_ranks_primary_name_match_above_secondary_name_match() -
         "deposit": "1500 грн",
         "attributes": {},
     }
-    query = "ботинки"
+    query = "черевики"
     product_list = [boot_cover, ski_boots]
 
     result = search_products(product_list, query, limit=2)
