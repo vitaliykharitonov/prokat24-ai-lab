@@ -26,11 +26,19 @@ def format_product_answer_eval_failure(failure: ProductAnswerEvalFailure) -> str
     return "\n".join(lines)
 
 
-def main() -> None:
+def get_product_answer_eval_exit_code(failure_count: int) -> int:
+    if failure_count == 0:
+        return 0
+
+    return 1
+
+
+def main() -> int:
     loaded_products = load_products(PRODUCTS_FILE)
     failures = find_failed_product_answer_evals(loaded_products)
+    failure_count = len(failures)
     total_count = len(PRODUCT_ANSWER_EVAL_CASES)
-    passed_count = total_count - len(failures)
+    passed_count = total_count - failure_count
 
     print(format_product_answer_eval_summary(passed_count, total_count))
 
@@ -41,6 +49,8 @@ def main() -> None:
         for failure in failures:
             print(format_product_answer_eval_failure(failure))
 
+    return get_product_answer_eval_exit_code(failure_count)
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
