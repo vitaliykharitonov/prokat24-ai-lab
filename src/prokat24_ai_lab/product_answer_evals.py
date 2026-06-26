@@ -34,7 +34,7 @@ PRODUCT_ANSWER_EVAL_CASES: list[ProductAnswerEvalCase] = [
         "query": "яка застава за 2 місний намет",
         "expected_fragments": [
             "Прокат 2-місних наметів",
-            "Deposit: 4000 грн",
+            "Застава: 4000 грн",
         ],
     },
     {

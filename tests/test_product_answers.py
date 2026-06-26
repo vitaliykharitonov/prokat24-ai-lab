@@ -97,7 +97,7 @@ def test_format_product_search_results_formats_multiple_products() -> None:
 
 
 def test_format_product_search_results_returns_message_when_empty() -> None:
-    assert format_product_search_results([]) == "Products not found"
+    assert format_product_search_results([]) == "Товари не знайдено"
 
 
 def test_answer_product_query_returns_formatted_search_results() -> None:
@@ -116,7 +116,7 @@ def test_answer_product_query_returns_not_found_message_when_no_products_match()
 
     result = answer_product_query(product_list, query)
 
-    assert result == "Products not found"
+    assert result == "Товари не знайдено"
 
 
 def test_answer_product_query_returns_specific_period_price_when_period_detected() -> None:
@@ -127,7 +127,7 @@ def test_answer_product_query_returns_specific_period_price_when_period_detected
 
     assert "Прокат 2-місних наметів" in result
     assert "Тиждень: 1200 грн" in result
-    assert "Deposit:" in result
+    assert "Застава:" in result
     assert PRODUCT_1["url"] in result
 
 
@@ -138,7 +138,7 @@ def test_answer_product_query_returns_deposit_when_deposit_intent_detected() -> 
     result = answer_product_query(product_list, query)
 
     assert "Прокат 2-місних наметів" in result
-    assert "Deposit: 4000 грн або Закордонний паспорт/права" in result
+    assert "Застава: 4000 грн або Закордонний паспорт/права" in result
     assert PRODUCT_1["url"] in result
 
 
@@ -174,7 +174,7 @@ def test_format_product_rental_price_answer_returns_message_when_period_missing(
 
     result = format_product_rental_price_answer(PRODUCT_1, period)
 
-    assert result == "Price for Місяць not found"
+    assert result == "Ціну для періоду Місяць не знайдено"
 
 
 @pytest.mark.parametrize(
@@ -196,5 +196,5 @@ def test_format_product_deposit_answer_includes_deposit() -> None:
     result = format_product_deposit_answer(PRODUCT_1)
 
     assert "Прокат 2-місних наметів" in result
-    assert "Deposit: 4000 грн або Закордонний паспорт/права" in result
+    assert "Застава: 4000 грн або Закордонний паспорт/права" in result
     assert PRODUCT_1["url"] in result

@@ -75,8 +75,8 @@ def build_product_search_query(query: str) -> str:
 def format_product_search_result(product: Product) -> str:
     lines = [
         product["name"],
-        f"Deposit: {product['deposit']}",
-        "Prices:",
+        f"Застава: {product['deposit']}",
+        "Ціни:",
     ]
 
     for label, price in product["rental_prices"].items():
@@ -89,7 +89,7 @@ def format_product_search_result(product: Product) -> str:
 
 def format_product_search_results(products: list[Product]) -> str:
     if not products:
-        return "Products not found"
+        return "Товари не знайдено"
 
     formatted_products = []
 
@@ -147,12 +147,12 @@ def format_product_rental_price_answer(product: Product, period: str) -> str:
     price = product["rental_prices"].get(period)
 
     if price is None:
-        return f"Price for {period} not found"
+        return f"Ціну для періоду {period} не знайдено"
 
     lines = [
         product["name"],
         f"{period}: {price}",
-        f"Deposit: {product['deposit']}",
+        f"Застава: {product['deposit']}",
         f"URL: {product['url']}",
     ]
 
@@ -168,7 +168,7 @@ def detect_deposit_intent(query: str) -> bool:
 def format_product_deposit_answer(product: Product) -> str:
     lines = [
         product["name"],
-        f"Deposit: {product['deposit']}",
+        f"Застава: {product['deposit']}",
         f"URL: {product['url']}",
     ]
 
