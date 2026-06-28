@@ -101,6 +101,13 @@ PRODUCT_ANSWER_EVAL_CASES: list[ProductAnswerEvalCase] = [
             "Застава: 10000 грн",
         ],
     },
+    {
+        "query": "скільки коштує 2 місний намет на 5 днів",
+        "expected_fragments": [
+            "Прокат 2-місних наметів",
+            "5 днів: 980 грн",
+        ],
+    },
 ]
 
 
