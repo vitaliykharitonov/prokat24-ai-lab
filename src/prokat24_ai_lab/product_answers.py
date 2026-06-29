@@ -281,10 +281,13 @@ def format_product_deposit_answer(product: Product) -> str:
 
 
 def format_day_count_label(day_count: int) -> str:
-    if day_count == 1:
+    if 11 <= day_count <= 14:
+        return f"{day_count} днів"
+
+    if day_count % 10 == 1:
         return f"{day_count} день"
 
-    if 1 < day_count <= 4:
+    if day_count % 10 in (2, 3, 4):
         return f"{day_count} дні"
 
     return f"{day_count} днів"

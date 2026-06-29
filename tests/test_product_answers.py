@@ -329,6 +329,15 @@ def test_format_product_deposit_answer_includes_deposit() -> None:
         (3, "3 дні"),
         (4, "4 дні"),
         (5, "5 днів"),
+        (10, "10 днів"),
+        (11, "11 днів"),
+        (20, "20 днів"),
+        (21, "21 день"),
+        (22, "22 дні"),
+        (23, "23 дні"),
+        (24, "24 дні"),
+        (25, "25 днів"),
+        (30, "30 днів"),
     ],
 )
 def test_format_day_count_label(day_count: int, expected_label: str) -> None:
