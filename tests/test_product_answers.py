@@ -99,6 +99,14 @@ def test_build_product_search_query_removes_day_count_words() -> None:
     assert result == "2 місний намет"
 
 
+def test_build_product_search_query_removes_question_words() -> None:
+    query = "скільки буде коштувати на 5 днів 2 місний намет"
+
+    result = build_product_search_query(query)
+
+    assert result == "2 місний намет"
+
+
 def test_format_product_search_result_includes_product_fields():
     result = format_product_search_result(PRODUCT_1)
 

@@ -122,6 +122,13 @@ PRODUCT_ANSWER_EVAL_CASES: list[ProductAnswerEvalCase] = [
             "5 днів: 1550 грн",
         ],
     },
+    {
+        "query": "скільки буде коштувати на 5 днів 2 місний намет",
+        "expected_fragments": [
+            "Прокат 2-місних наметів",
+            "5 днів: 980 грн",
+        ],
+    },
 ]
 
 

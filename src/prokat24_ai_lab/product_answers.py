@@ -1,4 +1,5 @@
 import re
+from collections.abc import Sequence
 
 from prokat24_ai_lab.product_catalog import Product
 from prokat24_ai_lab.product_search import search_products
@@ -40,6 +41,8 @@ PRODUCT_QUERY_STOP_WORDS = {
     "яке",
 }
 
+PRODUCT_QUERY_STOP_WORD_SEQUENCES = (("буде", "коштувати"),)
+
 DEPOSIT_INTENT_WORDS = {
     "застава",
     "заставу",
@@ -65,13 +68,14 @@ UKRAINIAN_NUMBER_WORDS = {
 RENTAL_DAY_WORDS: set[str]
 
 
-def remove_word_sequence(words: list[str], sequence: list[str]) -> list[str]:
-    sequence_length = len(sequence)
+def remove_word_sequence(words: list[str], sequence: Sequence[str]) -> list[str]:
+    sequence_words = list(sequence)
+    sequence_length = len(sequence_words)
 
     for start_index in range(len(words)):
         end_index = start_index + sequence_length
 
-        if words[start_index:end_index] == sequence:
+        if words[start_index:end_index] == sequence_words:
             return words[:start_index] + words[end_index:]
 
     return words
@@ -84,6 +88,9 @@ def build_product_search_query(query: str) -> str:
 
     words = remove_rental_period_words(words, period)
     words = remove_rental_day_count_words(words, day_count)
+
+    for sequence in PRODUCT_QUERY_STOP_WORD_SEQUENCES:
+        words = remove_word_sequence(words, sequence)
 
     product_words = []
 
