@@ -27,8 +27,12 @@ PRODUCT_QUERY_STOP_WORDS = {
     "ціна",
     "за",
     "що",
+    "чи",
+    "є",
     "на",
     "в",
+    "у",
+    "вас",
     "оренда",
     "прокат",
     "тиждень",
@@ -39,6 +43,9 @@ PRODUCT_QUERY_STOP_WORDS = {
     "яка",
     "яку",
     "яке",
+    "наявності",
+    "наявність",
+    "маєте",
 }
 
 PRODUCT_QUERY_STOP_WORD_SEQUENCES = (("буде", "коштувати"),)
@@ -48,11 +55,31 @@ DEPOSIT_INTENT_WORDS = {
     "заставу",
 }
 
+AVAILABILITY_INTENT_WORDS = {
+    "наявності",
+    "наявність",
+    "маєте",
+}
+
+AVAILABILITY_INTENT_WORD_SEQUENCES = (
+    ("чи", "є"),
+    ("у", "вас", "є"),
+)
+
 RENTAL_DAY_WORDS = {
     "день",
     "дні",
     "дня",
     "днів",
+}
+
+PRICE_AND_DEPOSIT_WORDS = {
+    "ціна",
+    "вартість",
+    "коштує",
+    "коштувати",
+    "застава",
+    "заставу",
 }
 
 UKRAINIAN_NUMBER_WORDS = {
@@ -64,8 +91,6 @@ UKRAINIAN_NUMBER_WORDS = {
     "п'ять": 5,
     "шість": 6,
 }
-
-RENTAL_DAY_WORDS: set[str]
 
 
 def remove_word_sequence(words: list[str], sequence: Sequence[str]) -> list[str]:
@@ -79,6 +104,23 @@ def remove_word_sequence(words: list[str], sequence: Sequence[str]) -> list[str]
             return words[:start_index] + words[end_index:]
 
     return words
+
+
+def contains_word_sequence(words: list[str], sequence: Sequence[str]) -> bool:
+    sequence_words = list(sequence)
+
+    if not sequence_words:
+        return False
+
+    sequence_length = len(sequence_words)
+
+    for start_index in range(len(words) - sequence_length + 1):
+        end_index = start_index + sequence_length
+
+        if words[start_index:end_index] == sequence_words:
+            return True
+
+    return False
 
 
 def build_product_search_query(query: str) -> str:
@@ -147,6 +189,9 @@ def answer_product_query(products: list[Product], query: str, limit: int = 5) ->
 
     if period is not None:
         return format_product_rental_price_answer(search_results[0], period)
+
+    if detect_availability_intent(query):
+        return format_product_availability_answer(search_results[0])
 
     return format_product_search_results(search_results)
 
@@ -270,6 +315,23 @@ def detect_deposit_intent(query: str) -> bool:
     return bool(query_words & DEPOSIT_INTENT_WORDS)
 
 
+def detect_availability_intent(query: str) -> bool:
+    words = normalize_text(query).split()
+    query_words = set(words)
+
+    if query_words & PRICE_AND_DEPOSIT_WORDS:
+        return False
+
+    if query_words & AVAILABILITY_INTENT_WORDS:
+        return True
+
+    for sequence in AVAILABILITY_INTENT_WORD_SEQUENCES:
+        if contains_word_sequence(words, sequence):
+            return True
+
+    return bool(words and words[0] == "є")
+
+
 def format_product_deposit_answer(product: Product) -> str:
     lines = [
         product["name"],
@@ -306,6 +368,12 @@ def format_product_day_count_rental_price_answer(product: Product, day_count: in
         f"Застава: {product['deposit']}",
         f"URL: {product['url']}",
     ]
+    return "\n".join(lines)
+
+
+def format_product_availability_answer(product: Product) -> str:
+    lines = [product["name"], "Актуальну наявність краще уточнити у менеджера"]
+
     return "\n".join(lines)
 
 

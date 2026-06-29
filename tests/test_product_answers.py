@@ -4,6 +4,7 @@ from prokat24_ai_lab.product_answers import (
     answer_product_query,
     build_product_search_query,
     calculate_rental_price_for_day_count,
+    detect_availability_intent,
     detect_deposit_intent,
     detect_rental_day_count,
     detect_rental_period,
@@ -83,28 +84,24 @@ def test_remove_rental_day_count_words() -> None:
     assert result == ["скільки", "коштує", "2", "місний", "намет", "на"]
 
 
-def test_build_product_search_query_removes_question_and_period_words() -> None:
-    query = "скільки коштує 2 місний намет на тиждень"
-
+@pytest.mark.parametrize(
+    ("query", "expected_query"),
+    [
+        ("скільки коштує 2 місний намет на тиждень", "2 місний намет"),
+        ("скільки коштує 2 місний намет на 5 днів", "2 місний намет"),
+        ("скільки буде коштувати на 5 днів 2 місний намет", "2 місний намет"),
+        ("чи є в наявності 2 місний намет", "2 місний намет"),
+        ("є човен", "човен"),
+        ("чи маєте байдарку", "байдарку"),
+        ("у вас є намет", "намет"),
+    ],
+)
+def test_build_product_search_query_removes_non_product_words(
+    query: str, expected_query: str
+) -> None:
     result = build_product_search_query(query)
 
-    assert result == "2 місний намет"
-
-
-def test_build_product_search_query_removes_day_count_words() -> None:
-    query = "скільки коштує 2 місний намет на 5 днів"
-
-    result = build_product_search_query(query)
-
-    assert result == "2 місний намет"
-
-
-def test_build_product_search_query_removes_question_words() -> None:
-    query = "скільки буде коштувати на 5 днів 2 місний намет"
-
-    result = build_product_search_query(query)
-
-    assert result == "2 місний намет"
+    assert result == expected_query
 
 
 def test_format_product_search_result_includes_product_fields():
@@ -311,6 +308,25 @@ def test_format_product_rental_price_answer_returns_message_when_period_missing(
 )
 def test_detect_deposit_intent(query: str, expected_result: bool) -> None:
     assert detect_deposit_intent(query) is expected_result
+
+
+@pytest.mark.parametrize(
+    ("query", "expected_result"),
+    [
+        ("чи є в наявності 2 місний намет", True),
+        ("є човен?", True),
+        ("чи маєте байдарку", True),
+        ("у вас є намет?", True),
+        ("наявність човна", True),
+        ("скільки коштує 2 місний намет", False),
+        ("яка застава за човен", False),
+        ("ціна на тиждень байдарка", False),
+        ("яка є ціна на намет", False),
+        ("яка є застава за човен", False),
+    ],
+)
+def test_detect_availability_intent(query: str, expected_result: bool) -> None:
+    assert detect_availability_intent(query) is expected_result
 
 
 def test_format_product_deposit_answer_includes_deposit() -> None:
