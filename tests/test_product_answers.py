@@ -222,8 +222,7 @@ def test_parse_price_amount(price: str, expected_amount: int | None) -> None:
     ],
 )
 def test_calculate_rental_price_for_day_count(
-        day_count: int,
-        expected_total_price: int | None
+    day_count: int, expected_total_price: int | None
 ) -> None:
     product = {
         "url": "https://prokat24.com.ua/ua/test-tent/",
