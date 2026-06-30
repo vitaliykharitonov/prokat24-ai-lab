@@ -43,9 +43,17 @@ PRODUCT_QUERY_STOP_WORDS = {
     "яка",
     "яку",
     "яке",
+    "які",
     "наявності",
     "наявність",
     "маєте",
+    "характеристики",
+    "опис",
+    "комплектація",
+    "комплект",
+    "входить",
+    "розмір",
+    "вага",
 }
 
 PRODUCT_QUERY_STOP_WORD_SEQUENCES = (("буде", "коштувати"),)
@@ -65,6 +73,16 @@ AVAILABILITY_INTENT_WORD_SEQUENCES = (
     ("чи", "є"),
     ("у", "вас", "є"),
 )
+
+DETAILS_INTENT_WORDS = {
+    "характеристики",
+    "опис",
+    "комплектація",
+    "комплект",
+    "входить",
+    "розмір",
+    "вага",
+}
 
 RENTAL_DAY_WORDS = {
     "день",
@@ -192,6 +210,9 @@ def answer_product_query(products: list[Product], query: str, limit: int = 5) ->
 
     if detect_availability_intent(query):
         return format_product_availability_answer(search_results[0])
+
+    if detect_product_details_intent(query):
+        return format_product_details_answer(search_results[0])
 
     return format_product_search_results(search_results)
 
@@ -332,6 +353,12 @@ def detect_availability_intent(query: str) -> bool:
     return bool(words and words[0] == "є")
 
 
+def detect_product_details_intent(query: str) -> bool:
+    query_words = set(normalize_text(query).split())
+
+    return bool(query_words & DETAILS_INTENT_WORDS)
+
+
 def format_product_deposit_answer(product: Product) -> str:
     lines = [
         product["name"],
@@ -373,6 +400,15 @@ def format_product_day_count_rental_price_answer(product: Product, day_count: in
 
 def format_product_availability_answer(product: Product) -> str:
     lines = [product["name"], "Актуальну наявність краще уточнити у менеджера"]
+
+    return "\n".join(lines)
+
+
+def format_product_details_answer(product: Product) -> str:
+    lines = [product["name"], product["description"], "Характеристики:"]
+
+    for label, value in product["attributes"].items():
+        lines.append(f"{label}: {value}")
 
     return "\n".join(lines)
 
