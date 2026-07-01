@@ -130,6 +130,7 @@ def test_remove_rental_day_count_words() -> None:
         ("комплектація 2 місний намет", "2 місний намет"),
         ("розмір 2 місний намет", "2 місний намет"),
         ("вага 2 місний намет", "2 місний намет"),
+        ("яка вага 2 місного намету", "2 місного намету"),
     ],
 )
 def test_build_product_search_query_removes_non_product_words(
