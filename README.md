@@ -29,7 +29,7 @@ python src/check_project.py
 Ожидаемый результат:
 
 ```
-Product answer evals: 18/18 passed
+Product answer evals: 21/21 passed
 ```
 
 ## Основные команды

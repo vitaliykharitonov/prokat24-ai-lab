@@ -44,6 +44,8 @@ PRODUCT_QUERY_STOP_WORDS = {
     "яку",
     "яке",
     "які",
+    "якого",
+    "якої",
     "наявності",
     "наявність",
     "маєте",
@@ -51,9 +53,14 @@ PRODUCT_QUERY_STOP_WORDS = {
     "опис",
     "комплектація",
     "комплект",
+    "комплекті",
     "входить",
     "розмір",
+    "розміру",
+    "розміри",
     "вага",
+    "ваги",
+    "важить",
 }
 
 PRODUCT_QUERY_STOP_WORD_SEQUENCES = (("буде", "коштувати"),)
@@ -82,6 +89,24 @@ DETAILS_INTENT_WORDS = {
     "входить",
     "розмір",
     "вага",
+}
+
+ATTRIBUTE_ALIASES = {
+    "Комплектація": {
+        "комплектація",
+        "комплект",
+        "комплекті",
+    },
+    "Розмір": {
+        "розмір",
+        "розміру",
+        "розміри",
+    },
+    "Вага": {
+        "вага",
+        "ваги",
+        "важить",
+    },
 }
 
 RENTAL_DAY_WORDS = {
@@ -193,6 +218,7 @@ def format_product_search_results(products: list[Product]) -> str:
 def answer_product_query(products: list[Product], query: str, limit: int = 5) -> str:
     day_count = detect_rental_day_count(query)
     period = detect_rental_period(query)
+    requested_attribute = detect_requested_attribute_label(query)
     search_query = build_product_search_query(query)
     search_results = search_products(products, search_query, limit=limit)
 
@@ -210,6 +236,9 @@ def answer_product_query(products: list[Product], query: str, limit: int = 5) ->
 
     if detect_availability_intent(query):
         return format_product_availability_answer(search_results[0])
+
+    if requested_attribute is not None:
+        return format_product_attribute_answer(search_results[0], requested_attribute)
 
     if detect_product_details_intent(query):
         return format_product_details_answer(search_results[0])
@@ -359,6 +388,16 @@ def detect_product_details_intent(query: str) -> bool:
     return bool(query_words & DETAILS_INTENT_WORDS)
 
 
+def detect_requested_attribute_label(query: str) -> str | None:
+    query_words = set(normalize_text(query).split())
+
+    for attribute, aliases in ATTRIBUTE_ALIASES.items():
+        if query_words & aliases:
+            return attribute
+
+    return None
+
+
 def format_product_deposit_answer(product: Product) -> str:
     lines = [
         product["name"],
@@ -409,6 +448,20 @@ def format_product_details_answer(product: Product) -> str:
 
     for label, value in product["attributes"].items():
         lines.append(f"{label}: {value}")
+
+    return "\n".join(lines)
+
+
+def format_product_attribute_answer(product: Product, attribute_label: str) -> str:
+    attribute_value = product["attributes"].get(attribute_label)
+
+    if attribute_value is None:
+        return f"{product['name']}\nХарактеристику {attribute_label} не знайдено"
+
+    lines = [
+        product["name"],
+        f"{attribute_label}: {attribute_value}",
+    ]
 
     return "\n".join(lines)
 

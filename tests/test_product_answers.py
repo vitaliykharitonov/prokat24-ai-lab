@@ -9,7 +9,9 @@ from prokat24_ai_lab.product_answers import (
     detect_product_details_intent,
     detect_rental_day_count,
     detect_rental_period,
+    detect_requested_attribute_label,
     format_day_count_label,
+    format_product_attribute_answer,
     format_product_day_count_rental_price_answer,
     format_product_deposit_answer,
     format_product_details_answer,
@@ -217,6 +219,16 @@ def test_answer_product_query_returns_product_details() -> None:
     assert "Комплектація: Намет, зовнішній тент" in result
 
 
+def test_answer_product_query_returns_requested_attribute() -> None:
+    query = "яка вага 2 місний намет"
+
+    result = answer_product_query([FULL_PRODUCT], query)
+
+    assert "Прокат 2-місних наметів" in result
+    assert "Вага: 3.31 кг" in result
+    assert "Характеристики:" not in result
+
+
 @pytest.mark.parametrize(
     ("query", "expected_period"),
     [
@@ -379,6 +391,27 @@ def test_detect_product_details_intent(query: str, expected_result: bool) -> Non
     assert detect_product_details_intent(query) is expected_result
 
 
+@pytest.mark.parametrize(
+    ("query", "expected_attribute"),
+    [
+        ("яка вага 2 місний намет", "Вага"),
+        ("скільки важить 2 місний намет", "Вага"),
+        ("якої ваги 2 місний намет", "Вага"),
+        ("який розмір 2 місний намет", "Розмір"),
+        ("якого розміру 2 місний намет", "Розмір"),
+        ("2 місний намет комплектація", "Комплектація"),
+        ("2 місний намет що у комплекті", "Комплектація"),
+        ("які характеристики у 2 місний намет", None),
+        ("який опис у 2 місний намет", None),
+        ("скільки коштує 2 місний намет", None),
+        ("яка застава за човен", None),
+        ("чи є в наявності байдарка", None),
+    ],
+)
+def test_detect_requested_attribute_label(query: str, expected_attribute: str | None) -> None:
+    assert detect_requested_attribute_label(query) == expected_attribute
+
+
 def test_format_product_deposit_answer_includes_deposit() -> None:
     result = format_product_deposit_answer(PRODUCT_1)
 
@@ -454,3 +487,18 @@ def test_format_product_details_answer() -> None:
     assert "Розмір: 205 х 240 см" in result
     assert "Вага: 3.31 кг" in result
     assert "Комплектація: Намет, зовнішній тент" in result
+
+
+@pytest.mark.parametrize(
+    ("attribute_label", "expected_result"),
+    [
+        ("Вага", "Вага: 3.31 кг"),
+        ("Розмір", "Розмір: 205 х 240 см"),
+        ("Комплектація", "Комплектація: Намет, зовнішній тент"),
+    ],
+)
+def test_format_product_attribute_answer(attribute_label: str, expected_result: str) -> None:
+    result = format_product_attribute_answer(FULL_PRODUCT, attribute_label)
+
+    assert "Прокат 2-місних наметів" in result
+    assert expected_result in result
