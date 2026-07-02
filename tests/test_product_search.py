@@ -2,6 +2,7 @@ import pytest
 
 from prokat24_ai_lab.product_catalog import Product
 from prokat24_ai_lab.product_search import (
+    build_product_query_aliases,
     build_product_search_text,
     build_query_word_groups,
     contains_all_word_groups,
@@ -83,6 +84,18 @@ BOAT_PRODUCT: Product = {
 }
 
 
+def test_build_product_query_aliases_builds_aliases() -> None:
+    groups = (("намет", "намету", "наметів"),)
+
+    results = build_product_query_aliases(groups)
+
+    assert results == {
+        "намет": {"намету", "наметів"},
+        "намету": {"намет", "наметів"},
+        "наметів": {"намет", "намету"},
+    }
+
+
 def test_build_query_word_groups_adds_aliases() -> None:
     query_words = ["прокат", "палатка"]
 
@@ -90,7 +103,7 @@ def test_build_query_word_groups_adds_aliases() -> None:
 
     assert result == [
         {"прокат"},
-        {"палатка", "палатки", "намет", "наметів", "намети"},
+        {"наметів", "намет", "палатці", "намети", "намету", "наметі", "палатки", "палатка"},
     ]
 
 
@@ -206,6 +219,7 @@ def test_search_products_does_not_match_query_words_split_across_fields() -> Non
         ("лижні черевики", [SKI_BOOTS_PRODUCT]),
         ("черевики", [SKI_BOOTS_PRODUCT]),
         ("човен", [BOAT_PRODUCT]),
+        ("2 місного намету", [PRODUCT]),
     ],
 )
 def test_search_products_matches_product_aliases(
