@@ -175,6 +175,13 @@ PRODUCT_ANSWER_EVAL_CASES: list[ProductAnswerEvalCase] = [
             "Вага: 3.31 кг",
         ],
     },
+    {
+        "query": "яка вага лижних черевиків",
+        "expected_fragments": [
+            "Прокат лижних черевиків",
+            "Характеристику Вага не знайдено",
+        ],
+    },
 ]
 
 
