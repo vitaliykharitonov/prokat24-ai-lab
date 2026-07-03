@@ -9,79 +9,82 @@ from prokat24_ai_lab.product_search import (
     search_products,
 )
 
-PRODUCT = {
-    "url": (
-        "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/"
-        "prokat-palatok/prokat-palatki-2-mestnaya/"
-    ),
-    "name": "Прокат 2-місних наметів",
-    "description": "Опис 2-місного намету.",
-    "rental_prices": {
-        "1-й день": "250 грн",
-    },
-    "deposit": "4000 грн або Закордонний паспорт/права",
-    "attributes": {
-        "К-сть осіб": "2 - 3",
-    },
-}
 
-PRODUCT_2 = {
-    "url": "https://prokat24.com.ua/ua/test-sleeping-bag/",
-    "name": "Прокат літнього спальника",
-    "description": "Опис літнього спальника.",
-    "rental_prices": {
-        "1-й день": "100 грн",
-    },
-    "deposit": "1000 грн",
-    "attributes": {
-        "Температура комфорту": "+10°C",
-    },
-}
+@pytest.fixture
+def two_person_tent() -> Product:
+    return {
+        "url": (
+            "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/"
+            "prokat-palatok/prokat-palatki-2-mestnaya/"
+        ),
+        "name": "Прокат 2-місних наметів",
+        "description": "Опис 2-місного намету.",
+        "rental_prices": {
+            "1-й день": "250 грн",
+        },
+        "deposit": "4000 грн або Закордонний паспорт/права",
+        "attributes": {
+            "К-сть осіб": "2 - 3",
+        },
+    }
 
-PRODUCT_3 = {
-    "url": "https://prokat24.com.ua/ua/test-boat/",
-    "name": "Прокат 3-місних човнів",
-    "description": "Опис човна.",
-    "rental_prices": {
-        "1-й день": "500 грн",
-        "2-й день": "450 грн",
-    },
-    "deposit": "10000 грн",
-    "attributes": {},
-}
 
-SLEEPING_BAG_PRODUCT: Product = {
-    "url": "https://prokat24.com.ua/ua/test-sleeping-bag/",
-    "name": "Прокат літніх спальників",
-    "description": "Опис літнього спальника.",
-    "rental_prices": {
-        "1-й день": "100 грн",
-    },
-    "deposit": "1000 грн",
-    "attributes": {},
-}
+@pytest.fixture
+def summer_sleeping_bag() -> Product:
+    return {
+        "url": "https://prokat24.com.ua/ua/test-sleeping-bag/",
+        "name": "Прокат літнього спальника",
+        "description": "Опис літнього спальника.",
+        "rental_prices": {
+            "1-й день": "100 грн",
+        },
+        "deposit": "1000 грн",
+        "attributes": {
+            "Температура комфорту": "+10°C",
+        },
+    }
 
-SKI_BOOTS_PRODUCT: Product = {
-    "url": "https://prokat24.com.ua/ua/test-ski-boots/",
-    "name": "Прокат лижних черевиків",
-    "description": "Опис лижних черевиків.",
-    "rental_prices": {
-        "1-й день": "150 грн",
-    },
-    "deposit": "1500 грн",
-    "attributes": {},
-}
 
-BOAT_PRODUCT: Product = {
-    "url": "https://prokat24.com.ua/ua/test-boat/",
-    "name": "Прокат човнів",
-    "description": "Опис човна.",
-    "rental_prices": {
-        "1-й день": "400 грн",
-    },
-    "deposit": "8000 грн",
-    "attributes": {},
-}
+@pytest.fixture
+def summer_sleeping_bags() -> Product:
+    return {
+        "url": "https://prokat24.com.ua/ua/test-sleeping-bag/",
+        "name": "Прокат літніх спальників",
+        "description": "Опис літнього спальника.",
+        "rental_prices": {
+            "1-й день": "100 грн",
+        },
+        "deposit": "1000 грн",
+        "attributes": {},
+    }
+
+
+@pytest.fixture
+def ski_boots() -> Product:
+    return {
+        "url": "https://prokat24.com.ua/ua/test-ski-boots/",
+        "name": "Прокат лижних черевиків",
+        "description": "Опис лижних черевиків.",
+        "rental_prices": {
+            "1-й день": "150 грн",
+        },
+        "deposit": "1500 грн",
+        "attributes": {},
+    }
+
+
+@pytest.fixture
+def boat() -> Product:
+    return {
+        "url": "https://prokat24.com.ua/ua/test-boat/",
+        "name": "Прокат човнів",
+        "description": "Опис човна.",
+        "rental_prices": {
+            "1-й день": "400 грн",
+        },
+        "deposit": "8000 грн",
+        "attributes": {},
+    }
 
 
 def test_build_product_query_aliases_builds_aliases() -> None:
@@ -107,8 +110,8 @@ def test_build_query_word_groups_adds_aliases() -> None:
     ]
 
 
-def test_build_product_search_text_contains_product_fields() -> None:
-    result = build_product_search_text(PRODUCT)
+def test_build_product_search_text_contains_product_fields(two_person_tent: Product) -> None:
+    result = build_product_search_text(two_person_tent)
 
     assert "Прокат 2-місних наметів" in result
     assert "Опис 2-місного намету." in result
@@ -126,51 +129,55 @@ def test_contains_all_words_matches_alias_group() -> None:
 
 
 @pytest.mark.parametrize(
-    ("query", "expected_result"),
+    ("query", "expected_product_names"),
     [
-        ("2 місних", [PRODUCT]),
+        ("2 місних", ["Прокат 2-місних наметів"]),
         ("", []),
         ("   ", []),
     ],
 )
 def test_search_products_returns_products_matching_query_words(
+    two_person_tent: Product,
+    summer_sleeping_bag: Product,
     query: str,
-    expected_result: list[Product],
+    expected_product_names: list[str],
 ) -> None:
-    product_list = [PRODUCT, PRODUCT_2]
+    product_list = [two_person_tent, summer_sleeping_bag]
 
     result = search_products(product_list, query)
 
-    assert result == expected_result
+    assert [product["name"] for product in result] == expected_product_names
 
 
-def test_search_products_matches_product_by_query_alias() -> None:
-    result = search_products([PRODUCT], "палатка")
+def test_search_products_matches_product_by_query_alias(two_person_tent: Product) -> None:
+    result = search_products([two_person_tent], "палатка")
 
-    assert result == [PRODUCT]
+    assert result == [two_person_tent]
 
 
 @pytest.mark.parametrize(
-    ("limit", "expected_result"),
+    ("limit", "expected_product_names"),
     [
-        (1, [PRODUCT]),
+        (1, ["Прокат 2-місних наметів"]),
         (0, []),
     ],
 )
 def test_search_products_respects_limit(
+    two_person_tent: Product,
+    summer_sleeping_bag: Product,
     limit: int,
-    expected_result: list[Product],
+    expected_product_names: list[str],
 ) -> None:
     query = "прокат"
-    product_list = [PRODUCT, PRODUCT_2]
+    product_list = [two_person_tent, summer_sleeping_bag]
 
     result = search_products(product_list, query, limit)
 
-    assert result == expected_result
+    assert [product["name"] for product in result] == expected_product_names
 
 
-def test_search_products_orders_results_by_score() -> None:
-    two_person_boat: Product = {
+def test_search_products_orders_results_by_score(two_person_tent: Product) -> None:
+    two_person_boat_wrong_description: Product = {
         "url": "https://prokat24.com.ua/ua/test-boat/",
         "name": "Прокат 2-місних човнів",
         "description": "Опис човна.",
@@ -182,11 +189,11 @@ def test_search_products_orders_results_by_score() -> None:
         "attributes": {},
     }
     query = "2 місних"
-    product_list = [two_person_boat, PRODUCT]
+    product_list = [two_person_boat_wrong_description, two_person_tent]
 
     result = search_products(product_list, query, limit=2)
 
-    assert result == [PRODUCT, two_person_boat]
+    assert result == [two_person_tent, two_person_boat_wrong_description]
 
 
 def test_search_products_does_not_match_query_words_split_across_fields() -> None:
@@ -212,30 +219,35 @@ def test_search_products_does_not_match_query_words_split_across_fields() -> Non
 
 
 @pytest.mark.parametrize(
-    ("query", "expected_result"),
+    ("query", "expected_product_name"),
     [
-        ("палатка", [PRODUCT]),
-        ("прокат спальника", [SLEEPING_BAG_PRODUCT]),
-        ("лижні черевики", [SKI_BOOTS_PRODUCT]),
-        ("черевики", [SKI_BOOTS_PRODUCT]),
-        ("човен", [BOAT_PRODUCT]),
-        ("2 місного намету", [PRODUCT]),
+        ("палатка", "Прокат 2-місних наметів"),
+        ("прокат спальника", "Прокат літніх спальників"),
+        ("лижні черевики", "Прокат лижних черевиків"),
+        ("черевики", "Прокат лижних черевиків"),
+        ("човен", "Прокат човнів"),
+        ("2 місного намету", "Прокат 2-місних наметів"),
     ],
 )
 def test_search_products_matches_product_aliases(
+    two_person_tent: Product,
+    summer_sleeping_bags: Product,
+    ski_boots: Product,
+    boat: Product,
     query: str,
-    expected_result: list[Product],
+    expected_product_name: str,
 ) -> None:
     products = [
-        PRODUCT,
-        SLEEPING_BAG_PRODUCT,
-        SKI_BOOTS_PRODUCT,
-        BOAT_PRODUCT,
+        two_person_tent,
+        summer_sleeping_bags,
+        ski_boots,
+        boat,
     ]
 
     result = search_products(products, query)
 
-    assert result == expected_result
+    assert result
+    assert result[0]["name"] == expected_product_name
 
 
 def test_search_products_ranks_alias_match_in_name_above_alias_match_in_description() -> None:

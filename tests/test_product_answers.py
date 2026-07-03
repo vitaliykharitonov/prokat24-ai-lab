@@ -22,60 +22,90 @@ from prokat24_ai_lab.product_answers import (
     remove_rental_day_count_words,
     remove_word_sequence,
 )
+from prokat24_ai_lab.product_catalog import Product
 
-PRODUCT_1 = {
-    "url": "https://prokat24.com.ua/ua/test-tent/",
-    "name": "Прокат 2-місних наметів",
-    "description": "Опис 2-місного намету.",
-    "rental_prices": {
-        "1-й день": "250 грн",
-        "Тиждень": "1200 грн",
-    },
-    "deposit": "4000 грн або Закордонний паспорт/права",
-    "attributes": {
-        "К-сть осіб": "2 - 3",
-    },
-}
 
-PRODUCT_2 = {
-    "url": "https://prokat24.com.ua/ua/test-tent3/",
-    "name": "Прокат 3-місних наметів",
-    "description": "Опис 3-місного намету.",
-    "rental_prices": {
-        "1-й день": "300 грн",
-        "Тиждень": "1500 грн",
-    },
-    "deposit": "4500 грн або закордонний паспорт/права + 1000 грн",
-    "attributes": {
-        "К-сть осіб": "3 - 4",
-    },
-}
+@pytest.fixture
+def two_person_tent() -> Product:
+    return {
+        "url": "https://prokat24.com.ua/ua/test-tent/",
+        "name": "Прокат 2-місних наметів",
+        "description": "Опис 2-місного намету.",
+        "rental_prices": {
+            "1-й день": "250 грн",
+            "Тиждень": "1200 грн",
+        },
+        "deposit": "4000 грн або Закордонний паспорт/права",
+        "attributes": {
+            "К-сть осіб": "2 - 3",
+        },
+    }
 
-FULL_PRODUCT = {
-    "url": "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/prokat-palatki-2-mestnaya/",
-    "name": "Прокат 2-місних наметів",
-    "description": "Прокат легких двомісних наметів Terra Incognita Alfa2. "
-    "Ідеально підходить для туристичних походів. "
-    "Ефективна вентиляція, просте та швидке встановлення.",
-    "rental_prices": {
-        "1-й день": "250 грн",
-        "2-й день": "220 грн",
-        "3-й день": "190 грн",
-        "з 4-го дня": "160 грн",
-        "Тиждень": "1200 грн",
-        "2 тижні": "2300 грн",
-    },
-    "deposit": "4000 грн або Закордонний паспорт/права",
-    "attributes": {
-        "Розмір": "205 х 240 см",
-        "Висота": "115 см",
-        "Вага": "3.31 кг",
-        "К-сть осіб": "2 - 3",
-        "Колір": "Хакі, пісочний",
-        "Габарити упаковки": "15 х 15 х 45 см",
-        "Комплектація": "Намет, зовнішній тент, набір кілочків (10 шт), дуги (2 шт), чохли",
-    },
-}
+
+@pytest.fixture
+def three_person_tent() -> Product:
+    return {
+        "url": "https://prokat24.com.ua/ua/test-tent3/",
+        "name": "Прокат 3-місних наметів",
+        "description": "Опис 3-місного намету.",
+        "rental_prices": {
+            "1-й день": "300 грн",
+            "Тиждень": "1500 грн",
+        },
+        "deposit": "4500 грн або закордонний паспорт/права + 1000 грн",
+        "attributes": {
+            "К-сть осіб": "3 - 4",
+        },
+    }
+
+
+@pytest.fixture
+def full_product() -> Product:
+    return {
+        "url": "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/prokat-palatki-2-mestnaya/",
+        "name": "Прокат 2-місних наметів",
+        "description": "Прокат легких двомісних наметів Terra Incognita Alfa2. "
+        "Ідеально підходить для туристичних походів. "
+        "Ефективна вентиляція, просте та швидке встановлення.",
+        "rental_prices": {
+            "1-й день": "250 грн",
+            "2-й день": "220 грн",
+            "3-й день": "190 грн",
+            "з 4-го дня": "160 грн",
+            "Тиждень": "1200 грн",
+            "2 тижні": "2300 грн",
+        },
+        "deposit": "4000 грн або Закордонний паспорт/права",
+        "attributes": {
+            "Розмір": "205 х 240 см",
+            "Висота": "115 см",
+            "Вага": "3.31 кг",
+            "К-сть осіб": "2 - 3",
+            "Колір": "Хакі, пісочний",
+            "Габарити упаковки": "15 х 15 х 45 см",
+            "Комплектація": "Намет, зовнішній тент, набір кілочків (10 шт), дуги (2 шт), чохли",
+        },
+    }
+
+
+@pytest.fixture
+def product_without_extra_day_price() -> Product:
+    return {
+        "url": "https://prokat24.com.ua/ua/test-tent/",
+        "name": "Прокат 2-місних наметів",
+        "description": "Опис 2-місного намету.",
+        "rental_prices": {
+            "1-й день": "250 грн",
+            "2-й день": "220 грн",
+            "3-й день": "190 грн",
+            "Тиждень": "1200 грн",
+            "2 тижні": "2300 грн",
+        },
+        "deposit": "4000 грн або Закордонний паспорт/права",
+        "attributes": {
+            "К-сть осіб": "2 - 3",
+        },
+    }
 
 
 def test_remove_word_sequence_removes_existing_sequence() -> None:
@@ -141,8 +171,8 @@ def test_build_product_search_query_removes_non_product_words(
     assert result == expected_query
 
 
-def test_format_product_search_result_includes_product_fields():
-    result = format_product_search_result(PRODUCT_1)
+def test_format_product_search_result_includes_product_fields(two_person_tent: Product):
+    result = format_product_search_result(two_person_tent)
 
     assert "Прокат 2-місних наметів" in result
     assert "4000 грн" in result
@@ -151,13 +181,15 @@ def test_format_product_search_result_includes_product_fields():
     assert "https://prokat24.com.ua/ua/test-tent/" in result
 
 
-def test_format_product_search_results_formats_multiple_products() -> None:
-    product_list = [PRODUCT_1, PRODUCT_2]
+def test_format_product_search_results_formats_multiple_products(
+    two_person_tent: Product, three_person_tent: Product
+) -> None:
+    product_list = [two_person_tent, three_person_tent]
 
     result = format_product_search_results(product_list)
 
-    assert PRODUCT_1["name"] in result
-    assert PRODUCT_2["name"] in result
+    assert two_person_tent["name"] in result
+    assert three_person_tent["name"] in result
     assert "\n\n" in result
 
 
@@ -165,8 +197,10 @@ def test_format_product_search_results_returns_message_when_empty() -> None:
     assert format_product_search_results([]) == "Товари не знайдено"
 
 
-def test_answer_product_query_returns_formatted_search_results() -> None:
-    product_list = [PRODUCT_1, PRODUCT_2]
+def test_answer_product_query_returns_formatted_search_results(
+    two_person_tent: Product, three_person_tent: Product
+) -> None:
+    product_list = [two_person_tent, three_person_tent]
     query = "2 місних"
 
     result = answer_product_query(product_list, query, limit=5)
@@ -175,8 +209,10 @@ def test_answer_product_query_returns_formatted_search_results() -> None:
     assert "Прокат 3-місних наметів" not in result
 
 
-def test_answer_product_query_returns_not_found_message_when_no_products_match() -> None:
-    product_list = [PRODUCT_1]
+def test_answer_product_query_returns_not_found_message_when_no_products_match(
+    two_person_tent: Product,
+) -> None:
+    product_list = [two_person_tent]
     query = "абракадабра"
 
     result = answer_product_query(product_list, query)
@@ -184,8 +220,10 @@ def test_answer_product_query_returns_not_found_message_when_no_products_match()
     assert result == "Товари не знайдено"
 
 
-def test_answer_product_query_returns_specific_period_price_when_period_detected() -> None:
-    product_list = [PRODUCT_1, PRODUCT_2]
+def test_answer_product_query_returns_specific_period_price_when_period_detected(
+    two_person_tent: Product, three_person_tent: Product
+) -> None:
+    product_list = [two_person_tent, three_person_tent]
     query = "скільки коштує 2 місний намет на тиждень"
 
     result = answer_product_query(product_list, query)
@@ -193,24 +231,26 @@ def test_answer_product_query_returns_specific_period_price_when_period_detected
     assert "Прокат 2-місних наметів" in result
     assert "Тиждень: 1200 грн" in result
     assert "Застава:" in result
-    assert PRODUCT_1["url"] in result
+    assert two_person_tent["url"] in result
 
 
-def test_answer_product_query_returns_deposit_when_deposit_intent_detected() -> None:
-    product_list = [PRODUCT_1, PRODUCT_2]
+def test_answer_product_query_returns_deposit_when_deposit_intent_detected(
+    two_person_tent: Product, three_person_tent: Product
+) -> None:
+    product_list = [two_person_tent, three_person_tent]
     query = "яка застава за 2 місний намет"
 
     result = answer_product_query(product_list, query)
 
     assert "Прокат 2-місних наметів" in result
     assert "Застава: 4000 грн або Закордонний паспорт/права" in result
-    assert PRODUCT_1["url"] in result
+    assert two_person_tent["url"] in result
 
 
-def test_answer_product_query_returns_product_details() -> None:
+def test_answer_product_query_returns_product_details(full_product: Product) -> None:
     query = "які характеристики у 2 місний намет"
 
-    result = answer_product_query([FULL_PRODUCT], query)
+    result = answer_product_query([full_product], query)
 
     assert "Прокат 2-місних наметів" in result
     assert "Прокат легких двомісних наметів" in result
@@ -220,10 +260,10 @@ def test_answer_product_query_returns_product_details() -> None:
     assert "Комплектація: Намет, зовнішній тент" in result
 
 
-def test_answer_product_query_returns_requested_attribute() -> None:
+def test_answer_product_query_returns_requested_attribute(full_product: Product) -> None:
     query = "яка вага 2 місний намет"
 
-    result = answer_product_query([FULL_PRODUCT], query)
+    result = answer_product_query([full_product], query)
 
     assert "Прокат 2-місних наметів" in result
     assert "Вага: 3.31 кг" in result
@@ -287,54 +327,40 @@ def test_parse_price_amount(price: str, expected_amount: int | None) -> None:
     ],
 )
 def test_calculate_rental_price_for_day_count(
-    day_count: int, expected_total_price: int | None
+    full_product: Product, day_count: int, expected_total_price: int | None
 ) -> None:
-    product = FULL_PRODUCT
-
-    result = calculate_rental_price_for_day_count(product, day_count)
+    result = calculate_rental_price_for_day_count(full_product, day_count)
 
     assert result == expected_total_price
 
 
-def test_calculate_rental_price_for_day_count_when_extra_day_price_missing() -> None:
-    product = {
-        "url": "https://prokat24.com.ua/ua/test-tent/",
-        "name": "Прокат 2-місних наметів",
-        "description": "Опис 2-місного намету.",
-        "rental_prices": {
-            "1-й день": "250 грн",
-            "2-й день": "220 грн",
-            "3-й день": "190 грн",
-            "Тиждень": "1200 грн",
-            "2 тижні": "2300 грн",
-        },
-        "deposit": "4000 грн або Закордонний паспорт/права",
-        "attributes": {
-            "К-сть осіб": "2 - 3",
-        },
-    }
+def test_calculate_rental_price_for_day_count_when_extra_day_price_missing(
+    product_without_extra_day_price: Product,
+) -> None:
     day_count = 5
 
-    result = calculate_rental_price_for_day_count(product, day_count)
+    result = calculate_rental_price_for_day_count(product_without_extra_day_price, day_count)
 
     assert result is None
 
 
-def test_format_product_rental_price_answer_includes_period_price() -> None:
+def test_format_product_rental_price_answer_includes_period_price(two_person_tent: Product) -> None:
     period = "Тиждень"
 
-    result = format_product_rental_price_answer(PRODUCT_1, period)
+    result = format_product_rental_price_answer(two_person_tent, period)
 
     assert "Прокат 2-місних наметів" in result
     assert "Тиждень: 1200 грн" in result
     assert "4000 грн" in result
-    assert PRODUCT_1["url"] in result
+    assert two_person_tent["url"] in result
 
 
-def test_format_product_rental_price_answer_returns_message_when_period_missing() -> None:
+def test_format_product_rental_price_answer_returns_message_when_period_missing(
+    two_person_tent: Product,
+) -> None:
     period = "Місяць"
 
-    result = format_product_rental_price_answer(PRODUCT_1, period)
+    result = format_product_rental_price_answer(two_person_tent, period)
 
     assert result == "Ціну для періоду Місяць не знайдено"
 
@@ -413,12 +439,12 @@ def test_detect_requested_attribute_label(query: str, expected_attribute: str | 
     assert detect_requested_attribute_label(query) == expected_attribute
 
 
-def test_format_product_deposit_answer_includes_deposit() -> None:
-    result = format_product_deposit_answer(PRODUCT_1)
+def test_format_product_deposit_answer_includes_deposit(two_person_tent: Product) -> None:
+    result = format_product_deposit_answer(two_person_tent)
 
     assert "Прокат 2-місних наметів" in result
     assert "Застава: 4000 грн або Закордонний паспорт/права" in result
-    assert PRODUCT_1["url"] in result
+    assert two_person_tent["url"] in result
 
 
 @pytest.mark.parametrize(
@@ -444,10 +470,12 @@ def test_format_day_count_label(day_count: int, expected_label: str) -> None:
     assert format_day_count_label(day_count) == expected_label
 
 
-def test_format_product_day_count_rental_price_answer_includes_total_price() -> None:
+def test_format_product_day_count_rental_price_answer_includes_total_price(
+    full_product: Product,
+) -> None:
     day_count = 5
 
-    result = format_product_day_count_rental_price_answer(FULL_PRODUCT, day_count)
+    result = format_product_day_count_rental_price_answer(full_product, day_count)
 
     assert "Прокат 2-місних наметів" in result
     assert "5 днів: 980 грн" in result
@@ -455,32 +483,20 @@ def test_format_product_day_count_rental_price_answer_includes_total_price() -> 
     assert "URL:" in result
 
 
-def test_format_product_day_count_rental_price_answer_returns_message_when_price_missing() -> None:
-    product = {
-        "url": "https://prokat24.com.ua/ua/test-tent/",
-        "name": "Прокат 2-місних наметів",
-        "description": "Опис 2-місного намету.",
-        "rental_prices": {
-            "1-й день": "250 грн",
-            "2-й день": "220 грн",
-            "3-й день": "190 грн",
-            "Тиждень": "1200 грн",
-            "2 тижні": "2300 грн",
-        },
-        "deposit": "4000 грн або Закордонний паспорт/права",
-        "attributes": {
-            "К-сть осіб": "2 - 3",
-        },
-    }
+def test_format_product_day_count_rental_price_answer_returns_message_when_price_missing(
+    product_without_extra_day_price: Product,
+) -> None:
     day_count = 5
 
-    result = format_product_day_count_rental_price_answer(product, day_count)
+    result = format_product_day_count_rental_price_answer(
+        product_without_extra_day_price, day_count
+    )
 
     assert result == "Ціну на 5 днів не знайдено"
 
 
-def test_format_product_details_answer() -> None:
-    result = format_product_details_answer(FULL_PRODUCT)
+def test_format_product_details_answer(full_product: Product) -> None:
+    result = format_product_details_answer(full_product)
 
     assert "Прокат 2-місних наметів" in result
     assert "Прокат легких двомісних наметів" in result
@@ -498,8 +514,10 @@ def test_format_product_details_answer() -> None:
         ("Комплектація", "Комплектація: Намет, зовнішній тент"),
     ],
 )
-def test_format_product_attribute_answer(attribute_label: str, expected_result: str) -> None:
-    result = format_product_attribute_answer(FULL_PRODUCT, attribute_label)
+def test_format_product_attribute_answer(
+    full_product: Product, attribute_label: str, expected_result: str
+) -> None:
+    result = format_product_attribute_answer(full_product, attribute_label)
 
     assert "Прокат 2-місних наметів" in result
     assert expected_result in result
