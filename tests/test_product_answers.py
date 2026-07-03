@@ -270,6 +270,17 @@ def test_answer_product_query_returns_requested_attribute(full_product: Product)
     assert "Характеристики:" not in result
 
 
+def test_answer_product_query_returns_message_when_requested_attribute_missing(
+    two_person_tent: Product,
+) -> None:
+    query = "яка вага 2 місний намет"
+
+    result = answer_product_query([two_person_tent], query)
+
+    assert "Прокат 2-місних наметів" in result
+    assert "Характеристику Вага не знайдено" in result
+
+
 @pytest.mark.parametrize(
     ("query", "expected_period"),
     [
@@ -521,3 +532,13 @@ def test_format_product_attribute_answer(
 
     assert "Прокат 2-місних наметів" in result
     assert expected_result in result
+
+
+def test_format_product_attribute_answer_returns_message_when_attribute_missing(
+    two_person_tent: Product,
+) -> None:
+    attribute_label = "Вага"
+    result = format_product_attribute_answer(two_person_tent, attribute_label)
+
+    assert "Прокат 2-місних наметів" in result
+    assert "Характеристику Вага не знайдено" in result
