@@ -18,6 +18,8 @@ class ProductAnswerEvalFailure(TypedDict):
 
 
 class ProductAnswerEvalReport(TypedDict):
+    report_type: str
+    schema_version: int
     passed: bool
     passed_count: int
     total_count: int
@@ -238,6 +240,8 @@ def build_product_answer_eval_report(
     passed = failed_count == 0
 
     return {
+        "report_type": "product-answer-eval",
+        "schema_version": 1,
         "passed": passed,
         "passed_count": passed_count,
         "total_count": total_count,

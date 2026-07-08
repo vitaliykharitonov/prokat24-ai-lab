@@ -51,6 +51,8 @@ def test_build_product_answer_eval_report_returns_summary_and_results() -> None:
         passed_count, total_count, failures
     )
 
+    assert report["report_type"] == "product-answer-eval"
+    assert report["schema_version"] == 1
     assert report["passed"]
     assert report["passed_count"] == 23
     assert report["total_count"] == 23
@@ -73,6 +75,8 @@ def test_build_product_answer_eval_report_with_failures() -> None:
         passed_count, total_count, failures
     )
 
+    assert report["report_type"] == "product-answer-eval"
+    assert report["schema_version"] == 1
     assert not report["passed"]
     assert report["passed_count"] == 22
     assert report["total_count"] == 23
@@ -115,6 +119,8 @@ def test_build_product_answer_eval_report_for_products_returns_passing_report(
         [product],
     )
 
+    assert report["report_type"] == "product-answer-eval"
+    assert report["schema_version"] == 1
     assert report["passed"]
     assert report["passed_count"] == 1
     assert report["total_count"] == 1
@@ -126,6 +132,8 @@ def test_save_product_answer_eval_report_writes_json_file(
     tmp_path: Path,
 ) -> None:
     report: product_answer_evals.ProductAnswerEvalReport = {
+        "report_type": "product-answer-eval",
+        "schema_version": 1,
         "passed": False,
         "passed_count": 1,
         "total_count": 2,
