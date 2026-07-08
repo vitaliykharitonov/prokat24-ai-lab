@@ -1,7 +1,6 @@
 from prokat24_ai_lab.product_answer_evals import (
-    PRODUCT_ANSWER_EVAL_CASES,
     ProductAnswerEvalFailure,
-    find_failed_product_answer_evals,
+    build_product_answer_eval_report_for_products,
 )
 from prokat24_ai_lab.product_catalog import load_products
 from prokat24_ai_lab.project_paths import PRODUCTS_FILE
@@ -35,21 +34,23 @@ def get_product_answer_eval_exit_code(failure_count: int) -> int:
 
 def main() -> int:
     loaded_products = load_products(PRODUCTS_FILE)
-    failures = find_failed_product_answer_evals(loaded_products)
-    failure_count = len(failures)
-    total_count = len(PRODUCT_ANSWER_EVAL_CASES)
-    passed_count = total_count - failure_count
+    report = build_product_answer_eval_report_for_products(loaded_products)
 
-    print(format_product_answer_eval_summary(passed_count, total_count))
+    print(
+        format_product_answer_eval_summary(
+            report["passed_count"],
+            report["total_count"],
+        )
+    )
 
-    if failures:
+    if report["failures"]:
         print()
         print("FAILED:")
 
-        for failure in failures:
+        for failure in report["failures"]:
             print(format_product_answer_eval_failure(failure))
 
-    return get_product_answer_eval_exit_code(failure_count)
+    return get_product_answer_eval_exit_code(report["failed_count"])
 
 
 if __name__ == "__main__":

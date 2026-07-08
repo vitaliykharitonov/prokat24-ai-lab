@@ -15,6 +15,14 @@ class ProductAnswerEvalFailure(TypedDict):
     missing_fragments: list[str]
 
 
+class ProductAnswerEvalReport(TypedDict):
+    passed: bool
+    passed_count: int
+    total_count: int
+    failed_count: int
+    failures: list[ProductAnswerEvalFailure]
+
+
 PRODUCT_ANSWER_EVAL_CASES: list[ProductAnswerEvalCase] = [
     {
         "query": "скільки коштує 2 місний намет на тиждень",
@@ -219,3 +227,28 @@ def find_failed_product_answer_evals(products: list[Product]) -> list[ProductAns
             failures.append(failure)
 
     return failures
+
+
+def build_product_answer_eval_report(
+    passed_count: int, total_count: int, failures: list[ProductAnswerEvalFailure]
+) -> ProductAnswerEvalReport:
+    failed_count = total_count - passed_count
+    passed = failed_count == 0
+
+    return {
+        "passed": passed,
+        "passed_count": passed_count,
+        "total_count": total_count,
+        "failed_count": failed_count,
+        "failures": failures,
+    }
+
+
+def build_product_answer_eval_report_for_products(
+    products: list[Product],
+) -> ProductAnswerEvalReport:
+    failures = find_failed_product_answer_evals(products)
+    total_count = len(PRODUCT_ANSWER_EVAL_CASES)
+    passed_count = total_count - len(failures)
+
+    return build_product_answer_eval_report(passed_count, total_count, failures)
