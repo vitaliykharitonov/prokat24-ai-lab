@@ -48,11 +48,12 @@ def test_build_product_answer_eval_report_returns_summary_and_results() -> None:
     failures = []
 
     report = product_answer_evals.build_product_answer_eval_report(
-        passed_count, total_count, failures
+        passed_count, total_count, failures, created_at="2026-01-01T00:00:00+00:00"
     )
 
-    assert report["report_type"] == "product-answer-eval"
+    assert report["report_type"] == "product_answer_eval"
     assert report["schema_version"] == 1
+    assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert report["passed"]
     assert report["passed_count"] == 23
     assert report["total_count"] == 23
@@ -72,11 +73,15 @@ def test_build_product_answer_eval_report_with_failures() -> None:
     ]
 
     report = product_answer_evals.build_product_answer_eval_report(
-        passed_count, total_count, failures
+        passed_count,
+        total_count,
+        failures,
+        created_at="2026-01-01T00:00:00+00:00",
     )
 
-    assert report["report_type"] == "product-answer-eval"
+    assert report["report_type"] == "product_answer_eval"
     assert report["schema_version"] == 1
+    assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert not report["passed"]
     assert report["passed_count"] == 22
     assert report["total_count"] == 23
@@ -117,10 +122,12 @@ def test_build_product_answer_eval_report_for_products_returns_passing_report(
 
     report = product_answer_evals.build_product_answer_eval_report_for_products(
         [product],
+        created_at="2026-01-01T00:00:00+00:00",
     )
 
-    assert report["report_type"] == "product-answer-eval"
+    assert report["report_type"] == "product_answer_eval"
     assert report["schema_version"] == 1
+    assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert report["passed"]
     assert report["passed_count"] == 1
     assert report["total_count"] == 1
@@ -132,8 +139,9 @@ def test_save_product_answer_eval_report_writes_json_file(
     tmp_path: Path,
 ) -> None:
     report: product_answer_evals.ProductAnswerEvalReport = {
-        "report_type": "product-answer-eval",
+        "report_type": "product_answer_eval",
         "schema_version": 1,
+        "created_at": "2026-01-01T00:00:00+00:00",
         "passed": False,
         "passed_count": 1,
         "total_count": 2,

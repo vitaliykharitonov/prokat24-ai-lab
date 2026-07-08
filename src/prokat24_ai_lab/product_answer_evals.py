@@ -1,3 +1,4 @@
+import datetime
 import json
 from pathlib import Path
 from typing import TypedDict
@@ -20,6 +21,7 @@ class ProductAnswerEvalFailure(TypedDict):
 class ProductAnswerEvalReport(TypedDict):
     report_type: str
     schema_version: int
+    created_at: str
     passed: bool
     passed_count: int
     total_count: int
@@ -234,14 +236,21 @@ def find_failed_product_answer_evals(products: list[Product]) -> list[ProductAns
 
 
 def build_product_answer_eval_report(
-    passed_count: int, total_count: int, failures: list[ProductAnswerEvalFailure]
+    passed_count: int,
+    total_count: int,
+    failures: list[ProductAnswerEvalFailure],
+    created_at: str | None = None,
 ) -> ProductAnswerEvalReport:
     failed_count = total_count - passed_count
     passed = failed_count == 0
 
+    if created_at is None:
+        created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
+
     return {
-        "report_type": "product-answer-eval",
+        "report_type": "product_answer_eval",
         "schema_version": 1,
+        "created_at": created_at,
         "passed": passed,
         "passed_count": passed_count,
         "total_count": total_count,
@@ -252,12 +261,13 @@ def build_product_answer_eval_report(
 
 def build_product_answer_eval_report_for_products(
     products: list[Product],
+    created_at: str | None = None,
 ) -> ProductAnswerEvalReport:
     failures = find_failed_product_answer_evals(products)
     total_count = len(PRODUCT_ANSWER_EVAL_CASES)
     passed_count = total_count - len(failures)
 
-    return build_product_answer_eval_report(passed_count, total_count, failures)
+    return build_product_answer_eval_report(passed_count, total_count, failures, created_at)
 
 
 def save_product_answer_eval_report(report: ProductAnswerEvalReport, output_file: Path) -> None:
