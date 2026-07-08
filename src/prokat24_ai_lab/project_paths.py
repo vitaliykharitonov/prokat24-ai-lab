@@ -25,3 +25,4 @@ PRODUCTS_FILE = DATA_DIR / "products.json"
 
 SEARCH_EVAL_REPORT_FILE = REPORTS_DIR / "search_eval_report.json"
 ANSWER_EVAL_REPORT_FILE = REPORTS_DIR / "answer_eval_report.json"
+PRODUCT_ANSWER_EVAL_REPORT_FILE = REPORTS_DIR / "product_answer_eval_report.json"

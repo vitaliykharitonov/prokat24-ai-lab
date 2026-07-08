@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pytest
 
 import prokat24_ai_lab.product_answer_evals as product_answer_evals
@@ -117,3 +120,34 @@ def test_build_product_answer_eval_report_for_products_returns_passing_report(
     assert report["total_count"] == 1
     assert report["failed_count"] == 0
     assert report["failures"] == []
+
+
+def test_save_product_answer_eval_report_writes_json_file(
+    tmp_path: Path,
+) -> None:
+    report: product_answer_evals.ProductAnswerEvalReport = {
+        "passed": False,
+        "passed_count": 1,
+        "total_count": 2,
+        "failed_count": 1,
+        "failures": [
+            {
+                "query": "яка вага лижних черевиків",
+                "missing_fragments": [
+                    "Характеристику Вага не знайдено",
+                ],
+                "answer": "Прокат лижних черевиків",
+            },
+        ],
+    }
+    output_file = tmp_path / "reports" / "product_answer_eval_report.json"
+
+    product_answer_evals.save_product_answer_eval_report(report, output_file)
+
+    assert output_file.exists()
+
+    raw_json = output_file.read_text(encoding="utf-8")
+    loaded_report = json.loads(raw_json)
+
+    assert loaded_report == report
+    assert "Прокат лижних черевиків" in raw_json

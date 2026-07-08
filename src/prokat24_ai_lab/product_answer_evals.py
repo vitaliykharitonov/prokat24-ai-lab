@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import TypedDict
 
 from prokat24_ai_lab.product_answers import answer_product_query
@@ -252,3 +254,10 @@ def build_product_answer_eval_report_for_products(
     passed_count = total_count - len(failures)
 
     return build_product_answer_eval_report(passed_count, total_count, failures)
+
+
+def save_product_answer_eval_report(report: ProductAnswerEvalReport, output_file: Path) -> None:
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_file, "w", encoding="utf-8") as file:
+        json.dump(report, file, ensure_ascii=False, indent=2)

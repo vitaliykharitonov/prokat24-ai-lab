@@ -1,9 +1,10 @@
 from prokat24_ai_lab.product_answer_evals import (
     ProductAnswerEvalFailure,
     build_product_answer_eval_report_for_products,
+    save_product_answer_eval_report,
 )
 from prokat24_ai_lab.product_catalog import load_products
-from prokat24_ai_lab.project_paths import PRODUCTS_FILE
+from prokat24_ai_lab.project_paths import PRODUCT_ANSWER_EVAL_REPORT_FILE, PRODUCTS_FILE
 
 
 def format_product_answer_eval_summary(passed_count: int, total_count: int) -> str:
@@ -35,6 +36,7 @@ def get_product_answer_eval_exit_code(failure_count: int) -> int:
 def main() -> int:
     loaded_products = load_products(PRODUCTS_FILE)
     report = build_product_answer_eval_report_for_products(loaded_products)
+    save_product_answer_eval_report(report, PRODUCT_ANSWER_EVAL_REPORT_FILE)
 
     print(
         format_product_answer_eval_summary(
