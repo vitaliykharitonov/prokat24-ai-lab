@@ -23,6 +23,7 @@ class ProductAnswerEvalReport(TypedDict):
     schema_version: int
     created_at: str
     git_commit: str | None
+    git_dirty: bool | None
     passed: bool
     passed_count: int
     total_count: int
@@ -242,6 +243,7 @@ def build_product_answer_eval_report(
     failures: list[ProductAnswerEvalFailure],
     created_at: str | None = None,
     git_commit: str | None = None,
+    git_dirty: bool | None = None,
 ) -> ProductAnswerEvalReport:
     failed_count = total_count - passed_count
     passed = failed_count == 0
@@ -254,6 +256,7 @@ def build_product_answer_eval_report(
         "schema_version": 1,
         "created_at": created_at,
         "git_commit": git_commit,
+        "git_dirty": git_dirty,
         "passed": passed,
         "passed_count": passed_count,
         "total_count": total_count,
@@ -266,6 +269,7 @@ def build_product_answer_eval_report_for_products(
     products: list[Product],
     created_at: str | None = None,
     git_commit: str | None = None,
+    git_dirty: bool | None = None,
 ) -> ProductAnswerEvalReport:
     failures = find_failed_product_answer_evals(products)
     total_count = len(PRODUCT_ANSWER_EVAL_CASES)
@@ -277,6 +281,7 @@ def build_product_answer_eval_report_for_products(
         failures,
         created_at=created_at,
         git_commit=git_commit,
+        git_dirty=git_dirty,
     )
 
 

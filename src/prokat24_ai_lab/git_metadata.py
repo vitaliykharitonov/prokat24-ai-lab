@@ -21,3 +21,20 @@ def get_current_git_commit() -> str | None:
         return None
 
     return commit
+
+
+def is_git_worktree_dirty() -> bool | None:
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=PROJECT_ROOT,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+
+    dirty = result.stdout.strip()
+
+    return bool(dirty)

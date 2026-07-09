@@ -1,4 +1,4 @@
-from prokat24_ai_lab.git_metadata import get_current_git_commit
+from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.product_answer_evals import (
     ProductAnswerEvalFailure,
     build_product_answer_eval_report_for_products,
@@ -37,9 +37,11 @@ def get_product_answer_eval_exit_code(failure_count: int) -> int:
 def main() -> int:
     loaded_products = load_products(PRODUCTS_FILE)
     git_commit = get_current_git_commit()
+    git_dirty = is_git_worktree_dirty()
     report = build_product_answer_eval_report_for_products(
         loaded_products,
         git_commit=git_commit,
+        git_dirty=git_dirty,
     )
     save_product_answer_eval_report(report, PRODUCT_ANSWER_EVAL_REPORT_FILE)
 

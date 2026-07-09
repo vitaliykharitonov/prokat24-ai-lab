@@ -53,12 +53,14 @@ def test_build_product_answer_eval_report_returns_summary_and_results() -> None:
         failures,
         created_at="2026-01-01T00:00:00+00:00",
         git_commit="abc1234",
+        git_dirty=False,
     )
 
     assert report["report_type"] == "product_answer_eval"
     assert report["schema_version"] == 1
     assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert report["git_commit"] == "abc1234"
+    assert report["git_dirty"] is False
     assert report["passed"]
     assert report["passed_count"] == 23
     assert report["total_count"] == 23
@@ -83,12 +85,14 @@ def test_build_product_answer_eval_report_with_failures() -> None:
         failures,
         created_at="2026-01-01T00:00:00+00:00",
         git_commit="abc1234",
+        git_dirty=False,
     )
 
     assert report["report_type"] == "product_answer_eval"
     assert report["schema_version"] == 1
     assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert report["git_commit"] == "abc1234"
+    assert report["git_dirty"] is False
     assert not report["passed"]
     assert report["passed_count"] == 22
     assert report["total_count"] == 23
@@ -131,12 +135,14 @@ def test_build_product_answer_eval_report_for_products_returns_passing_report(
         [product],
         created_at="2026-01-01T00:00:00+00:00",
         git_commit="abc1234",
+        git_dirty=False,
     )
 
     assert report["report_type"] == "product_answer_eval"
     assert report["schema_version"] == 1
     assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert report["git_commit"] == "abc1234"
+    assert report["git_dirty"] is False
     assert report["passed"]
     assert report["passed_count"] == 1
     assert report["total_count"] == 1
@@ -152,6 +158,7 @@ def test_save_product_answer_eval_report_writes_json_file(
         "schema_version": 1,
         "created_at": "2026-01-01T00:00:00+00:00",
         "git_commit": "abc1234",
+        "git_dirty": False,
         "passed": False,
         "passed_count": 1,
         "total_count": 2,
