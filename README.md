@@ -1,5 +1,7 @@
 ﻿# Prokat24 AI Lab
 
+[![Check](https://github.com/vitaliykharitonov/prokat24-ai-lab/actions/workflows/check.yml/badge.svg)](https://github.com/vitaliykharitonov/prokat24-ai-lab/actions/workflows/check.yml)
+
 Учебный AI/Evals проект на базе сайта prokat24.com.ua.
 
 ## Цели
