@@ -1,3 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prokat24-ai-lab"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "requests",
+    "beautifulsoup4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
@@ -9,16 +31,16 @@ src = ["src", "tests", "learning"]
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "F",   # pyflakes: unused imports, undefined names
-    "I",   # import sorting
-    "UP",  # pyupgrade: modern Python syntax
-    "B",   # flake8-bugbear: likely bugs
+    "E", # pycodestyle errors
+    "F", # pyflakes: unused imports, undefined names
+    "I", # import sorting
+    "UP", # pyupgrade: modern Python syntax
+    "B", # flake8-bugbear: likely bugs
     "SIM", # flake8-simplify
     "RUF", # Ruff-specific rules
 ]
 ignore = [
-	"RUF001", # Cyrillic text is expected in this project
+    "RUF001", # Cyrillic text is expected in this project
 ]
 
 [tool.ruff.format]
