@@ -3,10 +3,10 @@ import subprocess
 from prokat24_ai_lab.project_paths import PROJECT_ROOT
 
 
-def get_current_git_commit() -> str | None:
+def run_git_command(arguments: list[str]) -> str | None:
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", *arguments],
             capture_output=True,
             text=True,
             check=True,
@@ -15,7 +15,11 @@ def get_current_git_commit() -> str | None:
     except (FileNotFoundError, subprocess.CalledProcessError):
         return None
 
-    commit = result.stdout.strip()
+    return result.stdout.strip()
+
+
+def get_current_git_commit() -> str | None:
+    commit = run_git_command(["rev-parse", "--short", "HEAD"])
 
     if not commit:
         return None
@@ -24,17 +28,9 @@ def get_current_git_commit() -> str | None:
 
 
 def is_git_worktree_dirty() -> bool | None:
-    try:
-        result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            capture_output=True,
-            text=True,
-            check=True,
-            cwd=PROJECT_ROOT,
-        )
-    except (FileNotFoundError, subprocess.CalledProcessError):
+    status = run_git_command(["status", "--porcelain"])
+
+    if status is None:
         return None
 
-    dirty = result.stdout.strip()
-
-    return bool(dirty)
+    return bool(status)
