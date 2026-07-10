@@ -157,3 +157,19 @@ python src/check_project.py
 ```
 
 4. Если всё зелёное — сделать commit.
+5. Отправить изменения на GitHub:
+
+```powershell
+git push
+```
+
+6. Проверить, что GitHub Actions workflow `Check` прошёл успешно.
+
+Для изменений в отдельной ветке используется pull request:
+
+1. Создать feature branch.
+2. Сделать изменения и commit.
+3. Отправить ветку на GitHub.
+4. Открыть pull request в `main`.
+5. Дождаться зелёного GitHub Actions check.
+6. После проверки выполнить merge.
