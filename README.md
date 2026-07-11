@@ -54,6 +54,8 @@ python src/check_project.py
 - ruff format --check
 - product answer evals
 
+Полные JSON eval reports можно создать отдельными командами из раздела `Evals`.
+
 Ожидаемый результат:
 
 ```
@@ -118,31 +120,35 @@ python src/export_product_catalog.py
 data/products.json
 ```
 
-## Проверка ответов
+## Evals
 
-Запуск product answer evals:
+В проекте есть три eval-направления:
 
-```
+- `product_answer_eval_report` — проверки ответов на товарные запросы.
+- `search_eval_report` — проверки качества поиска по базе знаний.
+- `answer_eval_report` — проверки ответов по базе знаний.
+
+Запуск:
+
+```powershell
 python src/run_product_answer_evals.py
+python src/run_search_evals.py
+python src/run_answer_evals.py
 ```
 
-(Проверяют пользовательские запросы к товарному answer engine)
+JSON-отчёты сохраняются в `reports/` и не коммитятся в Git.
 
-Пример успешного результата:
+Все eval reports содержат metadata:
 
-```
-Product answer evals: 5/5 passed
-```
-
-Если eval падает, runner показывает:
-
-```
-Query
-Missing fragments
-Answer
+```text
+report_type
+schema_version
+created_at
+git_commit
+git_dirty
 ```
 
-и завершает процесс с ненулевым exit code.
+`git_commit` и `git_dirty` помогают понять, на какой версии кода был создан отчёт и были ли незакоммиченные изменения.
 
 ## Рабочий цикл разработки
 
