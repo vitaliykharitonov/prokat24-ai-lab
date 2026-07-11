@@ -56,7 +56,7 @@ def test_build_product_answer_eval_report_returns_summary_and_results() -> None:
         git_dirty=False,
     )
 
-    assert report["report_type"] == "product_answer_eval"
+    assert report["report_type"] == "product_answer_eval_report"
     assert report["schema_version"] == 1
     assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert report["git_commit"] == "abc1234"
@@ -88,7 +88,7 @@ def test_build_product_answer_eval_report_with_failures() -> None:
         git_dirty=False,
     )
 
-    assert report["report_type"] == "product_answer_eval"
+    assert report["report_type"] == "product_answer_eval_report"
     assert report["schema_version"] == 1
     assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert report["git_commit"] == "abc1234"
@@ -138,7 +138,7 @@ def test_build_product_answer_eval_report_for_products_returns_passing_report(
         git_dirty=False,
     )
 
-    assert report["report_type"] == "product_answer_eval"
+    assert report["report_type"] == "product_answer_eval_report"
     assert report["schema_version"] == 1
     assert report["created_at"] == "2026-01-01T00:00:00+00:00"
     assert report["git_commit"] == "abc1234"
@@ -154,7 +154,7 @@ def test_save_product_answer_eval_report_writes_json_file(
     tmp_path: Path,
 ) -> None:
     report: product_answer_evals.ProductAnswerEvalReport = {
-        "report_type": "product_answer_eval",
+        "report_type": "product_answer_eval_report",
         "schema_version": 1,
         "created_at": "2026-01-01T00:00:00+00:00",
         "git_commit": "abc1234",
