@@ -1,7 +1,6 @@
 from run_product_answer_evals import (
     format_product_answer_eval_failure,
     format_product_answer_eval_summary,
-    get_product_answer_eval_exit_code,
 )
 
 
@@ -34,19 +33,3 @@ def test_format_product_answer_eval_failure_formats_failure_details() -> None:
         "Answer:\n"
         "Products not found"
     )
-
-
-def test_get_product_answer_eval_exit_code_returns_zero_without_failures() -> None:
-    failure_count = 0
-
-    result = get_product_answer_eval_exit_code(failure_count)
-
-    assert result == 0
-
-
-def test_get_product_answer_eval_exit_code_returns_one_with_failures() -> None:
-    failure_count = 3
-
-    result = get_product_answer_eval_exit_code(failure_count)
-
-    assert result == 1

@@ -6,6 +6,7 @@ from prokat24_ai_lab.answer_evals import (
     run_answer_evals,
     save_answer_eval_report,
 )
+from prokat24_ai_lab.eval_exit_codes import get_eval_exit_code
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.knowledge_base import load_knowledge_base
 from prokat24_ai_lab.project_paths import (
@@ -15,7 +16,7 @@ from prokat24_ai_lab.project_paths import (
 )
 
 
-def main() -> None:
+def main() -> int:
     pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
     eval_cases = load_answer_eval_cases(ANSWER_EVAL_CASES_FILE)
 
@@ -36,6 +37,10 @@ def main() -> None:
 
     print(f"Saved report to {ANSWER_EVAL_REPORT_FILE}")
 
+    failed_cases = report["total_cases"] - report["passed_cases"]
+
+    return get_eval_exit_code(failed_cases)
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
