@@ -6,6 +6,7 @@ from prokat24_ai_lab.answer_evals import (
     run_answer_evals,
     save_answer_eval_report,
 )
+from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.knowledge_base import load_knowledge_base
 from prokat24_ai_lab.project_paths import (
     ANSWER_EVAL_CASES_FILE,
@@ -20,9 +21,16 @@ def main() -> None:
 
     answer_results = run_answer_evals(eval_cases, pages)
 
-    created_at = datetime.datetime.now().isoformat(timespec="seconds")
+    created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
+    git_commit = get_current_git_commit()
+    git_dirty = is_git_worktree_dirty()
 
-    report = build_answer_eval_report(answer_results, created_at)
+    report = build_answer_eval_report(
+        answer_results,
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
 
     save_answer_eval_report(report, ANSWER_EVAL_REPORT_FILE)
 

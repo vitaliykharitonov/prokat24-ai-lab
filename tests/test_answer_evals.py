@@ -56,7 +56,7 @@ TEST_RESULTS = [
     },
 ]
 
-TEST_CREATED_AT = "2026-06-04T17:45:08"
+TEST_CREATED_AT = "2026-01-01T00:00:00+00:00"
 
 
 def test_load_answer_eval_cases_reads_json_file(tmp_path: Path) -> None:
@@ -184,15 +184,22 @@ def test_calculate_answer_accuracy_returns_zero_for_empty_results() -> None:
 
 
 def test_build_answer_eval_report_returns_summary_and_results() -> None:
-    results = TEST_RESULTS
+    report = build_answer_eval_report(
+        TEST_RESULTS,
+        TEST_CREATED_AT,
+        git_commit="abc1234",
+        git_dirty=False,
+    )
 
-    report = build_answer_eval_report(results, TEST_CREATED_AT)
-
+    assert report["report_type"] == "answer_eval_report"
+    assert report["schema_version"] == 1
     assert report["created_at"] == TEST_CREATED_AT
+    assert report["git_commit"] == "abc1234"
+    assert report["git_dirty"] is False
     assert report["total_cases"] == 3
     assert report["passed_cases"] == 2
     assert report["accuracy"] == 2 / 3
-    assert report["results"] == results
+    assert report["results"] == TEST_RESULTS
 
 
 def test_save_answer_eval_report_writes_json_file(tmp_path: Path) -> None:

@@ -252,7 +252,7 @@ def build_product_answer_eval_report(
         created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
 
     return {
-        "report_type": "product_answer_eval",
+        "report_type": "product_answer_eval_report",
         "schema_version": 1,
         "created_at": created_at,
         "git_commit": git_commit,
