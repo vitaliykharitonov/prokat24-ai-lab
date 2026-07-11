@@ -52,15 +52,13 @@ python src/check_project.py
 - pytest
 - ruff check
 - ruff format --check
+- search evals
+- answer evals
 - product answer evals
 
-Полные JSON eval reports можно создать отдельными командами из раздела `Evals`.
+Полные JSON eval reports можно создать отдельными командами из раздела `Evals`
 
-Ожидаемый результат:
-
-```
-Product answer evals: 23/23 passed
-```
+Ожидаемый результат: все проверки завершаются успешно
 
 ## Основные команды
 

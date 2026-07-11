@@ -33,6 +33,8 @@ def main() -> int:
         git_dirty=git_dirty,
     )
 
+    print(f"Search evals: {report['passed_cases']}/{report['total_cases']} passed")
+
     save_search_eval_report(report, SEARCH_EVAL_REPORT_FILE)
 
     print(f"Saved report to {SEARCH_EVAL_REPORT_FILE}")
