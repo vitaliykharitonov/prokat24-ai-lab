@@ -238,12 +238,12 @@ def find_failed_product_answer_evals(products: list[Product]) -> list[ProductAns
 
 
 def build_product_answer_eval_report(
-    passed_count: int,
-    total_count: int,
-    failures: list[ProductAnswerEvalFailure],
-    created_at: str | None = None,
-    git_commit: str | None = None,
-    git_dirty: bool | None = None,
+        passed_count: int,
+        total_count: int,
+        failures: list[ProductAnswerEvalFailure],
+        created_at: str | None = None,
+        git_commit: str | None = None,
+        git_dirty: bool | None = None,
 ) -> ProductAnswerEvalReport:
     failed_count = total_count - passed_count
     passed = failed_count == 0
@@ -252,7 +252,7 @@ def build_product_answer_eval_report(
         created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
 
     return {
-        "report_type": "product_answer_eval",
+        "report_type": "product_answer_eval_report",
         "schema_version": 1,
         "created_at": created_at,
         "git_commit": git_commit,
@@ -266,10 +266,10 @@ def build_product_answer_eval_report(
 
 
 def build_product_answer_eval_report_for_products(
-    products: list[Product],
-    created_at: str | None = None,
-    git_commit: str | None = None,
-    git_dirty: bool | None = None,
+        products: list[Product],
+        created_at: str | None = None,
+        git_commit: str | None = None,
+        git_dirty: bool | None = None,
 ) -> ProductAnswerEvalReport:
     failures = find_failed_product_answer_evals(products)
     total_count = len(PRODUCT_ANSWER_EVAL_CASES)

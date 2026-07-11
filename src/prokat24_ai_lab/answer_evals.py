@@ -26,7 +26,11 @@ class AnswerEvalResult(TypedDict):
 
 
 class AnswerEvalReport(TypedDict):
+    report_type: str
+    schema_version: int
     created_at: str
+    git_commit: str | None
+    git_dirty: bool | None
     total_cases: int
     passed_cases: int
     accuracy: float
@@ -100,9 +104,15 @@ def calculate_answer_accuracy(results: list[AnswerEvalResult]) -> float:
 def build_answer_eval_report(
     results: list[AnswerEvalResult],
     created_at: str,
+    git_commit: str | None = None,
+    git_dirty: bool | None = None,
 ) -> AnswerEvalReport:
     return {
+        "report_type": "answer_eval_report",
+        "schema_version": 1,
         "created_at": created_at,
+        "git_commit": git_commit,
+        "git_dirty": git_dirty,
         "total_cases": len(results),
         "passed_cases": count_passed_answer_results(results),
         "accuracy": calculate_answer_accuracy(results),
