@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from typing import TypedDict
 
+from prokat24_ai_lab.eval_report_metadata import build_eval_report_metadata
 from prokat24_ai_lab.product_answers import answer_product_query
 from prokat24_ai_lab.product_catalog import Product
 
@@ -245,6 +246,12 @@ def build_product_answer_eval_report(
     git_commit: str | None = None,
     git_dirty: bool | None = None,
 ) -> ProductAnswerEvalReport:
+    metadata = build_eval_report_metadata(
+        report_type="product_answer_eval_report",
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
     failed_count = total_count - passed_count
     passed = failed_count == 0
 
@@ -252,11 +259,7 @@ def build_product_answer_eval_report(
         created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
 
     return {
-        "report_type": "product_answer_eval_report",
-        "schema_version": 1,
-        "created_at": created_at,
-        "git_commit": git_commit,
-        "git_dirty": git_dirty,
+        **metadata,
         "passed": passed,
         "passed_count": passed_count,
         "total_count": total_count,

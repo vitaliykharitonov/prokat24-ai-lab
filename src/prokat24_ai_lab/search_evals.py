@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import TypedDict
 
+from prokat24_ai_lab.eval_report_metadata import build_eval_report_metadata
 from prokat24_ai_lab.knowledge_base import KnowledgePage
 from prokat24_ai_lab.knowledge_search import (
     KnowledgeSearchResult,
@@ -112,12 +113,14 @@ def build_search_eval_report(
     git_commit: str | None = None,
     git_dirty: bool | None = None,
 ) -> SearchEvalReport:
+    metadata = build_eval_report_metadata(
+        report_type="search_eval_report",
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
     return {
-        "report_type": "search_eval_report",
-        "schema_version": 1,
-        "created_at": created_at,
-        "git_commit": git_commit,
-        "git_dirty": git_dirty,
+        **metadata,
         "total_cases": len(results),
         "passed_cases": count_passed_results(results),
         "accuracy": calculate_accuracy(results),
