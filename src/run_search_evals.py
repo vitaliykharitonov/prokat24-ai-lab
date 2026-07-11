@@ -9,11 +9,39 @@ from prokat24_ai_lab.project_paths import (
     SEARCH_EVAL_REPORT_FILE,
 )
 from prokat24_ai_lab.search_evals import (
+    SearchEvalResult,
     build_search_eval_report,
     load_search_eval_cases,
     run_search_evals,
     save_search_eval_report,
 )
+
+
+def print_failed_search_eval_results(results: list[SearchEvalResult]) -> None:
+    failed_results = [result for result in results if not result["passed"]]
+
+    if not failed_results:
+        return
+
+    print()
+    print("Failed search evals:")
+    print()
+
+    for result in failed_results:
+        print("Query:")
+        print(result["query"])
+        print()
+        print("Expected URL:")
+        print(result["expected_url"])
+        print()
+        print("Top results:")
+
+        for index, top_result in enumerate(result["top_results"], start=1):
+            print(f"{index}. {top_result['url']}")
+            print(f"   Title: {top_result['title']}")
+            print(f"   Score: {top_result['score']}")
+
+        print()
 
 
 def main() -> int:
@@ -40,6 +68,9 @@ def main() -> int:
     print(f"Saved report to {SEARCH_EVAL_REPORT_FILE}")
 
     failed_cases = report["total_cases"] - report["passed_cases"]
+
+    if failed_cases > 0:
+        print_failed_search_eval_results(report["results"])
 
     return get_eval_exit_code(failed_cases)
 
