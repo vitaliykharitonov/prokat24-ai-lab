@@ -27,7 +27,11 @@ class SearchEvalResult(TypedDict):
 
 
 class SearchEvalReport(TypedDict):
+    report_type: str
+    schema_version: int
     created_at: str
+    git_commit: str | None
+    git_dirty: bool | None
     total_cases: int
     passed_cases: int
     accuracy: float
@@ -105,9 +109,15 @@ def count_passed_results(results: list[SearchEvalResult]) -> int:
 def build_search_eval_report(
     results: list[SearchEvalResult],
     created_at: str,
+    git_commit: str | None = None,
+    git_dirty: bool | None = None,
 ) -> SearchEvalReport:
     return {
+        "report_type": "search_eval_report",
+        "schema_version": 1,
         "created_at": created_at,
+        "git_commit": git_commit,
+        "git_dirty": git_dirty,
         "total_cases": len(results),
         "passed_cases": count_passed_results(results),
         "accuracy": calculate_accuracy(results),

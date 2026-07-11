@@ -80,10 +80,12 @@ TEST_SEARCH_EVAL_RESULTS = [
     },
 ]
 
-TEST_CREATED_AT = "2026-06-04T17:45:08"
-
 TEST_SEARCH_EVAL_REPORT = {
-    "created_at": TEST_CREATED_AT,
+    "report_type": "search_eval_report",
+    "schema_version": 1,
+    "created_at": "2026-01-01T00:00:00+00:00",
+    "git_commit": "abc1234",
+    "git_dirty": False,
     "total_cases": 3,
     "passed_cases": 2,
     "accuracy": 2 / 3,
@@ -192,7 +194,12 @@ def test_count_passed_results_returns_number_of_passed_results() -> None:
 
 
 def test_build_search_eval_report_returns_summary() -> None:
-    report = build_search_eval_report(TEST_SEARCH_EVAL_RESULTS, TEST_CREATED_AT)
+    report = build_search_eval_report(
+        TEST_SEARCH_EVAL_RESULTS,
+        created_at="2026-01-01T00:00:00+00:00",
+        git_commit="abc1234",
+        git_dirty=False,
+    )
 
     assert report == TEST_SEARCH_EVAL_REPORT
 

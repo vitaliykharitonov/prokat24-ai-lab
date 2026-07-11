@@ -1,5 +1,6 @@
 import datetime
 
+from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.knowledge_base import load_knowledge_base
 from prokat24_ai_lab.project_paths import (
     KNOWLEDGE_PAGES_FILE,
@@ -20,9 +21,16 @@ def main() -> None:
 
     search_results = run_search_evals(eval_cases, pages)
 
-    created_at = datetime.datetime.now().isoformat(timespec="seconds")
+    created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
+    git_commit = get_current_git_commit()
+    git_dirty = is_git_worktree_dirty()
 
-    report = build_search_eval_report(search_results, created_at)
+    report = build_search_eval_report(
+        search_results,
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
 
     save_search_eval_report(report, SEARCH_EVAL_REPORT_FILE)
 
