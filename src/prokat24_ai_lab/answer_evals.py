@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import TypedDict
 
 from prokat24_ai_lab.answer_engine import answer_question
+from prokat24_ai_lab.eval_report_metadata import build_eval_report_metadata
 from prokat24_ai_lab.knowledge_base import KnowledgePage
 
 
@@ -107,12 +108,14 @@ def build_answer_eval_report(
     git_commit: str | None = None,
     git_dirty: bool | None = None,
 ) -> AnswerEvalReport:
+    metadata = build_eval_report_metadata(
+        report_type="answer_eval_report",
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
     return {
-        "report_type": "answer_eval_report",
-        "schema_version": 1,
-        "created_at": created_at,
-        "git_commit": git_commit,
-        "git_dirty": git_dirty,
+        **metadata,
         "total_cases": len(results),
         "passed_cases": count_passed_answer_results(results),
         "accuracy": calculate_answer_accuracy(results),
