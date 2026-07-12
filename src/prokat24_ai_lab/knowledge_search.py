@@ -11,13 +11,17 @@ STOP_WORDS = {
     "яка",
     "який",
     "що",
+    "до",
+    "у",
     "в",
     "на",
     "при",
     "з",
     "за",
+    "не",
     # --Domain stop words
     "спорядження",
+    "спорядженням",
     "прокат",
     "прокату",
 }
@@ -39,8 +43,12 @@ QUERY_ALIASES = {
     "знайти": ["адреса", "контакти"],
     "зв'язатись": ["контакти", "телефон"],
     "продовжити": ["прострочення", "строк", "термін"],
+    "під'їхати": ["адреса", "контакти"],
 }
 
+PHRASE_ALIASES = {
+    "не приїжджаючи": ["доставка"],
+}
 
 WORD_ALIASES = {
     "київ": ["києву", "києва", "києві"],
@@ -55,7 +63,6 @@ WORD_ALIASES = {
     "оренді": ["оренда", "оренди"],
     "довгостроковій": ["довгострокова"],
 }
-
 
 WORD_WEIGHTS = {
     "можна": 0.5,
@@ -92,6 +99,17 @@ def expand_query_words(words: list[str]) -> list[str]:
     return expanded_words
 
 
+def expand_query_phrases(query: str) -> list[str]:
+    normalized_query = normalize_text(query)
+    expanded_words = []
+
+    for phrase, aliases in PHRASE_ALIASES.items():
+        if phrase in normalized_query:
+            expanded_words.extend(aliases)
+
+    return expanded_words
+
+
 def expand_word_forms(words: list[str]) -> list[str]:
     expanded_words = []
 
@@ -122,7 +140,9 @@ def get_query_words(query: str) -> list[str]:
     query_words = normalize_text(query).split()
     filtered_words = [word for word in query_words if word not in STOP_WORDS]
     expanded_query_words = expand_query_words(filtered_words)
-    expanded_word_forms = expand_word_forms(expanded_query_words)
+    phrase_aliases = expand_query_phrases(query)
+    all_expanded_words = expanded_query_words + phrase_aliases
+    expanded_word_forms = expand_word_forms(all_expanded_words)
     deduplicated_words = deduplicate_words(expanded_word_forms)
 
     return deduplicated_words

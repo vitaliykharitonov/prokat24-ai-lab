@@ -102,5 +102,25 @@
   {
     "query": "як рахується довгострокова оренда",
     "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "можете привезти спорядження додому?",
+    "expected_url": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "що треба залишити як гарантію?",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "як отримати спорядження, не приїжджаючи до вас?",
+    "expected_url": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "що залишається у вас до повернення речей?",
+    "expected_url": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "куди під'їхати за спорядженням?",
+    "expected_url": "https://prokat24.com.ua/ua/contact-us/"
   }
 ]

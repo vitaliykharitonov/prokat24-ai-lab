@@ -7,6 +7,7 @@ from prokat24_ai_lab.knowledge_search import (
     calculate_weighted_score,
     count_query_word_matches,
     deduplicate_words,
+    expand_query_phrases,
     expand_query_words,
     expand_word_forms,
     find_best_snippet_position,
@@ -38,10 +39,16 @@ def test_expand_query_words_adds_aliases_and_keeps_words_without_aliases(
     words: list[str],
     expected: list[str],
 ) -> None:
-
     result = expand_query_words(words)
 
     assert result == expected
+
+
+def test_expand_query_phrases_adds_aliases() -> None:
+    query = "як отримати спорядження, не приїжджаючи до вас?"
+    result = expand_query_phrases(query)
+
+    assert result == ["доставка"]
 
 
 def test_expand_word_forms_adds_grammatical_forms() -> None:
@@ -108,12 +115,19 @@ def test_get_query_words_adds_aliases() -> None:
                 "оренді",
             ],
         ),
+        (
+            "куди під'їхати",
+            [
+                "під'їхати",
+                "адреса",
+                "контакти",
+            ],
+        ),
     ],
 )
 def test_get_query_words_expands_query_aliases_and_word_forms(
     query: str, expected_words: list[str]
 ) -> None:
-
     result = get_query_words(query)
 
     for expected_word in expected_words:
@@ -132,11 +146,19 @@ def test_get_query_words_expands_reverse_word_forms() -> None:
 
 
 def test_get_query_words_removes_duplicates() -> None:
-    query_words = "продовжити термін прокату"
+    query = "продовжити термін прокату"
 
-    result = get_query_words(query_words)
+    result = get_query_words(query)
 
     assert result.count("термін") == 1
+
+
+def test_get_query_words_adds_phrase_aliases() -> None:
+    query = "як отримати спорядження, не приїжджаючи до вас?"
+
+    result = get_query_words(query)
+
+    assert "доставка" in result
 
 
 def test_get_page_search_text_adds_keywords() -> None:
