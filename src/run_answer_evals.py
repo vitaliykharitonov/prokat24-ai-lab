@@ -1,6 +1,7 @@
 import datetime
 
 from prokat24_ai_lab.answer_evals import (
+    AnswerEvalResult,
     build_answer_eval_report,
     load_answer_eval_cases,
     run_answer_evals,
@@ -14,6 +15,31 @@ from prokat24_ai_lab.project_paths import (
     ANSWER_EVAL_REPORT_FILE,
     KNOWLEDGE_PAGES_FILE,
 )
+
+
+def print_failed_answer_eval_results(results: list[AnswerEvalResult]) -> None:
+    failed_results = [result for result in results if not result["passed"]]
+
+    if not failed_results:
+        return
+
+    print()
+    print("Failed answer evals:")
+    print()
+
+    for result in failed_results:
+        print("Question:")
+        print(result["question"])
+        print()
+        print("Missing fragments:")
+
+        for fragment in result["missing_answer_fragments"]:
+            print(f"- {fragment}")
+
+        print()
+        print("Answer:")
+        print(result["answer"])
+        print()
 
 
 def main() -> int:
@@ -40,6 +66,9 @@ def main() -> int:
     print(f"Saved report to {ANSWER_EVAL_REPORT_FILE}")
 
     failed_cases = report["total_cases"] - report["passed_cases"]
+
+    if failed_cases > 0:
+        print_failed_answer_eval_results(report["results"])
 
     return get_eval_exit_code(failed_cases)
 
