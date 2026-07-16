@@ -22,3 +22,14 @@ def text_to_binary_vector(
             text_vector.append(0.0)
 
     return text_vector
+
+
+def text_to_count_vector(text: str, vocabulary: list[str]) -> list[float]:
+    normalized_words = normalize_text(text).split()
+    count_vector = []
+
+    for word in vocabulary:
+        word_count = normalized_words.count(word)
+        count_vector.append(float(word_count))
+
+    return count_vector
