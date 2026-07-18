@@ -9,6 +9,7 @@ requires-python = ">=3.12"
 dependencies = [
     "requests",
     "beautifulsoup4",
+    "openai>=2.46,<3",
 ]
 
 [project.optional-dependencies]

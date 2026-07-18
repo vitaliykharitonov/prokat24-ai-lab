@@ -14,7 +14,6 @@ jiter==0.16.0
 openai==2.46.0
 packaging==26.2
 pluggy==1.6.0
--e git+https://github.com/vitaliykharitonov/prokat24-ai-lab.git@b5d74acf19a639616014ec51c36f64257f2328cc#egg=prokat24_ai_lab
 pydantic==2.13.4
 pydantic_core==2.46.4
 Pygments==2.20.0
