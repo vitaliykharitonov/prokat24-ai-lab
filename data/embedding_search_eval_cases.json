@@ -1,0 +1,22 @@
+[
+  {
+    "query": "можете привезти спорядження мені додому?",
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "що потрібно залишити вам до повернення речей?",
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "куди мені приїхати, щоб забрати замовлення?",
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "чи ремонтуєте ви туристичне спорядження?",
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/"
+  },
+  {
+    "query": "що буде, якщо поверну речі пізніше?",
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+  }
+]
