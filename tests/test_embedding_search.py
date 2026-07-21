@@ -1,6 +1,11 @@
 import pytest
 
-from prokat24_ai_lab.embedding_search import rank_texts_by_embeddings
+from prokat24_ai_lab.embedding_search import (
+    build_embedding_documents,
+    rank_query_by_document_embeddings,
+    rank_texts_by_embeddings,
+)
+from prokat24_ai_lab.knowledge_base import KnowledgePage
 
 
 def fake_embed_text(text: str) -> list[float]:
@@ -98,3 +103,67 @@ def test_rank_texts_by_embeddings_reuses_embedding_when_query_matches_document()
     assert embedded_texts == [
         "доставка по києву",
     ]
+
+
+def test_build_embedding_documents_uses_urls_and_combines_title_with_text() -> None:
+    pages: list[KnowledgePage] = [
+        {
+            "url": "https://prokat24.com.ua/ua/dostavka/",
+            "title": "Доставка",
+            "text": "Доставляємо спорядження по Києву.",
+            "text_length": len("Доставляємо спорядження по Києву."),
+        },
+        {
+            "url": "https://prokat24.com.ua/ua/contact-us/",
+            "title": "Контакти",
+            "text": "Адреса та номер телефону.",
+            "text_length": len("Адреса та номер телефону."),
+        },
+    ]
+
+    result = build_embedding_documents(pages)
+
+    assert result == {
+        "https://prokat24.com.ua/ua/dostavka/": "Доставка\n\nДоставляємо спорядження по Києву.",
+        "https://prokat24.com.ua/ua/contact-us/": "Контакти\n\nАдреса та номер телефону.",
+    }
+
+
+def test_rank_query_by_document_embeddings_ranks_precomputed_vectors() -> None:
+    query = "привезти додому"
+    query_vector = [1.0, 0.0]
+    embedded_texts: list[str] = []
+
+    def fake_embed_text(query: str) -> list[float]:
+        embedded_texts.append(query)
+        return query_vector
+
+    document_embeddings = {
+        "delivery": [1.0, 0.0],
+        "contacts": [0.0, 1.0],
+        "deposit": [-1.0, 0.0],
+    }
+
+    result = rank_query_by_document_embeddings(query, document_embeddings, fake_embed_text)
+
+    assert result == [
+        ("delivery", 1.0),
+        ("contacts", 0.0),
+        ("deposit", -1.0),
+    ]
+    assert embedded_texts == ["привезти додому"]
+
+
+def test_rank_query_by_document_embeddings_returns_empty_list_without_embedding_query() -> None:
+    query = "привезти додому"
+    document_embeddings: dict[str, list[float]] = {}
+    embedded_texts: list[str] = []
+
+    def fake_embed_text(query: str) -> list[float]:
+        embedded_texts.append(query)
+        raise AssertionError("embed_text should not be called")
+
+    result = rank_query_by_document_embeddings(query, document_embeddings, fake_embed_text)
+
+    assert embedded_texts == []
+    assert result == []
