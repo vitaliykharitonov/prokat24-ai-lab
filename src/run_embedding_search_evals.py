@@ -19,13 +19,17 @@ from prokat24_ai_lab.project_paths import (
 
 
 def main() -> None:
-    document_embeddings = load_document_embedding_index(DOCUMENT_EMBEDDING_INDEX_FILE)
+    document_embedding_index = load_document_embedding_index(DOCUMENT_EMBEDDING_INDEX_FILE)
     eval_cases = load_embedding_search_eval_cases(EMBEDDING_SEARCH_EVAL_CASES_FILE)
     client = OpenAI()
 
-    embed_text = create_openai_embed_text(client)
+    embed_text = create_openai_embed_text(client, document_embedding_index["model"])
 
-    results = run_embedding_search_evals(eval_cases, document_embeddings, embed_text)
+    results = run_embedding_search_evals(
+        eval_cases,
+        document_embedding_index["embeddings"],
+        embed_text,
+    )
 
     created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
     git_commit = get_current_git_commit()

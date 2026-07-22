@@ -6,7 +6,7 @@ from prokat24_ai_lab.embedding_index import (
 )
 from prokat24_ai_lab.embedding_search import build_embedding_documents
 from prokat24_ai_lab.knowledge_base import load_knowledge_base
-from prokat24_ai_lab.openai_embeddings import create_openai_embed_text
+from prokat24_ai_lab.openai_embeddings import OPENAI_EMBEDDING_MODEL, create_openai_embed_text
 from prokat24_ai_lab.project_paths import DOCUMENT_EMBEDDING_INDEX_FILE, KNOWLEDGE_PAGES_FILE
 
 
@@ -16,12 +16,17 @@ def main() -> None:
     client = OpenAI()
     embed_text = create_openai_embed_text(client)
 
-    document_embeddings = build_document_embedding_index(documents, embed_text)
+    document_embedding_index = build_document_embedding_index(
+        documents,
+        embed_text,
+        OPENAI_EMBEDDING_MODEL,
+    )
 
-    save_document_embedding_index(document_embeddings, DOCUMENT_EMBEDDING_INDEX_FILE)
+    save_document_embedding_index(document_embedding_index, DOCUMENT_EMBEDDING_INDEX_FILE)
 
     print(
-        f"Saved {len(document_embeddings)} document embeddings to {DOCUMENT_EMBEDDING_INDEX_FILE}"
+        f"Saved {len(document_embedding_index['embeddings'])} "
+        f"document embeddings to {DOCUMENT_EMBEDDING_INDEX_FILE}"
     )
 
 
