@@ -26,7 +26,7 @@ def rank_texts_by_embeddings(
     for document_id, text in documents.items():
         document_vectors[document_id] = get_embedding(text)
 
-    return rank_vectors_by_similarity(query_vector, document_vectors, top_k=top_k)
+    return rank_query_embedding_by_document_embeddings(query_vector, document_vectors, top_k=top_k)
 
 
 def build_embedding_documents(pages: list[KnowledgePage]) -> dict[str, str]:
@@ -51,4 +51,17 @@ def rank_query_by_document_embeddings(
 
     query_vector = embed_text(query)
 
-    return rank_vectors_by_similarity(query_vector, document_embeddings, top_k=top_k)
+    return rank_query_embedding_by_document_embeddings(
+        query_vector, document_embeddings, top_k=top_k
+    )
+
+
+def rank_query_embedding_by_document_embeddings(
+    query_embedding,
+    document_embeddings,
+    top_k: int | None = None,
+) -> list[tuple[str, float]]:
+    if not document_embeddings or not query_embedding:
+        return []
+
+    return rank_vectors_by_similarity(query_embedding, document_embeddings, top_k=top_k)
