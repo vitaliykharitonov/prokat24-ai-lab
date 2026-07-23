@@ -6,7 +6,7 @@ def test_build_eval_report_metadata_returns_common_report_fields() -> None:
         report_type="search_eval_report",
         created_at="2026-01-01T00:00:00+00:00",
         git_commit="abc1234",
-        git_dirty=False,
+        git_dirty=True,
     )
 
     assert metadata == {
@@ -14,5 +14,5 @@ def test_build_eval_report_metadata_returns_common_report_fields() -> None:
         "schema_version": 1,
         "created_at": "2026-01-01T00:00:00+00:00",
         "git_commit": "abc1234",
-        "git_dirty": False,
+        "git_dirty": True,
     }
