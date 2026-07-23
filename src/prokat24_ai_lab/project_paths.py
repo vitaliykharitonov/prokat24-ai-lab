@@ -23,9 +23,13 @@ SEARCH_EVAL_CASES_FILE = DATA_DIR / "search_eval_cases.json"
 ANSWER_EVAL_CASES_FILE = DATA_DIR / "answer_eval_cases.json"
 EMBEDDING_SEARCH_EVAL_CASES_FILE = DATA_DIR / "embedding_search_eval_cases.json"
 DOCUMENT_EMBEDDING_INDEX_FILE = DATA_DIR / "document_embedding_index.json"
+QUERY_EMBEDDING_INDEX_FILE = DATA_DIR / "query_embedding_index.json"
 PRODUCTS_FILE = DATA_DIR / "products.json"
 
 SEARCH_EVAL_REPORT_FILE = REPORTS_DIR / "search_eval_report.json"
 ANSWER_EVAL_REPORT_FILE = REPORTS_DIR / "answer_eval_report.json"
 PRODUCT_ANSWER_EVAL_REPORT_FILE = REPORTS_DIR / "product_answer_eval_report.json"
 EMBEDDING_SEARCH_EVAL_REPORT_FILE = REPORTS_DIR / "embedding_search_eval_report.json"
+OFFLINE_EMBEDDING_SEARCH_EVAL_REPORT_FILE = (
+    REPORTS_DIR / "offline_embedding_search_eval_report.json"
+)
