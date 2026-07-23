@@ -150,6 +150,17 @@ def test_build_product_answer_eval_report_for_products_returns_passing_report(
     assert report["failures"] == []
 
 
+def test_build_product_answer_eval_report_generates_created_at_when_missing() -> None:
+    report = product_answer_evals.build_product_answer_eval_report(
+        passed_count=1,
+        total_count=1,
+        failures=[],
+    )
+
+    assert isinstance(report["created_at"], str)
+    assert report["created_at"]
+
+
 def test_save_product_answer_eval_report_writes_json_file(
     tmp_path: Path,
 ) -> None:

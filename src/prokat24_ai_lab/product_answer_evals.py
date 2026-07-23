@@ -246,6 +246,9 @@ def build_product_answer_eval_report(
     git_commit: str | None = None,
     git_dirty: bool | None = None,
 ) -> ProductAnswerEvalReport:
+    if created_at is None:
+        created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
+
     metadata = build_eval_report_metadata(
         report_type="product_answer_eval_report",
         created_at=created_at,
@@ -254,9 +257,6 @@ def build_product_answer_eval_report(
     )
     failed_count = total_count - passed_count
     passed = failed_count == 0
-
-    if created_at is None:
-        created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
 
     return {
         **metadata,

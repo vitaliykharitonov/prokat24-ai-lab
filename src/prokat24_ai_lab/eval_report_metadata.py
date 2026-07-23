@@ -10,10 +10,10 @@ class EvalReportMetadata(TypedDict):
 
 
 def build_eval_report_metadata(
-        report_type: str,
-        created_at: str,
-        git_commit: str | None = None,
-        git_dirty: bool | None = None,
+    report_type: str,
+    created_at: str,
+    git_commit: str | None = None,
+    git_dirty: bool | None = None,
 ) -> EvalReportMetadata:
     return {
         "report_type": report_type,
