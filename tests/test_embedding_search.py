@@ -3,6 +3,7 @@ import pytest
 from prokat24_ai_lab.embedding_search import (
     build_embedding_documents,
     rank_query_by_document_embeddings,
+    rank_query_embedding_by_document_embeddings,
     rank_texts_by_embeddings,
 )
 from prokat24_ai_lab.knowledge_base import KnowledgePage
@@ -129,7 +130,7 @@ def test_build_embedding_documents_uses_urls_and_combines_title_with_text() -> N
     }
 
 
-def test_rank_query_by_document_embeddings_ranks_precomputed_vectors() -> None:
+def test_rank_query_by_document_embeddings_embeds_query_and_ranks_document_vectors() -> None:
     query = "привезти додому"
     query_vector = [1.0, 0.0]
     embedded_texts: list[str] = []
@@ -166,4 +167,77 @@ def test_rank_query_by_document_embeddings_returns_empty_list_without_embedding_
     result = rank_query_by_document_embeddings(query, document_embeddings, fake_embed_text)
 
     assert embedded_texts == []
+    assert result == []
+
+
+def test_rank_query_embedding_by_document_embeddings_ranks_precomputed_vectors() -> None:
+    query_embedding = [1.0, 0.0]
+
+    document_embeddings = {
+        "delivery": [1.0, 0.0],
+        "contacts": [0.0, 1.0],
+        "deposit": [-1.0, 0.0],
+    }
+
+    result = rank_query_embedding_by_document_embeddings(
+        query_embedding,
+        document_embeddings,
+        top_k=3,
+    )
+
+    assert result == [
+        ("delivery", 1.0),
+        ("contacts", 0.0),
+        ("deposit", -1.0),
+    ]
+
+
+def test_rank_query_embedding_by_document_embeddings_limits_results_by_top_k() -> None:
+    query_embedding = [1.0, 0.0]
+
+    document_embeddings = {
+        "delivery": [1.0, 0.0],
+        "contacts": [0.0, 1.0],
+        "deposit": [-1.0, 0.0],
+    }
+
+    result = rank_query_embedding_by_document_embeddings(
+        query_embedding,
+        document_embeddings,
+        top_k=2,
+    )
+
+    assert result == [
+        ("delivery", 1.0),
+        ("contacts", 0.0),
+    ]
+
+
+def test_rank_query_embedding_by_document_embeddings_returns_empty_list_without_documents() -> None:
+    query_embedding = [1.0, 0.0]
+
+    document_embeddings = {}
+
+    result = rank_query_embedding_by_document_embeddings(
+        query_embedding,
+        document_embeddings,
+    )
+
+    assert result == []
+
+
+def test_rank_query_embedding_by_document_embeddings_returns_empty_list_for_empty_query() -> None:
+    query_embedding = []
+
+    document_embeddings = {
+        "delivery": [1.0, 0.0],
+        "contacts": [0.0, 1.0],
+        "deposit": [-1.0, 0.0],
+    }
+
+    result = rank_query_embedding_by_document_embeddings(
+        query_embedding,
+        document_embeddings,
+    )
+
     assert result == []

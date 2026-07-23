@@ -3,7 +3,10 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
 
-from prokat24_ai_lab.embedding_search import rank_query_by_document_embeddings
+from prokat24_ai_lab.embedding_search import (
+    rank_query_by_document_embeddings,
+    rank_query_embedding_by_document_embeddings,
+)
 from prokat24_ai_lab.eval_report_metadata import build_eval_report_metadata
 
 
@@ -40,12 +43,33 @@ def evaluate_embedding_search_case(
     embed_text: Callable[[str], list[float]],
 ) -> EmbeddingSearchEvalResult:
     query = case["query"]
-    expected_document_id = case["expected_document_id"]
 
     search_results = rank_query_by_document_embeddings(
         query, document_embeddings, embed_text, top_k=3
     )
 
+    return build_embedding_search_eval_result(case, search_results)
+
+
+def evaluate_precomputed_embedding_search_case(
+    case: EmbeddingSearchEvalCase,
+    document_embeddings: dict[str, list[float]],
+    query_embedding: list[float],
+) -> EmbeddingSearchEvalResult:
+    search_results = rank_query_embedding_by_document_embeddings(
+        query_embedding,
+        document_embeddings,
+        top_k=3,
+    )
+
+    return build_embedding_search_eval_result(case, search_results)
+
+
+def build_embedding_search_eval_result(
+    case: EmbeddingSearchEvalCase,
+    search_results: list[tuple[str, float]],
+) -> EmbeddingSearchEvalResult:
+    expected_document_id = case["expected_document_id"]
     actual_document_id = None
     actual_score = None
 
@@ -55,7 +79,7 @@ def evaluate_embedding_search_case(
     passed = actual_document_id == expected_document_id
 
     return {
-        "query": query,
+        "query": case["query"],
         "expected_document_id": expected_document_id,
         "actual_document_id": actual_document_id,
         "actual_score": actual_score,
@@ -73,6 +97,32 @@ def run_embedding_search_evals(
 
     for case in cases:
         results.append(evaluate_embedding_search_case(case, document_embeddings, embed_text))
+
+    return results
+
+
+def run_precomputed_embedding_search_evals(
+    cases: list[EmbeddingSearchEvalCase],
+    document_embeddings: dict[str, list[float]],
+    query_embeddings: dict[str, list[float]],
+) -> list[EmbeddingSearchEvalResult]:
+    results: list[EmbeddingSearchEvalResult] = []
+
+    for case in cases:
+        query = case["query"]
+        try:
+            query_embedding = query_embeddings[query]
+
+        except KeyError:
+            raise ValueError(f"Query embedding not found: {query}") from None
+
+        results.append(
+            evaluate_precomputed_embedding_search_case(
+                case,
+                document_embeddings,
+                query_embedding,
+            )
+        )
 
     return results
 

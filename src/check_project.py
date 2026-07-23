@@ -10,6 +10,7 @@ def get_quality_check_commands() -> list[list[str]]:
         [sys.executable, "src/run_search_evals.py"],
         [sys.executable, "src/run_answer_evals.py"],
         [sys.executable, "src/run_product_answer_evals.py"],
+        [sys.executable, "src/run_offline_embedding_search_evals.py"],
     ]
 
 

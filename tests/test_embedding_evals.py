@@ -11,8 +11,10 @@ from prokat24_ai_lab.embedding_evals import (
     calculate_top_k_accuracy,
     count_passed_results,
     evaluate_embedding_search_case,
+    evaluate_precomputed_embedding_search_case,
     load_embedding_search_eval_cases,
     run_embedding_search_evals,
+    run_precomputed_embedding_search_evals,
     save_embedding_search_eval_report,
 )
 
@@ -134,6 +136,28 @@ def test_evaluate_embedding_search_case_handles_empty_document_embeddings() -> N
     assert result["top_results"] == []
 
 
+def test_evaluate_precomputed_embedding_search_case_uses_query_embedding() -> None:
+    case = {
+        "query": "привезти додому",
+        "expected_document_id": "delivery",
+    }
+
+    query_embedding = [1.0, 0.0]
+
+    document_embeddings = {
+        "delivery": [1.0, 0.0],
+        "contacts": [0.0, 1.0],
+        "deposit": [-1.0, 0.0],
+    }
+
+    result = evaluate_precomputed_embedding_search_case(case, document_embeddings, query_embedding)
+
+    assert result["actual_document_id"] == "delivery"
+    assert result["actual_score"] == pytest.approx(1.0)
+    assert result["passed"] is True
+    assert len(result["top_results"]) == 3
+
+
 def test_run_embedding_search_evals_returns_results_for_all_cases() -> None:
     cases: list[EmbeddingSearchEvalCase] = [
         {
@@ -165,6 +189,56 @@ def test_run_embedding_search_evals_returns_results_for_all_cases() -> None:
     assert results[0]["passed"] is True
     assert results[1]["actual_document_id"] == "contacts"
     assert results[1]["passed"] is False
+
+
+def test_run_precomputed_embedding_search_evals_evaluates_all_cases() -> None:
+    cases: list[EmbeddingSearchEvalCase] = [
+        {
+            "query": "привезти додому",
+            "expected_document_id": "delivery",
+        },
+        {
+            "query": "де вас знайти",
+            "expected_document_id": "delivery",
+        },
+    ]
+    document_embeddings = {
+        "delivery": [1.0, 0.0],
+        "contacts": [0.0, 1.0],
+        "deposit": [-1.0, 0.0],
+    }
+    query_embeddings = {
+        "привезти додому": [1.0, 0.0],
+        "де вас знайти": [0.0, 1.0],
+    }
+
+    results = run_precomputed_embedding_search_evals(cases, document_embeddings, query_embeddings)
+
+    assert len(results) == 2
+    assert results[0]["actual_document_id"] == "delivery"
+    assert results[0]["passed"] is True
+    assert results[1]["actual_document_id"] == "contacts"
+    assert results[1]["passed"] is False
+
+
+def test_run_precomputed_embedding_search_evals_raises_for_missing_query_embedding() -> None:
+    cases: list[EmbeddingSearchEvalCase] = [
+        {
+            "query": "привезти додому",
+            "expected_document_id": "delivery",
+        },
+    ]
+    document_embeddings = {
+        "delivery": [1.0, 0.0],
+        "contacts": [0.0, 1.0],
+        "deposit": [-1.0, 0.0],
+    }
+    query_embeddings = {
+        "де вас знайти": [0.0, 1.0],
+    }
+
+    with pytest.raises(ValueError, match="Query embedding not found: привезти додому"):
+        run_precomputed_embedding_search_evals(cases, document_embeddings, query_embeddings)
 
 
 def test_count_passed_results_returns_number_of_passed_cases() -> None:
