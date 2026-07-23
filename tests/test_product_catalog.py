@@ -522,6 +522,20 @@ def test_extract_rental_prices_from_lines_returns_rental_prices() -> None:
     }
 
 
+def test_extract_rental_prices_from_lines_returns_empty_dict_when_section_is_missing() -> None:
+    lines = [
+        "Назва товару",
+        "Характеристики",
+        "Вага",
+        "3 кг",
+    ]
+
+    result = extract_rental_prices_from_lines(lines)
+
+    assert result == {}
+    assert isinstance(result, dict)
+
+
 def test_extract_deposit_from_lines_returns_deposit() -> None:
     lines = PRODUCT_INFO_LINES
 
