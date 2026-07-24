@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from prokat24_ai_lab.embedding_evals import (
+from prokat24_ai_lab.evals.embedding_evals import (
     EmbeddingSearchEvalCase,
     EmbeddingSearchEvalResult,
     build_embedding_search_eval_report,

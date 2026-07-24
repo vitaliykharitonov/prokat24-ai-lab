@@ -1,4 +1,4 @@
-import prokat24_ai_lab.eval_report_metadata as eval_report_metadata
+import prokat24_ai_lab.evals.report_metadata as eval_report_metadata
 
 
 def test_build_eval_report_metadata_returns_common_report_fields() -> None:

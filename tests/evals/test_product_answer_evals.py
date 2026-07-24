@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-import prokat24_ai_lab.product_answer_evals as product_answer_evals
+import prokat24_ai_lab.evals.product_answer_evals as product_answer_evals
 from prokat24_ai_lab.product_catalog import Product
 
 

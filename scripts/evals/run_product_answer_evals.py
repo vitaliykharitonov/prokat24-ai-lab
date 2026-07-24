@@ -1,10 +1,10 @@
 from prokat24_ai_lab.eval_exit_codes import get_eval_exit_code
-from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
-from prokat24_ai_lab.product_answer_evals import (
+from prokat24_ai_lab.evals.product_answer_evals import (
     ProductAnswerEvalFailure,
     build_product_answer_eval_report_for_products,
     save_product_answer_eval_report,
 )
+from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.product_catalog import load_products
 from prokat24_ai_lab.project_paths import PRODUCT_ANSWER_EVAL_REPORT_FILE, PRODUCTS_FILE
 
