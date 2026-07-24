@@ -52,4 +52,5 @@ def save_knowledge_base(pages: list[KnowledgePage], output_file: Path) -> None:
 
 def load_knowledge_base(input_file: Path) -> list[KnowledgePage]:
     with open(input_file, encoding="utf-8") as file:
-        return json.load(file)
+        loaded_data: list[KnowledgePage] = json.load(file)
+        return loaded_data

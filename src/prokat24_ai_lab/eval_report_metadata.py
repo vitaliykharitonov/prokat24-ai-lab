@@ -4,7 +4,7 @@ from typing import TypedDict
 class EvalReportMetadata(TypedDict):
     report_type: str
     schema_version: int
-    created_at: str | None
+    created_at: str
     git_commit: str | None
     git_dirty: bool | None
 

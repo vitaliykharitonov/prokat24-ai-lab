@@ -246,7 +246,7 @@ def make_snippet(text: str, query: str, max_length: int = 300) -> str:
 
 
 def build_score_details(matched_words: dict[str, int]) -> dict[str, ScoreDetail]:
-    score_details = {}
+    score_details: dict[str, ScoreDetail] = {}
 
     for word, count in matched_words.items():
         weight = WORD_WEIGHTS.get(word, 1.0)

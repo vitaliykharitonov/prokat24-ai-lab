@@ -16,10 +16,14 @@ dependencies = [
 dev = [
     "pytest",
     "ruff",
+    "mypy>=2.3,<3",
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"prokat24_ai_lab" = ["py.typed"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -48,3 +52,10 @@ ignore = [
 quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true

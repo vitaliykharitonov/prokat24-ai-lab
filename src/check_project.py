@@ -7,6 +7,7 @@ def get_quality_check_commands() -> list[list[str]]:
         [sys.executable, "-m", "pytest"],
         [sys.executable, "-m", "ruff", "check", "."],
         [sys.executable, "-m", "ruff", "format", "--check", "."],
+        [sys.executable, "-m", "mypy", "src/prokat24_ai_lab"],
         [sys.executable, "src/run_search_evals.py"],
         [sys.executable, "src/run_answer_evals.py"],
         [sys.executable, "src/run_product_answer_evals.py"],

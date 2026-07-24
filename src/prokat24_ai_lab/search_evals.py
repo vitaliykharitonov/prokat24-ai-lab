@@ -42,7 +42,8 @@ class SearchEvalReport(TypedDict):
 
 def load_search_eval_cases(input_file: Path) -> list[SearchEvalCase]:
     with open(input_file, encoding="utf-8") as file:
-        return json.load(file)
+        loaded_data: list[SearchEvalCase] = json.load(file)
+        return loaded_data
 
 
 def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> SearchEvalResult:
