@@ -52,9 +52,11 @@ python scripts/check_project.py
 - pytest
 - ruff check
 - ruff format --check
-- search evals
-- answer evals
+- mypy
+- knowledge search evals
+- knowledge answer evals
 - product answer evals
+- offline embedding search evals
 
 Полные JSON eval reports можно создать отдельными командами из раздела `Evals`
 
@@ -120,18 +122,20 @@ data/products.json
 
 ## Evals
 
-В проекте есть три eval-направления:
+В проекте есть 4 eval-направления:
 
-- `product_answer_eval_report` — проверки ответов на товарные запросы.
-- `search_eval_report` — проверки качества поиска по базе знаний.
-- `answer_eval_report` — проверки ответов по базе знаний.
+- `search_eval_report` — оценка качества keyword-поиска по базе знаний.
+- `answer_eval_report` — оценка ответов по базе знаний.
+- `product_answer_eval_report` — оценка ответов на товарные запросы.
+- `embedding_search_eval_report` — оценка качества поиска по эмбеддингам.
 
 Запуск:
 
 ```powershell
-python scripts/evals/run_product_answer_evals.py
 python scripts/evals/run_search_evals.py
 python scripts/evals/run_answer_evals.py
+python scripts/evals/run_product_answer_evals.py
+python scripts/evals/run_offline_embedding_search_evals.py
 ```
 
 JSON-отчёты сохраняются в `reports/` и не коммитятся в Git.
