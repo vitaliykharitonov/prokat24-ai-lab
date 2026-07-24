@@ -34,17 +34,17 @@ pip install -e ".[dev]"
 Запустить полную проверку проекта:
 
 ```
-python src/check_project.py
+python scripts/check_project.py
 ```
 
 ## Быстрая проверка проекта
 
 Главная команда перед коммитом:
 
-[Открыть скрипт проверки проекта](src/check_project.py)
+[Открыть скрипт проверки проекта](scripts/check_project.py)
 
 ```
-python src/check_project.py
+python scripts/check_project.py
 ```
 
 Проверки:
@@ -89,7 +89,7 @@ ruff format .
 Проверка полного проекта:
 
 ```
-python src/check_project.py
+python scripts/check_project.py
 ```
 
 ## Поиск по продуктам CLI
@@ -157,7 +157,7 @@ git_dirty
 3. Запустить проверку проекта:
 
 ```
-python src/check_project.py
+python scripts/check_project.py
 ```
 
 4. Если всё зелёное — сделать commit.

@@ -34,7 +34,3 @@ def run_quality_checks(commands: list[list[str]]) -> int:
 def main() -> int:
     commands = get_quality_check_commands()
     return run_quality_checks(commands)
-
-
-if __name__ == "__main__":
-    sys.exit(main())

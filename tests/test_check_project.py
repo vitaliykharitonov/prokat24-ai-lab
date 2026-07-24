@@ -1,4 +1,4 @@
-from check_project import get_quality_check_commands
+from prokat24_ai_lab.project_checks import get_quality_check_commands
 
 
 def test_get_quality_check_commands_returns_project_checks() -> None:
