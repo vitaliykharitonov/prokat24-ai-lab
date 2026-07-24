@@ -1,4 +1,4 @@
-from prokat24_ai_lab.answer_engine import answer_question
+from prokat24_ai_lab.knowledge.answer_engine import answer_question
 
 TEST_PAGES = [
     {

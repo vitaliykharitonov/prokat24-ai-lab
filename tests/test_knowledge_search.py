@@ -1,6 +1,6 @@
 import pytest
 
-from prokat24_ai_lab.knowledge_search import (
+from prokat24_ai_lab.knowledge.keyword_search import (
     build_score_details,
     calculate_keyword_score,
     calculate_score_from_details,

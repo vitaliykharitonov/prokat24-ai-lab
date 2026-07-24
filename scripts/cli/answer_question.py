@@ -1,6 +1,6 @@
 from argparse import ArgumentParser, Namespace
 
-from prokat24_ai_lab.answer_engine import answer_question
+from prokat24_ai_lab.knowledge.answer_engine import answer_question
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.project_paths import KNOWLEDGE_PAGES_FILE
 
