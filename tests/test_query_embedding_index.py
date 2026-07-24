@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from prokat24_ai_lab.query_embedding_index import (
+from prokat24_ai_lab.embeddings.query_index import (
     build_query_embedding_index,
     load_query_embedding_index,
     save_query_embedding_index,

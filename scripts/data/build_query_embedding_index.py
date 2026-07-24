@@ -5,13 +5,13 @@ from prokat24_ai_lab.embeddings.openai_client import (
     OPENAI_EMBEDDING_MODEL,
     create_openai_embed_text,
 )
+from prokat24_ai_lab.embeddings.query_index import (
+    build_query_embedding_index,
+    save_query_embedding_index,
+)
 from prokat24_ai_lab.project_paths import (
     EMBEDDING_SEARCH_EVAL_CASES_FILE,
     QUERY_EMBEDDING_INDEX_FILE,
-)
-from prokat24_ai_lab.query_embedding_index import (
-    build_query_embedding_index,
-    save_query_embedding_index,
 )
 
 
