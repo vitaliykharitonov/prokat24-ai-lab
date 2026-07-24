@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 import prokat24_ai_lab.evals.product_answer_evals as product_answer_evals
-from prokat24_ai_lab.product_catalog import Product
+from prokat24_ai_lab.products.catalog import Product
 
 
 def test_find_missing_fragments_returns_missing_fragments() -> None:

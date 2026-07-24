@@ -1,6 +1,6 @@
 import pytest
 
-from prokat24_ai_lab.product_answers import (
+from prokat24_ai_lab.products.answers import (
     answer_product_query,
     build_product_search_query,
     calculate_rental_price_for_day_count,
@@ -22,7 +22,7 @@ from prokat24_ai_lab.product_answers import (
     remove_rental_day_count_words,
     remove_word_sequence,
 )
-from prokat24_ai_lab.product_catalog import Product
+from prokat24_ai_lab.products.catalog import Product
 
 
 @pytest.fixture

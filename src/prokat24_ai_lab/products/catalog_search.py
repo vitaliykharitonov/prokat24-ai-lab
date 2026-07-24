@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from prokat24_ai_lab.product_catalog import Product
+from prokat24_ai_lab.products.catalog import Product
 from prokat24_ai_lab.text_normalization import normalize_text
 
 PRODUCT_QUERY_ALIAS_GROUPS = (

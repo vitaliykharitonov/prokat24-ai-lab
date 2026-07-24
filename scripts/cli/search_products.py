@@ -1,9 +1,9 @@
 from argparse import ArgumentParser, Namespace
 
-from prokat24_ai_lab.product_answers import (
+from prokat24_ai_lab.products.answers import (
     answer_product_query,
 )
-from prokat24_ai_lab.product_catalog import load_products
+from prokat24_ai_lab.products.catalog import load_products
 from prokat24_ai_lab.project_paths import PRODUCTS_FILE
 
 

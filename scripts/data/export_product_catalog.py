@@ -1,5 +1,5 @@
 from prokat24_ai_lab.html_parsing import extract_internal_links
-from prokat24_ai_lab.product_catalog import (
+from prokat24_ai_lab.products.catalog import (
     build_product_catalog,
     filter_leaf_product_category_urls,
     filter_product_category_urls,

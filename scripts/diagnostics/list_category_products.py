@@ -1,6 +1,6 @@
 from argparse import ArgumentParser, Namespace
 
-from prokat24_ai_lab.product_catalog import build_products_from_category
+from prokat24_ai_lab.products.catalog import build_products_from_category
 
 
 def parse_args() -> Namespace:

@@ -5,7 +5,7 @@ from prokat24_ai_lab.evals.product_answer_evals import (
     save_product_answer_eval_report,
 )
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
-from prokat24_ai_lab.product_catalog import load_products
+from prokat24_ai_lab.products.catalog import load_products
 from prokat24_ai_lab.project_paths import PRODUCT_ANSWER_EVAL_REPORT_FILE, PRODUCTS_FILE
 
 

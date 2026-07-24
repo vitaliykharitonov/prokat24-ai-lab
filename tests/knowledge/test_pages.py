@@ -1,4 +1,4 @@
-from prokat24_ai_lab.knowledge_pages import (
+from prokat24_ai_lab.knowledge.pages import (
     KNOWLEDGE_PAGE_PATHS,
     build_knowledge_page_urls,
     get_knowledge_page_urls,

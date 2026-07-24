@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from prokat24_ai_lab.knowledge_base import KnowledgePage
+from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.text_normalization import normalize_text
 
 STOP_WORDS = {

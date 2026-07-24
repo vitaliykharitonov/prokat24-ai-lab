@@ -1,7 +1,7 @@
 from typing import TypedDict
 
-from prokat24_ai_lab.knowledge_base import KnowledgePage
-from prokat24_ai_lab.knowledge_search import search_knowledge_base
+from prokat24_ai_lab.knowledge.base import KnowledgePage
+from prokat24_ai_lab.knowledge.keyword_search import search_knowledge_base
 
 
 class AnswerSource(TypedDict):

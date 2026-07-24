@@ -1,4 +1,4 @@
-from prokat24_ai_lab.knowledge_pages import get_knowledge_page_urls
+from prokat24_ai_lab.knowledge.pages import get_knowledge_page_urls
 
 
 def main() -> None:

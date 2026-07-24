@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 from typing import TypedDict
 
-from prokat24_ai_lab.answer_engine import answer_question
 from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
-from prokat24_ai_lab.knowledge_base import KnowledgePage
+from prokat24_ai_lab.knowledge.answer_engine import answer_question
+from prokat24_ai_lab.knowledge.base import KnowledgePage
 
 
 class AnswerEvalCase(TypedDict):

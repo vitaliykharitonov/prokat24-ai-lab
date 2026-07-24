@@ -6,7 +6,7 @@ from prokat24_ai_lab.embeddings.search import (
     rank_query_embedding_by_document_embeddings,
     rank_texts_by_embeddings,
 )
-from prokat24_ai_lab.knowledge_base import KnowledgePage
+from prokat24_ai_lab.knowledge.base import KnowledgePage
 
 
 def fake_embed_text(text: str) -> list[float]:
