@@ -7,7 +7,7 @@ from prokat24_ai_lab.embeddings.search import (
     rank_query_by_document_embeddings,
     rank_query_embedding_by_document_embeddings,
 )
-from prokat24_ai_lab.eval_report_metadata import build_eval_report_metadata
+from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
 
 
 class EmbeddingSearchEvalCase(TypedDict):
