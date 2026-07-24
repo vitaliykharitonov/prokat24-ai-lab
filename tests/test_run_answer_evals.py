@@ -1,6 +1,5 @@
 import pytest
-
-from run_answer_evals import print_failed_answer_eval_results
+from scripts.evals.run_answer_evals import print_failed_answer_eval_results
 
 
 def test_print_failed_answer_eval_results_prints_nothing_when_all_results_pass(

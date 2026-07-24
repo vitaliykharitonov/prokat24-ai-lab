@@ -1,4 +1,4 @@
-from run_product_answer_evals import (
+from scripts.evals.run_product_answer_evals import (
     format_product_answer_eval_failure,
     format_product_answer_eval_summary,
 )

@@ -109,7 +109,7 @@ python src/search_products.py "прокат спальника на 2 тижні
 Экспорт каталога товаров:
 
 ```
-python src/export_product_catalog.py
+python scripts/data/export_product_catalog.py
 ```
 
 Команда обновляет файл (на основе страниц сайта):
@@ -129,9 +129,9 @@ data/products.json
 Запуск:
 
 ```powershell
-python src/run_product_answer_evals.py
-python src/run_search_evals.py
-python src/run_answer_evals.py
+python scripts/evals/run_product_answer_evals.py
+python scripts/evals/run_search_evals.py
+python scripts/evals/run_answer_evals.py
 ```
 
 JSON-отчёты сохраняются в `reports/` и не коммитятся в Git.
