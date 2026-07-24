@@ -178,7 +178,7 @@ def extract_rental_prices_from_lines(lines: list[str]) -> dict[str, str]:
     )
 
     if not extracted_section:
-        return "No product prices found"
+        return {}
 
     return parse_key_value_lines(extracted_section)
 

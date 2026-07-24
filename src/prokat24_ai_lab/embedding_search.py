@@ -57,8 +57,8 @@ def rank_query_by_document_embeddings(
 
 
 def rank_query_embedding_by_document_embeddings(
-    query_embedding,
-    document_embeddings,
+    query_embedding: list[float],
+    document_embeddings: dict[str, list[float]],
     top_k: int | None = None,
 ) -> list[tuple[str, float]]:
     if not document_embeddings or not query_embedding:

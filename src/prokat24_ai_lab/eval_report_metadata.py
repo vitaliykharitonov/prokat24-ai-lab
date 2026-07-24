@@ -4,7 +4,7 @@ from typing import TypedDict
 class EvalReportMetadata(TypedDict):
     report_type: str
     schema_version: int
-    created_at: str | None
+    created_at: str
     git_commit: str | None
     git_dirty: bool | None
 
@@ -13,7 +13,7 @@ def build_eval_report_metadata(
     report_type: str,
     created_at: str,
     git_commit: str | None = None,
-    git_dirty: str | None = None,
+    git_dirty: bool | None = None,
 ) -> EvalReportMetadata:
     return {
         "report_type": report_type,

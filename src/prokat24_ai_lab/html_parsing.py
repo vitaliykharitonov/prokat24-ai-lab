@@ -28,6 +28,10 @@ def extract_internal_links(html: str, base_url: str, allowed_domain: str) -> lis
 
     for tag in soup.find_all("a", href=True):
         href = tag["href"]
+
+        if not isinstance(href, str):
+            continue
+
         absolute_url = urljoin(base_url, href)
 
         if is_internal_link(absolute_url, allowed_domain):

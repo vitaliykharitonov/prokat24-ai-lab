@@ -480,10 +480,7 @@ def remove_rental_day_count_words(words: list[str], day_count: int | None) -> li
         if current_word.isdigit() and int(current_word) == day_count:
             return remove_word_sequence(words, [current_word, next_word])
 
-        if current_word in UKRAINIAN_NUMBER_WORDS:
-            current_number = UKRAINIAN_NUMBER_WORDS[current_word]
-
-        if current_number == day_count:
+        if UKRAINIAN_NUMBER_WORDS.get(current_word) == day_count:
             return remove_word_sequence(words, [current_word, next_word])
 
     return words

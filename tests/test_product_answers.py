@@ -144,6 +144,15 @@ def test_remove_rental_day_count_words() -> None:
     assert result == ["скільки", "коштує", "2", "місний", "намет", "на"]
 
 
+def test_remove_rental_day_count_words_ignores_unknown_day_count_phrase() -> None:
+    words = ["багато", "днів", "5", "днів", "намет"]
+    day_count = 5
+
+    result = remove_rental_day_count_words(words, day_count)
+
+    assert result == ["багато", "днів", "намет"]
+
+
 @pytest.mark.parametrize(
     ("query", "expected_query"),
     [

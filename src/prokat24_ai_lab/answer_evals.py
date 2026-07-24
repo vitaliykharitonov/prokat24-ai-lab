@@ -40,7 +40,8 @@ class AnswerEvalReport(TypedDict):
 
 def load_answer_eval_cases(input_file: Path) -> list[AnswerEvalCase]:
     with open(input_file, encoding="utf-8") as file:
-        return json.load(file)
+        loaded_data: list[AnswerEvalCase] = json.load(file)
+        return loaded_data
 
 
 def evaluate_answer_case(case: AnswerEvalCase, pages: list[KnowledgePage]) -> AnswerEvalResult:
