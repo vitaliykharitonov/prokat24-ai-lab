@@ -97,9 +97,9 @@ python src/check_project.py
 Примеры пользовательских запросов:
 
 ```
-python src/search_products.py "скільки коштує 2 місний намет на тиждень"
-python src/search_products.py "яка застава за 2 місний намет"
-python src/search_products.py "прокат спальника на 2 тижні"
+python scripts/cli/search_products.py "скільки коштує 2 місний намет на тиждень"
+python scripts/cli/search_products.py "яка застава за 2 місний намет"
+python scripts/cli/search_products.py "прокат спальника на 2 тижні"
 ```
 
 (Сейчас товарные запросы в answer layer ориентированы на украинский язык)
