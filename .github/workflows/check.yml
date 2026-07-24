@@ -23,4 +23,4 @@ jobs:
           pip install -e ".[dev]"
 
       - name: Run project checks
-        run: python src/check_project.py
+        run: python scripts/check_project.py
