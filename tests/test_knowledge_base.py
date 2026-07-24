@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from prokat24_ai_lab.knowledge_base import (
+from prokat24_ai_lab.knowledge.base import (
     KnowledgePage,
     build_knowledge_page_from_html,
     save_knowledge_base,

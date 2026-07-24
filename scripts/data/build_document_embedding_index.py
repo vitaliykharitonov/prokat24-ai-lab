@@ -9,7 +9,7 @@ from prokat24_ai_lab.embeddings.openai_client import (
     create_openai_embed_text,
 )
 from prokat24_ai_lab.embeddings.search import build_embedding_documents
-from prokat24_ai_lab.knowledge_base import load_knowledge_base
+from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.project_paths import DOCUMENT_EMBEDDING_INDEX_FILE, KNOWLEDGE_PAGES_FILE
 
 

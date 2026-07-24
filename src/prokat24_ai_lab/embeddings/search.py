@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from prokat24_ai_lab.knowledge_base import KnowledgePage
+from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.vector_search import rank_vectors_by_similarity
 
 
