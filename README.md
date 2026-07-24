@@ -32,25 +32,25 @@ src/prokat24_ai_lab/
 
 Create virtual environment:
 
-```
+```powershell
 python -m venv .venv
 ```
 
 Activate virtual environment:
 
-```
+```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
 Install project and dependencies:
 
-```
+```powershell
 pip install -e ".[dev]"
 ```
 
 Run full project check:
 
-```
+```powershell
 python scripts/check_project.py
 ```
 
@@ -58,19 +58,19 @@ python scripts/check_project.py
 
 Search the knowledge base:
 
-```
+```powershell
 python scripts/cli/search_knowledge_base.py "як отримати спорядження?"
 ```
 
 Generate an answer from the knowledge base:
 
-```
+```powershell
 python scripts/cli/answer_question.py "де ви знаходитесь?"
 ```
 
 Search the product catalog:
 
-```
+```powershell
 python scripts/cli/search_products.py "скільки коштує 2 місний намет на тиждень"
 ```
 
