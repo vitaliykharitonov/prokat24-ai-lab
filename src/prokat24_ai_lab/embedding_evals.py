@@ -38,9 +38,9 @@ class EmbeddingSearchEvalReport(TypedDict):
 
 
 def evaluate_embedding_search_case(
-        case: EmbeddingSearchEvalCase,
-        document_embeddings: dict[str, list[float]],
-        embed_text: Callable[[str], list[float]],
+    case: EmbeddingSearchEvalCase,
+    document_embeddings: dict[str, list[float]],
+    embed_text: Callable[[str], list[float]],
 ) -> EmbeddingSearchEvalResult:
     query = case["query"]
 
@@ -52,9 +52,9 @@ def evaluate_embedding_search_case(
 
 
 def evaluate_precomputed_embedding_search_case(
-        case: EmbeddingSearchEvalCase,
-        document_embeddings: dict[str, list[float]],
-        query_embedding: list[float],
+    case: EmbeddingSearchEvalCase,
+    document_embeddings: dict[str, list[float]],
+    query_embedding: list[float],
 ) -> EmbeddingSearchEvalResult:
     search_results = rank_query_embedding_by_document_embeddings(
         query_embedding,
@@ -66,8 +66,8 @@ def evaluate_precomputed_embedding_search_case(
 
 
 def build_embedding_search_eval_result(
-        case: EmbeddingSearchEvalCase,
-        search_results: list[tuple[str, float]],
+    case: EmbeddingSearchEvalCase,
+    search_results: list[tuple[str, float]],
 ) -> EmbeddingSearchEvalResult:
     expected_document_id = case["expected_document_id"]
     actual_document_id = None
@@ -89,9 +89,9 @@ def build_embedding_search_eval_result(
 
 
 def run_embedding_search_evals(
-        cases: list[EmbeddingSearchEvalCase],
-        document_embeddings: dict[str, list[float]],
-        embed_text: Callable[[str], list[float]],
+    cases: list[EmbeddingSearchEvalCase],
+    document_embeddings: dict[str, list[float]],
+    embed_text: Callable[[str], list[float]],
 ) -> list[EmbeddingSearchEvalResult]:
     results: list[EmbeddingSearchEvalResult] = []
 
@@ -102,9 +102,9 @@ def run_embedding_search_evals(
 
 
 def run_precomputed_embedding_search_evals(
-        cases: list[EmbeddingSearchEvalCase],
-        document_embeddings: dict[str, list[float]],
-        query_embeddings: dict[str, list[float]],
+    cases: list[EmbeddingSearchEvalCase],
+    document_embeddings: dict[str, list[float]],
+    query_embeddings: dict[str, list[float]],
 ) -> list[EmbeddingSearchEvalResult]:
     results: list[EmbeddingSearchEvalResult] = []
 
@@ -128,7 +128,7 @@ def run_precomputed_embedding_search_evals(
 
 
 def count_passed_results(
-        results: list[EmbeddingSearchEvalResult],
+    results: list[EmbeddingSearchEvalResult],
 ) -> int:
     passed_count = 0
     for result in results:
@@ -139,7 +139,7 @@ def count_passed_results(
 
 
 def calculate_accuracy(
-        results: list[EmbeddingSearchEvalResult],
+    results: list[EmbeddingSearchEvalResult],
 ) -> float:
     if not results:
         return 0.0
@@ -151,8 +151,8 @@ def calculate_accuracy(
 
 
 def calculate_top_k_accuracy(
-        results: list[EmbeddingSearchEvalResult],
-        top_k: int,
+    results: list[EmbeddingSearchEvalResult],
+    top_k: int,
 ) -> float:
     if not results:
         return 0.0
@@ -169,10 +169,10 @@ def calculate_top_k_accuracy(
 
 
 def build_embedding_search_eval_report(
-        results: list[EmbeddingSearchEvalResult],
-        created_at: str,
-        git_commit: str | None = None,
-        git_dirty: bool | None = None,
+    results: list[EmbeddingSearchEvalResult],
+    created_at: str,
+    git_commit: str | None = None,
+    git_dirty: bool | None = None,
 ) -> EmbeddingSearchEvalReport:
     metadata = build_eval_report_metadata(
         report_type="embedding_search_eval_report",
@@ -192,8 +192,8 @@ def build_embedding_search_eval_report(
 
 
 def save_embedding_search_eval_report(
-        report: EmbeddingSearchEvalReport,
-        output_file: Path,
+    report: EmbeddingSearchEvalReport,
+    output_file: Path,
 ) -> None:
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
