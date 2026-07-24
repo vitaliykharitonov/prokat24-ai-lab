@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import TypedDict
 
 from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
-from prokat24_ai_lab.product_answers import answer_product_query
-from prokat24_ai_lab.product_catalog import Product
+from prokat24_ai_lab.products.answers import answer_product_query
+from prokat24_ai_lab.products.catalog import Product
 
 
 class ProductAnswerEvalCase(TypedDict):

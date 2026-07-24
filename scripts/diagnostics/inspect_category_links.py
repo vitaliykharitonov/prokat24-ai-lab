@@ -1,7 +1,7 @@
 from argparse import ArgumentParser, Namespace
 
 from prokat24_ai_lab.html_parsing import extract_internal_links
-from prokat24_ai_lab.product_catalog import filter_product_urls
+from prokat24_ai_lab.products.catalog import filter_product_urls
 from prokat24_ai_lab.prokat24_client import fetch_page
 from prokat24_ai_lab.site_config import ALLOWED_DOMAIN
 

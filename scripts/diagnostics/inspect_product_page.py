@@ -3,7 +3,7 @@ from argparse import ArgumentParser, Namespace
 from prokat24_ai_lab.html_parsing import (
     extract_title,
 )
-from prokat24_ai_lab.product_catalog import build_product_from_html
+from prokat24_ai_lab.products.catalog import build_product_from_html
 from prokat24_ai_lab.prokat24_client import fetch_page
 
 

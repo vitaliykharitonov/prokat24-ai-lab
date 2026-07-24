@@ -1,6 +1,6 @@
 import pytest
 
-from prokat24_ai_lab.product_catalog import (
+from prokat24_ai_lab.products.catalog import (
     Product,
     build_product,
     build_product_catalog,
@@ -633,7 +633,7 @@ def test_build_product_fetches_html_and_returns_product(monkeypatch) -> None:
         return PRODUCT_HTML
 
     monkeypatch.setattr(
-        "prokat24_ai_lab.product_catalog.fetch_page",
+        "prokat24_ai_lab.products.catalog.fetch_page",
         fake_fetch_page,
     )
 
@@ -694,7 +694,7 @@ def test_build_products_from_category_returns_products(monkeypatch) -> None:
         raise AssertionError(f"Unexpected URL: {requested_url}")
 
     monkeypatch.setattr(
-        "prokat24_ai_lab.product_catalog.fetch_page",
+        "prokat24_ai_lab.products.catalog.fetch_page",
         fake_fetch_page,
     )
 
@@ -730,7 +730,7 @@ def test_build_product_catalog_returns_products_from_all_categories(monkeypatch)
         raise AssertionError(f"Unexpected category URL: {category_url}")
 
     monkeypatch.setattr(
-        "prokat24_ai_lab.product_catalog.build_products_from_category",
+        "prokat24_ai_lab.products.catalog.build_products_from_category",
         fake_build_products_from_category,
     )
 

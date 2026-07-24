@@ -1,7 +1,7 @@
 import pytest
 
-from prokat24_ai_lab.product_catalog import Product
-from prokat24_ai_lab.product_search import (
+from prokat24_ai_lab.products.catalog import Product
+from prokat24_ai_lab.products.catalog_search import (
     build_product_query_aliases,
     build_product_search_text,
     build_query_word_groups,
