@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from prokat24_ai_lab.openai_embeddings import create_openai_embed_text
+from prokat24_ai_lab.embeddings.openai_client import create_openai_embed_text
 
 
 def test_create_openai_embed_text_returns_embedding() -> None:

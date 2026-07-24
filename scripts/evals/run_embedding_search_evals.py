@@ -8,9 +8,9 @@ from prokat24_ai_lab.embedding_evals import (
     run_embedding_search_evals,
     save_embedding_search_eval_report,
 )
-from prokat24_ai_lab.embedding_index import load_document_embedding_index
+from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
+from prokat24_ai_lab.embeddings.openai_client import create_openai_embed_text
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
-from prokat24_ai_lab.openai_embeddings import create_openai_embed_text
 from prokat24_ai_lab.project_paths import (
     DOCUMENT_EMBEDDING_INDEX_FILE,
     EMBEDDING_SEARCH_EVAL_CASES_FILE,

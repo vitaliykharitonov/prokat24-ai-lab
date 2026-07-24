@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from prokat24_ai_lab.embedding_index import (
+from prokat24_ai_lab.embeddings.document_index import (
     build_document_embedding_index,
     create_document_embedding_index,
     load_document_embedding_index,

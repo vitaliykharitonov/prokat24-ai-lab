@@ -1,6 +1,6 @@
 import pytest
 
-from prokat24_ai_lab.embedding_search import (
+from prokat24_ai_lab.embeddings.search import (
     build_embedding_documents,
     rank_query_by_document_embeddings,
     rank_query_embedding_by_document_embeddings,

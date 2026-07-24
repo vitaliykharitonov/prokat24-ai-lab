@@ -3,7 +3,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
 
-from prokat24_ai_lab.embedding_search import (
+from prokat24_ai_lab.embeddings.search import (
     rank_query_by_document_embeddings,
     rank_query_embedding_by_document_embeddings,
 )
