@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from prokat24_ai_lab.search_evals import (
+from prokat24_ai_lab.evals.search_evals import (
     SearchEvalCase,
     build_search_eval_report,
     calculate_accuracy,

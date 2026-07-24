@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from prokat24_ai_lab.answer_evals import (
+from prokat24_ai_lab.evals.answer_evals import (
     build_answer_eval_report,
     calculate_answer_accuracy,
     count_passed_answer_results,
