@@ -2,134 +2,108 @@
 
 [![Check](https://github.com/vitaliykharitonov/prokat24-ai-lab/actions/workflows/check.yml/badge.svg)](https://github.com/vitaliykharitonov/prokat24-ai-lab/actions/workflows/check.yml)
 
-Учебный AI/Evals проект на базе сайта prokat24.com.ua.
+Python AI/Evals project built around a real equipment rental website.
 
-## Цели
+The project covers data collection, keyword and embedding search, rule-based answers, regression evals, and an automated
+quality gate.
 
-- Изучить Python через реальные задачи.
-- Построить базу знаний по товарам и правилам проката.
-- Сделать AI-чат для клиентов.
-- Построить evals-систему для проверки качества AI-ответов.
+## Features
 
-## Настройка окружения для разработки
+- Knowledge base and product catalog export
+- Keyword search with normalization and aliases
+- Product search and rule-based answers
+- OpenAI embeddings and vector search
+- Offline embedding evaluation
+- JSON eval reports with Git metadata
+- Automated checks with pytest, Ruff, mypy, and GitHub Actions
 
-Создать виртуальное окружение:
+## Architecture
+
+```text
+src/prokat24_ai_lab/
+├── knowledge/   # Knowledge base, search, and answers
+├── products/    # Product catalog, search, and answers
+├── embeddings/  # Embedding indexes and vector search
+├── evals/       # Evaluation logic and reports
+└── *.py         # Shared infrastructure and utilities
+```
+
+## Development setup
+
+Create virtual environment:
 
 ```
 python -m venv .venv
 ```
 
-Активировать виртуальное окружение:
+Activate virtual environment:
 
 ```
 .\.venv\Scripts\Activate.ps1
 ```
 
-Установить проект и dev-зависимости:
+Install project and dependencies:
 
 ```
 pip install -e ".[dev]"
 ```
 
-Запустить полную проверку проекта:
+Run full project check:
 
 ```
 python scripts/check_project.py
 ```
 
-## Быстрая проверка проекта
+## Usage
 
-Главная команда перед коммитом:
-
-[Открыть скрипт проверки проекта](scripts/check_project.py)
+Search the knowledge base:
 
 ```
-python scripts/check_project.py
+python scripts/cli/search_knowledge_base.py "як отримати спорядження?"
 ```
 
-Проверки:
-
-- pytest
-- ruff check
-- ruff format --check
-- mypy
-- knowledge search evals
-- knowledge answer evals
-- product answer evals
-- offline embedding search evals
-
-Полные JSON eval reports можно создать отдельными командами из раздела `Evals`
-
-Ожидаемый результат: все проверки завершаются успешно
-
-## Основные команды
-
-Запуск всех тестов:
+Generate an answer from the knowledge base:
 
 ```
-pytest
+python scripts/cli/answer_question.py "де ви знаходитесь?"
 ```
 
-Проверка качества кода:
-
-```
-ruff check .
-```
-
-Проверка форматирования:
-
-```
-ruff format --check .
-```
-
-Автоматическое форматирование:
-
-```
-ruff format .
-```
-
-Проверка полного проекта:
-
-```
-python scripts/check_project.py
-```
-
-## Поиск по продуктам CLI
-
-Примеры пользовательских запросов:
+Search the product catalog:
 
 ```
 python scripts/cli/search_products.py "скільки коштує 2 місний намет на тиждень"
-python scripts/cli/search_products.py "яка застава за 2 місний намет"
-python scripts/cli/search_products.py "прокат спальника на 2 тижні"
 ```
 
-(Сейчас товарные запросы в answer layer ориентированы на украинский язык)
+## Data export
 
-## Каталог продуктов
+Export the knowledge base:
 
-Экспорт каталога товаров:
-
+```powershell
+python scripts/data/export_knowledge_base.py
 ```
+
+Export the product catalog:
+
+```powershell
 python scripts/data/export_product_catalog.py
 ```
 
-Команда обновляет файл (на основе страниц сайта):
+Generated JSON files are saved in the `data/` directory.
 
+## Embeddings
+
+Build document and query embedding indexes:
+
+```powershell
+python scripts/data/build_document_embedding_index.py
+python scripts/data/build_query_embedding_index.py
 ```
-data/products.json
-```
+
+These commands require an OpenAI API key.
 
 ## Evals
 
-В проекте есть 4 eval-направления:
-
-- `search_eval_report` — оценка качества keyword-поиска по базе знаний.
-- `answer_eval_report` — оценка ответов по базе знаний.
-- `product_answer_eval_report` — оценка ответов на товарные запросы.
-- `embedding_search_eval_report` — оценка качества поиска по эмбеддингам.
-
-Запуск:
+Run individual evaluation suites:
 
 ```powershell
 python scripts/evals/run_search_evals.py
@@ -138,46 +112,24 @@ python scripts/evals/run_product_answer_evals.py
 python scripts/evals/run_offline_embedding_search_evals.py
 ```
 
-JSON-отчёты сохраняются в `reports/` и не коммитятся в Git.
+Run embedding search evals with the OpenAI API:
 
-Все eval reports содержат metadata:
-
-```text
-report_type
-schema_version
-created_at
-git_commit
-git_dirty
+```powershell
+python scripts/evals/run_embedding_search_evals.py
 ```
 
-`git_commit` и `git_dirty` помогают понять, на какой версии кода был создан отчёт и были ли незакоммиченные изменения.
+JSON reports are saved in the `reports/` directory.
 
-## Рабочий цикл разработки
+## Development workflow
 
-Обычный порядок работы:
+1. Create a feature branch.
+2. Make code and test changes.
+3. Run the full project check:
 
-1. Изменить код.
-2. Добавить или обновить тесты.
-3. Запустить проверку проекта:
-
-```
+```powershell
 python scripts/check_project.py
 ```
 
-4. Если всё зелёное — сделать commit.
-5. Отправить изменения на GitHub:
-
-```powershell
-git push
-```
-
-6. Проверить, что GitHub Actions workflow `Check` прошёл успешно.
-
-Для изменений в отдельной ветке используется pull request:
-
-1. Создать feature branch.
-2. Сделать изменения и commit.
-3. Отправить ветку на GitHub.
-4. Открыть pull request в `main`.
-5. Дождаться зелёного GitHub Actions check.
-6. После проверки выполнить merge.
+4. Commit and push the changes.
+5. Open a pull request.
+6. Merge after the GitHub Actions check passes.
