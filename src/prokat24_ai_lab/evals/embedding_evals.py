@@ -21,6 +21,7 @@ class EmbeddingSearchEvalResult(TypedDict):
     actual_document_id: str | None
     actual_score: float | None
     passed: bool
+    expected_rank: int | None
     top_results: list[tuple[str, float]]
 
 
@@ -44,9 +45,7 @@ def evaluate_embedding_search_case(
 ) -> EmbeddingSearchEvalResult:
     query = case["query"]
 
-    search_results = rank_query_by_document_embeddings(
-        query, document_embeddings, embed_text, top_k=3
-    )
+    search_results = rank_query_by_document_embeddings(query, document_embeddings, embed_text)
 
     return build_embedding_search_eval_result(case, search_results)
 
@@ -59,7 +58,6 @@ def evaluate_precomputed_embedding_search_case(
     search_results = rank_query_embedding_by_document_embeddings(
         query_embedding,
         document_embeddings,
-        top_k=3,
     )
 
     return build_embedding_search_eval_result(case, search_results)
@@ -72,11 +70,17 @@ def build_embedding_search_eval_result(
     expected_document_id = case["expected_document_id"]
     actual_document_id = None
     actual_score = None
+    expected_rank = None
 
     if search_results:
         actual_document_id, actual_score = search_results[0]
 
     passed = actual_document_id == expected_document_id
+
+    for index, (document_id, _) in enumerate(search_results, start=1):
+        if document_id == expected_document_id:
+            expected_rank = index
+            break
 
     return {
         "query": case["query"],
@@ -84,6 +88,7 @@ def build_embedding_search_eval_result(
         "actual_document_id": actual_document_id,
         "actual_score": actual_score,
         "passed": passed,
+        "expected_rank": expected_rank,
         "top_results": search_results,
     }
 
