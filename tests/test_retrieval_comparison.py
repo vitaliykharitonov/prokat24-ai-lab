@@ -1,6 +1,23 @@
 from prokat24_ai_lab.evals.retrieval_comparison import (
     build_retrieval_comparison_result,
+    evaluate_retrieval_comparison_case,
 )
+from prokat24_ai_lab.knowledge.base import KnowledgePage
+
+TEST_PAGES: list[KnowledgePage] = [
+    {
+        "url": "contact-us",
+        "title": "Контакти",
+        "text": "Наша адреса та телефон",
+        "text_length": 21,
+    },
+    {
+        "url": "dostavka",
+        "title": "Доставка",
+        "text": "Доставка спорядження по Києву",
+        "text_length": 30,
+    },
+]
 
 
 def test_comparison_when_both_retrievers_return_expected_first() -> None:
@@ -87,4 +104,62 @@ def test_build_retrieval_comparison_result_when_both_retrievers_return_no_docume
 
     assert result["embedding_actual_document_id"] is None
     assert result["embedding_expected_rank"] is None
+    assert result["embedding_passed"] is False
+
+
+def test_evaluate_retrieval_comparison_case_returns_expected_first() -> None:
+    case = {
+        "query": "де ваша адреса?",
+        "expected_document_id": "contact-us",
+    }
+
+    document_embeddings = {
+        "contact-us": [1.0, 0.0],
+        "dostavka": [0.0, 1.0],
+    }
+
+    query_embedding = [1.0, 0.0]
+
+    result = evaluate_retrieval_comparison_case(
+        case,
+        TEST_PAGES,
+        document_embeddings,
+        query_embedding,
+    )
+
+    assert result["keyword_actual_document_id"] == "contact-us"
+    assert result["keyword_expected_rank"] == 1
+    assert result["keyword_passed"] is True
+
+    assert result["embedding_actual_document_id"] == "contact-us"
+    assert result["embedding_expected_rank"] == 1
+    assert result["embedding_passed"] is True
+
+
+def test_evaluate_retrieval_comparison_case_returns_expected_second() -> None:
+    case = {
+        "query": "де ваша адреса?",
+        "expected_document_id": "contact-us",
+    }
+
+    document_embeddings = {
+        "contact-us": [1.0, 0.0],
+        "dostavka": [0.0, 1.0],
+    }
+
+    query_embedding = [0.0, 1.0]
+
+    result = evaluate_retrieval_comparison_case(
+        case,
+        TEST_PAGES,
+        document_embeddings,
+        query_embedding,
+    )
+
+    assert result["keyword_actual_document_id"] == "contact-us"
+    assert result["keyword_expected_rank"] == 1
+    assert result["keyword_passed"] is True
+
+    assert result["embedding_actual_document_id"] == "dostavka"
+    assert result["embedding_expected_rank"] == 2
     assert result["embedding_passed"] is False

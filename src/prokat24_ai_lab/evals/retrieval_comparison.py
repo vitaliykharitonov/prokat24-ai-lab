@@ -1,6 +1,11 @@
 from typing import TypedDict
 
+from prokat24_ai_lab.embeddings.search import (
+    rank_query_embedding_by_document_embeddings,
+)
 from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalCase
+from prokat24_ai_lab.knowledge.base import KnowledgePage
+from prokat24_ai_lab.knowledge.keyword_search import search_knowledge_base
 
 
 class RetrievalComparisonResult(TypedDict):
@@ -57,3 +62,24 @@ def build_retrieval_comparison_result(
         "embedding_expected_rank": embedding_expected_rank,
         "embedding_passed": embedding_passed,
     }
+
+
+def evaluate_retrieval_comparison_case(
+    case: EmbeddingSearchEvalCase,
+    pages: list[KnowledgePage],
+    document_embeddings: dict[str, list[float]],
+    query_embedding: list[float],
+) -> RetrievalComparisonResult:
+    keyword_results = search_knowledge_base(case["query"], pages)
+    keyword_document_ids = [keyword_result["url"] for keyword_result in keyword_results]
+    embedding_results = rank_query_embedding_by_document_embeddings(
+        query_embedding,
+        document_embeddings,
+    )
+    embedding_document_ids = [document_id for document_id, _score in embedding_results]
+
+    return build_retrieval_comparison_result(
+        case,
+        keyword_document_ids,
+        embedding_document_ids,
+    )
