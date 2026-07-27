@@ -1,6 +1,9 @@
+import pytest
+
 from prokat24_ai_lab.evals.retrieval_comparison import (
     build_retrieval_comparison_result,
     evaluate_retrieval_comparison_case,
+    run_retrieval_comparison_evals,
 )
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 
@@ -163,3 +166,61 @@ def test_evaluate_retrieval_comparison_case_returns_expected_second() -> None:
     assert result["embedding_actual_document_id"] == "dostavka"
     assert result["embedding_expected_rank"] == 2
     assert result["embedding_passed"] is False
+
+
+def test_run_retrieval_comparison_evals_returns_result_for_each_case() -> None:
+    cases = [
+        {
+            "query": "де ваша адреса?",
+            "expected_document_id": "contact-us",
+        },
+        {
+            "query": "чи є доставка?",
+            "expected_document_id": "dostavka",
+        },
+    ]
+    document_embeddings = {
+        "contact-us": [1.0, 0.0],
+        "dostavka": [0.0, 1.0],
+    }
+
+    query_embeddings = {
+        "де ваша адреса?": [1.0, 0.0],
+        "чи є доставка?": [0.0, 1.0],
+    }
+
+    results = run_retrieval_comparison_evals(
+        cases,
+        TEST_PAGES,
+        document_embeddings,
+        query_embeddings,
+    )
+
+    assert len(results) == 2
+    assert results[0]["query"] == "де ваша адреса?"
+    assert results[1]["query"] == "чи є доставка?"
+    assert results[0]["embedding_passed"] is True
+    assert results[1]["embedding_passed"] is True
+
+
+def test_run_retrieval_comparison_evals_raises_for_missing_query_embedding() -> None:
+    cases = [
+        {
+            "query": "де ваша адреса?",
+            "expected_document_id": "contact-us",
+        },
+    ]
+    document_embeddings = {
+        "contact-us": [1.0, 0.0],
+        "dostavka": [0.0, 1.0],
+    }
+
+    query_embeddings = {}
+
+    with pytest.raises(ValueError, match="Query embedding not found: де ваша адреса"):
+        run_retrieval_comparison_evals(
+            cases,
+            TEST_PAGES,
+            document_embeddings,
+            query_embeddings,
+        )

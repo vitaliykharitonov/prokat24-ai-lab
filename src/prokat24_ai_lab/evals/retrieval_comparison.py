@@ -83,3 +83,26 @@ def evaluate_retrieval_comparison_case(
         keyword_document_ids,
         embedding_document_ids,
     )
+
+
+def run_retrieval_comparison_evals(
+    cases: list[EmbeddingSearchEvalCase],
+    pages: list[KnowledgePage],
+    document_embeddings: dict[str, list[float]],
+    query_embeddings: dict[str, list[float]],
+) -> list[RetrievalComparisonResult]:
+    results: list[RetrievalComparisonResult] = []
+    for case in cases:
+        query = case["query"]
+
+        try:
+            query_embedding = query_embeddings[query]
+
+        except KeyError:
+            raise ValueError(f"Query embedding not found: {query}") from None
+
+        results.append(
+            evaluate_retrieval_comparison_case(case, pages, document_embeddings, query_embedding)
+        )
+
+    return results
