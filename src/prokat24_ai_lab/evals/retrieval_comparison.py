@@ -21,6 +21,23 @@ class RetrievalComparisonResult(TypedDict):
     embedding_passed: bool
 
 
+class RetrievalComparisonSummary(TypedDict):
+    total_cases: int
+
+    keyword_passed_cases: int
+    keyword_accuracy: float
+    keyword_top_3_accuracy: float
+
+    embedding_passed_cases: int
+    embedding_accuracy: float
+    embedding_top_3_accuracy: float
+
+    both_passed_cases: int
+    keyword_only_passed_cases: int
+    embedding_only_passed_cases: int
+    both_failed_cases: int
+
+
 def build_retrieval_comparison_result(
     case: EmbeddingSearchEvalCase,
     keyword_document_ids: list[str],
@@ -106,3 +123,67 @@ def run_retrieval_comparison_evals(
         )
 
     return results
+
+
+def build_retrieval_comparison_summary(
+    results: list[RetrievalComparisonResult],
+) -> RetrievalComparisonSummary:
+    total_cases = len(results)
+    keyword_passed_cases = 0
+    embedding_passed_cases = 0
+    keyword_top_3_passed_count = 0
+    embedding_top_3_passed_count = 0
+    both_passed_cases = 0
+    keyword_only_passed_cases = 0
+    embedding_only_passed_cases = 0
+    both_failed_cases = 0
+
+    for result in results:
+        if result["keyword_passed"]:
+            keyword_passed_cases += 1
+
+        if result["embedding_passed"]:
+            embedding_passed_cases += 1
+
+        if result["keyword_expected_rank"] is not None and result["keyword_expected_rank"] <= 3:
+            keyword_top_3_passed_count += 1
+
+        if result["embedding_expected_rank"] is not None and result["embedding_expected_rank"] <= 3:
+            embedding_top_3_passed_count += 1
+
+        if result["keyword_passed"] and result["embedding_passed"]:
+            both_passed_cases += 1
+
+        if result["keyword_passed"] and not result["embedding_passed"]:
+            keyword_only_passed_cases += 1
+
+        if result["embedding_passed"] and not result["keyword_passed"]:
+            embedding_only_passed_cases += 1
+
+        if not result["keyword_passed"] and not result["embedding_passed"]:
+            both_failed_cases += 1
+
+    if total_cases == 0:
+        keyword_accuracy = 0.0
+        embedding_accuracy = 0.0
+        keyword_top_3_accuracy = 0.0
+        embedding_top_3_accuracy = 0.0
+    else:
+        keyword_accuracy = keyword_passed_cases / total_cases
+        embedding_accuracy = embedding_passed_cases / total_cases
+        keyword_top_3_accuracy = keyword_top_3_passed_count / total_cases
+        embedding_top_3_accuracy = embedding_top_3_passed_count / total_cases
+
+    return {
+        "total_cases": total_cases,
+        "keyword_passed_cases": keyword_passed_cases,
+        "keyword_accuracy": keyword_accuracy,
+        "keyword_top_3_accuracy": keyword_top_3_accuracy,
+        "embedding_passed_cases": embedding_passed_cases,
+        "embedding_accuracy": embedding_accuracy,
+        "embedding_top_3_accuracy": embedding_top_3_accuracy,
+        "both_passed_cases": both_passed_cases,
+        "keyword_only_passed_cases": keyword_only_passed_cases,
+        "embedding_only_passed_cases": embedding_only_passed_cases,
+        "both_failed_cases": both_failed_cases,
+    }

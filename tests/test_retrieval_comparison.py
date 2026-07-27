@@ -1,7 +1,9 @@
 import pytest
 
 from prokat24_ai_lab.evals.retrieval_comparison import (
+    RetrievalComparisonResult,
     build_retrieval_comparison_result,
+    build_retrieval_comparison_summary,
     evaluate_retrieval_comparison_case,
     run_retrieval_comparison_evals,
 )
@@ -224,3 +226,83 @@ def test_run_retrieval_comparison_evals_raises_for_missing_query_embedding() -> 
             document_embeddings,
             query_embeddings,
         )
+
+
+def test_build_retrieval_comparison_summary_calculates_metrics() -> None:
+    results: list[RetrievalComparisonResult] = [
+        {
+            "query": "обидва знайшли правильно",
+            "expected_document_id": "contact-us",
+            "keyword_actual_document_id": "contact-us",
+            "keyword_expected_rank": 1,
+            "keyword_passed": True,
+            "embedding_actual_document_id": "contact-us",
+            "embedding_expected_rank": 1,
+            "embedding_passed": True,
+        },
+        {
+            "query": "тільки keyword знайшов правильно",
+            "expected_document_id": "dostavka",
+            "keyword_actual_document_id": "dostavka",
+            "keyword_expected_rank": 1,
+            "keyword_passed": True,
+            "embedding_actual_document_id": "pravila-prokata",
+            "embedding_expected_rank": 2,
+            "embedding_passed": False,
+        },
+        {
+            "query": "тільки embedding знайшов правильно",
+            "expected_document_id": "o-nas",
+            "keyword_actual_document_id": "pravila-prokata",
+            "keyword_expected_rank": 4,
+            "keyword_passed": False,
+            "embedding_actual_document_id": "o-nas",
+            "embedding_expected_rank": 1,
+            "embedding_passed": True,
+        },
+        {
+            "query": "обидва не знайшли",
+            "expected_document_id": "contact-us",
+            "keyword_actual_document_id": None,
+            "keyword_expected_rank": None,
+            "keyword_passed": False,
+            "embedding_actual_document_id": None,
+            "embedding_expected_rank": None,
+            "embedding_passed": False,
+        },
+    ]
+
+    summary = build_retrieval_comparison_summary(results)
+
+    assert summary["total_cases"] == 4
+
+    assert summary["keyword_passed_cases"] == 2
+    assert summary["keyword_accuracy"] == 0.5
+    assert summary["keyword_top_3_accuracy"] == 0.5
+
+    assert summary["embedding_passed_cases"] == 2
+    assert summary["embedding_accuracy"] == 0.5
+    assert summary["embedding_top_3_accuracy"] == 0.75
+
+    assert summary["both_passed_cases"] == 1
+    assert summary["keyword_only_passed_cases"] == 1
+    assert summary["embedding_only_passed_cases"] == 1
+    assert summary["both_failed_cases"] == 1
+
+
+def test_build_retrieval_comparison_summary_returns_zeros_for_empty_results() -> None:
+    results: list[RetrievalComparisonResult] = []
+
+    summary = build_retrieval_comparison_summary(results)
+
+    assert summary["total_cases"] == 0
+    assert summary["keyword_passed_cases"] == 0
+    assert summary["keyword_accuracy"] == 0.0
+    assert summary["keyword_top_3_accuracy"] == 0.0
+    assert summary["embedding_passed_cases"] == 0
+    assert summary["embedding_accuracy"] == 0.0
+    assert summary["embedding_top_3_accuracy"] == 0.0
+    assert summary["both_passed_cases"] == 0
+    assert summary["keyword_only_passed_cases"] == 0
+    assert summary["embedding_only_passed_cases"] == 0
+    assert summary["both_failed_cases"] == 0
