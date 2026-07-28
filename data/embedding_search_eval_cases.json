@@ -8,7 +8,7 @@
     "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
   },
   {
-    "query": "куди мені приїхати, щоб забрати замовлення?",
+    "query": "за якою адресою можна забрати орендоване спорядження?",
     "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
   },
   {
@@ -18,5 +18,45 @@
   {
     "query": "що буде, якщо поверну речі пізніше?",
     "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "чи можна забрати спорядження самостійно?",
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "де знаходяться ваші пункти прокату?",
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "як порахують строк оренди, якщо я беру речі більше ніж на три дні?",
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "чи повернуть передоплату, якщо я скасую бронювання?",
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+  },
+  {
+    "query": "скільки коштуватиме доставка спорядження за межі Києва?",
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "чи потрібно завчасно погоджувати доставку?",
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/"
+  },
+  {
+    "query": "за яким номером можна зв’язатися з вами у Viber?",
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "на яку електронну адресу написати службі підтримки?",
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
+  },
+  {
+    "query": "чи продаєте ви нове та вживане спорядження?",
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/"
+  },
+  {
+    "query": "як ви доглядаєте за одягом і взуттям після повернення з прокату?",
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/"
   }
 ]

@@ -90,6 +90,7 @@ def test_evaluate_embedding_search_case_passes_when_expected_document_is_first()
     assert result["actual_document_id"] == "delivery"
     assert result["actual_score"] == 1.0
     assert result["passed"] is True
+    assert result["expected_rank"] == 1
     assert result["top_results"][0] == ("delivery", 1.0)
 
 
@@ -115,6 +116,7 @@ def test_evaluate_embedding_search_case_fails_when_another_document_is_first() -
     assert result["actual_document_id"] == "contacts"
     assert result["actual_score"] == 1.0
     assert result["passed"] is False
+    assert result["expected_rank"] == 2
     assert result["top_results"][0] == ("contacts", 1.0)
 
 
@@ -133,6 +135,7 @@ def test_evaluate_embedding_search_case_handles_empty_document_embeddings() -> N
     assert result["actual_document_id"] is None
     assert result["actual_score"] is None
     assert result["passed"] is False
+    assert result["expected_rank"] is None
     assert result["top_results"] == []
 
 

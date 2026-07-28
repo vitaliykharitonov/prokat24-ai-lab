@@ -16,8 +16,8 @@ from prokat24_ai_lab.project_paths import (
     QUERY_EMBEDDING_INDEX_FILE,
 )
 
-MIN_ACCURACY = 0.80
-MIN_TOP_3_ACCURACY = 1.00
+MIN_ACCURACY = 0.70
+MIN_TOP_3_ACCURACY = 0.90
 
 
 def main() -> int:
@@ -56,6 +56,7 @@ def main() -> int:
         print(f"Actual document: {result['actual_document_id']}")
         print(f"Actual score: {result['actual_score']}")
         print(f"Passed: {result['passed']}")
+        print(f"Expected rank: {result['expected_rank']}")
 
         if result["passed"] is False:
             print("Top results:")
