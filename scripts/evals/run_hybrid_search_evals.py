@@ -58,6 +58,9 @@ def main() -> int:
     save_hybrid_search_eval_report(report, HYBRID_SEARCH_EVAL_REPORT_FILE)
 
     for result in results:
+        if result["passed"]:
+            continue
+
         print(f"Query: {result['query']}")
         print(f"Expected document: {result['expected_document_id']}")
         print(f"Actual document: {result['actual_document_id']}")
