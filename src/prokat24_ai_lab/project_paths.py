@@ -33,3 +33,4 @@ EMBEDDING_SEARCH_EVAL_REPORT_FILE = REPORTS_DIR / "embedding_search_eval_report.
 OFFLINE_EMBEDDING_SEARCH_EVAL_REPORT_FILE = (
     REPORTS_DIR / "offline_embedding_search_eval_report.json"
 )
+HYBRID_SEARCH_EVAL_REPORT_FILE = REPORTS_DIR / "hybrid_search_eval_report.json"
