@@ -14,6 +14,14 @@ class HybridSearchEvalResult(TypedDict):
     passed: bool
 
 
+class HybridSearchEvalSummary(TypedDict):
+    total_cases: int
+    passed_cases: int
+    accuracy: float
+    top_3_passed_cases: int
+    top_3_accuracy: float
+
+
 def evaluate_hybrid_search_case(
     case: EmbeddingSearchEvalCase,
     pages: list[KnowledgePage],
@@ -81,3 +89,34 @@ def run_hybrid_search_evals(
         )
 
     return results
+
+
+def build_hybrid_search_eval_summary(
+    results: list[HybridSearchEvalResult],
+) -> HybridSearchEvalSummary:
+    total_cases = len(results)
+    passed_cases = 0
+    top_3_passed_cases = 0
+
+    for result in results:
+        if result["passed"]:
+            passed_cases += 1
+
+        if result["expected_rank"] is not None and result["expected_rank"] <= 3:
+            top_3_passed_cases += 1
+
+    if total_cases == 0:
+        accuracy = 0.0
+        top_3_accuracy = 0.0
+
+    else:
+        accuracy = passed_cases / total_cases
+        top_3_accuracy = top_3_passed_cases / total_cases
+
+    return {
+        "total_cases": total_cases,
+        "passed_cases": passed_cases,
+        "accuracy": accuracy,
+        "top_3_passed_cases": top_3_passed_cases,
+        "top_3_accuracy": top_3_accuracy,
+    }

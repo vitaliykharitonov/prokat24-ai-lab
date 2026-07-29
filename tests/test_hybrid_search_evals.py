@@ -2,6 +2,8 @@ import pytest
 
 from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalCase
 from prokat24_ai_lab.evals.hybrid_search_evals import (
+    HybridSearchEvalResult,
+    build_hybrid_search_eval_summary,
     evaluate_hybrid_search_case,
     run_hybrid_search_evals,
 )
@@ -162,3 +164,60 @@ def test_run_hybrid_search_evals_raises_error_for_missing_query_embedding() -> N
             {},
             {},
         )
+
+
+def test_build_hybrid_search_eval_summary_calculates_metrics() -> None:
+    results: list[HybridSearchEvalResult] = [
+        {
+            "query": "очікуваний документ на першому місці",
+            "expected_document_id": "dostavka",
+            "actual_document_id": "dostavka",
+            "actual_score": 0.032,
+            "expected_rank": 1,
+            "passed": True,
+        },
+        {
+            "query": "очікуваний документ на другому місці",
+            "expected_document_id": "contact-us",
+            "actual_document_id": "dostavka",
+            "actual_score": 0.031,
+            "expected_rank": 2,
+            "passed": False,
+        },
+        {
+            "query": "очікуваний документ на четвертому місці",
+            "expected_document_id": "pravila-prokata",
+            "actual_document_id": "contact-us",
+            "actual_score": 0.030,
+            "expected_rank": 4,
+            "passed": False,
+        },
+        {
+            "query": "очікуваний документ не знайдено",
+            "expected_document_id": "o-nas",
+            "actual_document_id": None,
+            "actual_score": None,
+            "expected_rank": None,
+            "passed": False,
+        },
+    ]
+
+    summary = build_hybrid_search_eval_summary(results)
+
+    assert summary["total_cases"] == 4
+    assert summary["passed_cases"] == 1
+    assert summary["accuracy"] == 0.25
+    assert summary["top_3_passed_cases"] == 2
+    assert summary["top_3_accuracy"] == 0.5
+
+
+def test_build_hybrid_search_eval_summary_returns_zeros_for_empty_results() -> None:
+    results: list[HybridSearchEvalResult] = []
+
+    summary = build_hybrid_search_eval_summary(results)
+
+    assert summary["total_cases"] == 0
+    assert summary["passed_cases"] == 0
+    assert summary["accuracy"] == 0.0
+    assert summary["top_3_passed_cases"] == 0
+    assert summary["top_3_accuracy"] == 0.0
