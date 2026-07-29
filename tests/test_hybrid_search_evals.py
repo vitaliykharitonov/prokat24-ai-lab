@@ -1,11 +1,17 @@
+import json
+from pathlib import Path
+
 import pytest
 
 from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalCase
 from prokat24_ai_lab.evals.hybrid_search_evals import (
+    HybridSearchEvalReport,
     HybridSearchEvalResult,
+    build_hybrid_search_eval_report,
     build_hybrid_search_eval_summary,
     evaluate_hybrid_search_case,
     run_hybrid_search_evals,
+    save_hybrid_search_eval_report,
 )
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 
@@ -30,6 +36,44 @@ def knowledge_pages() -> list[KnowledgePage]:
             "title": "Правила прокату",
             "text": "Строк оренди, застава та повернення речей.",
             "text_length": 44,
+        },
+    ]
+
+
+@pytest.fixture
+def results() -> list[HybridSearchEvalResult]:
+    return [
+        {
+            "query": "очікуваний документ на першому місці",
+            "expected_document_id": "dostavka",
+            "actual_document_id": "dostavka",
+            "actual_score": 0.032,
+            "expected_rank": 1,
+            "passed": True,
+        },
+        {
+            "query": "очікуваний документ на другому місці",
+            "expected_document_id": "contact-us",
+            "actual_document_id": "dostavka",
+            "actual_score": 0.031,
+            "expected_rank": 2,
+            "passed": False,
+        },
+        {
+            "query": "очікуваний документ на четвертому місці",
+            "expected_document_id": "pravila-prokata",
+            "actual_document_id": "contact-us",
+            "actual_score": 0.030,
+            "expected_rank": 4,
+            "passed": False,
+        },
+        {
+            "query": "очікуваний документ не знайдено",
+            "expected_document_id": "o-nas",
+            "actual_document_id": None,
+            "actual_score": None,
+            "expected_rank": None,
+            "passed": False,
         },
     ]
 
@@ -166,42 +210,7 @@ def test_run_hybrid_search_evals_raises_error_for_missing_query_embedding() -> N
         )
 
 
-def test_build_hybrid_search_eval_summary_calculates_metrics() -> None:
-    results: list[HybridSearchEvalResult] = [
-        {
-            "query": "очікуваний документ на першому місці",
-            "expected_document_id": "dostavka",
-            "actual_document_id": "dostavka",
-            "actual_score": 0.032,
-            "expected_rank": 1,
-            "passed": True,
-        },
-        {
-            "query": "очікуваний документ на другому місці",
-            "expected_document_id": "contact-us",
-            "actual_document_id": "dostavka",
-            "actual_score": 0.031,
-            "expected_rank": 2,
-            "passed": False,
-        },
-        {
-            "query": "очікуваний документ на четвертому місці",
-            "expected_document_id": "pravila-prokata",
-            "actual_document_id": "contact-us",
-            "actual_score": 0.030,
-            "expected_rank": 4,
-            "passed": False,
-        },
-        {
-            "query": "очікуваний документ не знайдено",
-            "expected_document_id": "o-nas",
-            "actual_document_id": None,
-            "actual_score": None,
-            "expected_rank": None,
-            "passed": False,
-        },
-    ]
-
+def test_build_hybrid_search_eval_summary_calculates_metrics(results) -> None:
     summary = build_hybrid_search_eval_summary(results)
 
     assert summary["total_cases"] == 4
@@ -221,3 +230,64 @@ def test_build_hybrid_search_eval_summary_returns_zeros_for_empty_results() -> N
     assert summary["accuracy"] == 0.0
     assert summary["top_3_passed_cases"] == 0
     assert summary["top_3_accuracy"] == 0.0
+
+
+def test_build_hybrid_search_eval_report_includes_metadata_and_metrics(
+    results: list[HybridSearchEvalResult],
+) -> None:
+    report = build_hybrid_search_eval_report(
+        results,
+        created_at="2026-01-01T00:00:00+00:00",
+        rank_constant=60,
+        git_commit="abc1234",
+        git_dirty=False,
+    )
+
+    assert report["report_type"] == "hybrid_search_eval_report"
+    assert report["schema_version"] == 1
+    assert report["created_at"] == "2026-01-01T00:00:00+00:00"
+    assert report["git_commit"] == "abc1234"
+    assert report["git_dirty"] is False
+    assert report["rank_constant"] == 60
+    assert report["total_cases"] == 4
+    assert report["passed_cases"] == 1
+    assert report["accuracy"] == 0.25
+    assert report["top_3_passed_cases"] == 2
+    assert report["top_3_accuracy"] == 0.5
+    assert report["results"] == results
+
+
+def test_save_hybrid_search_eval_report_writes_json_file(tmp_path: Path) -> None:
+    report: HybridSearchEvalReport = {
+        "report_type": "hybrid_search_eval_report",
+        "schema_version": 1,
+        "created_at": "2026-07-29T18:00:00+00:00",
+        "git_commit": "abc123",
+        "git_dirty": False,
+        "rank_constant": 60,
+        "total_cases": 1,
+        "passed_cases": 1,
+        "accuracy": 1.0,
+        "top_3_passed_cases": 1,
+        "top_3_accuracy": 1.0,
+        "results": [
+            {
+                "query": "чи можна замовити доставку?",
+                "expected_document_id": "dostavka",
+                "actual_document_id": "dostavka",
+                "actual_score": 0.03278688524590164,
+                "expected_rank": 1,
+                "passed": True,
+            },
+        ],
+    }
+
+    output_file = tmp_path / "reports" / "hybrid_search_eval_report.json"
+
+    save_hybrid_search_eval_report(report, output_file)
+
+    with open(output_file, encoding="utf-8") as file:
+        loaded_report = json.load(file)
+
+    assert output_file.exists()
+    assert loaded_report == report

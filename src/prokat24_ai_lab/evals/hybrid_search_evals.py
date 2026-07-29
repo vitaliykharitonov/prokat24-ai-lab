@@ -1,6 +1,9 @@
+import json
+from pathlib import Path
 from typing import TypedDict
 
 from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalCase
+from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.retrieval.hybrid_search import rank_query_with_reciprocal_rank_fusion
 
@@ -20,6 +23,23 @@ class HybridSearchEvalSummary(TypedDict):
     accuracy: float
     top_3_passed_cases: int
     top_3_accuracy: float
+
+
+class HybridSearchEvalReport(TypedDict):
+    report_type: str
+    schema_version: int
+    created_at: str
+    git_commit: str | None
+    git_dirty: bool | None
+
+    rank_constant: int
+    total_cases: int
+    passed_cases: int
+    accuracy: float
+    top_3_passed_cases: int
+    top_3_accuracy: float
+
+    results: list[HybridSearchEvalResult]
 
 
 def evaluate_hybrid_search_case(
@@ -120,3 +140,37 @@ def build_hybrid_search_eval_summary(
         "top_3_passed_cases": top_3_passed_cases,
         "top_3_accuracy": top_3_accuracy,
     }
+
+
+def build_hybrid_search_eval_report(
+    results: list[HybridSearchEvalResult],
+    created_at: str,
+    rank_constant: int,
+    git_commit: str | None = None,
+    git_dirty: bool | None = None,
+) -> HybridSearchEvalReport:
+    metadata = build_eval_report_metadata(
+        report_type="hybrid_search_eval_report",
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
+
+    summary = build_hybrid_search_eval_summary(results)
+
+    return {
+        **metadata,
+        "rank_constant": rank_constant,
+        **summary,
+        "results": results,
+    }
+
+
+def save_hybrid_search_eval_report(
+    report: HybridSearchEvalReport,
+    output_file: Path,
+) -> None:
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_file, "w", encoding="utf-8") as file:
+        json.dump(report, file, ensure_ascii=False, indent=2)
