@@ -53,3 +53,31 @@ def evaluate_hybrid_search_case(
         "expected_rank": expected_rank,
         "passed": passed,
     }
+
+
+def run_hybrid_search_evals(
+    cases: list[EmbeddingSearchEvalCase],
+    pages: list[KnowledgePage],
+    document_embeddings: dict[str, list[float]],
+    query_embeddings: dict[str, list[float]],
+    rank_constant: int = 60,
+) -> list[HybridSearchEvalResult]:
+    results = []
+    for case in cases:
+        query = case["query"]
+        try:
+            query_embedding = query_embeddings[query]
+        except KeyError:
+            raise ValueError(f"Query embedding not found: {query}") from None
+
+        results.append(
+            evaluate_hybrid_search_case(
+                case,
+                pages,
+                document_embeddings,
+                query_embedding,
+                rank_constant,
+            )
+        )
+
+    return results
