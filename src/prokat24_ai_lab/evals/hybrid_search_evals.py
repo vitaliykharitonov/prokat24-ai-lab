@@ -5,7 +5,10 @@ from typing import TypedDict
 from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalCase
 from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
 from prokat24_ai_lab.knowledge.base import KnowledgePage
-from prokat24_ai_lab.retrieval.hybrid_search import rank_query_with_reciprocal_rank_fusion
+from prokat24_ai_lab.retrieval.hybrid_search import (
+    rank_query_with_reciprocal_rank_fusion,
+    rank_query_with_weighted_reciprocal_rank_fusion,
+)
 
 
 class HybridSearchEvalResult(TypedDict):
@@ -42,26 +45,15 @@ class HybridSearchEvalReport(TypedDict):
     results: list[HybridSearchEvalResult]
 
 
-def evaluate_hybrid_search_case(
+def build_hybrid_search_eval_result(
     case: EmbeddingSearchEvalCase,
-    pages: list[KnowledgePage],
-    document_embeddings: dict[str, list[float]],
-    query_embedding: list[float],
-    rank_constant: int = 60,
+    search_results: list[tuple[str, float]],
 ) -> HybridSearchEvalResult:
     query = case["query"]
     expected_document_id = case["expected_document_id"]
     actual_document_id: str | None = None
     actual_score: float | None = None
     expected_rank: int | None = None
-
-    search_results = rank_query_with_reciprocal_rank_fusion(
-        query,
-        pages,
-        document_embeddings,
-        query_embedding,
-        rank_constant,
-    )
 
     if search_results:
         actual_document_id, actual_score = search_results[0]
@@ -81,6 +73,50 @@ def evaluate_hybrid_search_case(
         "expected_rank": expected_rank,
         "passed": passed,
     }
+
+
+def evaluate_hybrid_search_case(
+    case: EmbeddingSearchEvalCase,
+    pages: list[KnowledgePage],
+    document_embeddings: dict[str, list[float]],
+    query_embedding: list[float],
+    rank_constant: int = 60,
+) -> HybridSearchEvalResult:
+    query = case["query"]
+
+    search_results = rank_query_with_reciprocal_rank_fusion(
+        query,
+        pages,
+        document_embeddings,
+        query_embedding,
+        rank_constant,
+    )
+
+    return build_hybrid_search_eval_result(case, search_results)
+
+
+def evaluate_weighted_hybrid_search_case(
+    case: EmbeddingSearchEvalCase,
+    pages: list[KnowledgePage],
+    document_embeddings: dict[str, list[float]],
+    query_embedding: list[float],
+    keyword_weight: float,
+    embedding_weight: float,
+    rank_constant: int = 60,
+) -> HybridSearchEvalResult:
+    query = case["query"]
+
+    search_results = rank_query_with_weighted_reciprocal_rank_fusion(
+        query,
+        pages,
+        document_embeddings,
+        query_embedding,
+        keyword_weight,
+        embedding_weight,
+        rank_constant,
+    )
+
+    return build_hybrid_search_eval_result(case, search_results)
 
 
 def run_hybrid_search_evals(
@@ -104,7 +140,39 @@ def run_hybrid_search_evals(
                 pages,
                 document_embeddings,
                 query_embedding,
-                rank_constant,
+                rank_constant=rank_constant,
+            )
+        )
+
+    return results
+
+
+def run_weighted_hybrid_search_evals(
+    cases: list[EmbeddingSearchEvalCase],
+    pages: list[KnowledgePage],
+    document_embeddings: dict[str, list[float]],
+    query_embeddings: dict[str, list[float]],
+    keyword_weight: float,
+    embedding_weight: float,
+    rank_constant: int = 60,
+) -> list[HybridSearchEvalResult]:
+    results = []
+    for case in cases:
+        query = case["query"]
+        try:
+            query_embedding = query_embeddings[query]
+        except KeyError:
+            raise ValueError(f"Query embedding not found: {query}") from None
+
+        results.append(
+            evaluate_weighted_hybrid_search_case(
+                case,
+                pages,
+                document_embeddings,
+                query_embedding,
+                keyword_weight=keyword_weight,
+                embedding_weight=embedding_weight,
+                rank_constant=rank_constant,
             )
         )
 
