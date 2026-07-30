@@ -12,6 +12,7 @@ from prokat24_ai_lab.evals.hybrid_search_evals import (
     evaluate_hybrid_search_case,
     evaluate_weighted_hybrid_search_case,
     run_hybrid_search_evals,
+    run_weighted_hybrid_search_evals,
     save_hybrid_search_eval_report,
 )
 from prokat24_ai_lab.knowledge.base import KnowledgePage
@@ -239,6 +240,68 @@ def test_run_hybrid_search_evals_raises_error_for_missing_query_embedding() -> N
             [],
             {},
             {},
+        )
+
+
+def test_run_weighted_hybrid_search_evals_returns_all_results(
+    knowledge_pages: list[KnowledgePage],
+) -> None:
+    cases: list[EmbeddingSearchEvalCase] = [
+        {
+            "query": "доставка спорядження",
+            "expected_document_id": "dostavka",
+        },
+        {
+            "query": "контактний телефон",
+            "expected_document_id": "contact-us",
+        },
+    ]
+    document_embeddings = {
+        "dostavka": [1.0, 0.0, 0.0],
+        "contact-us": [0.0, 1.0, 0.0],
+        "pravila-prokata": [0.0, 0.0, 1.0],
+    }
+    query_embeddings = {
+        "доставка спорядження": [1.0, 0.0, 0.0],
+        "контактний телефон": [0.0, 1.0, 0.0],
+    }
+    keyword_weight = 1
+    embedding_weight = 2
+
+    results = run_weighted_hybrid_search_evals(
+        cases,
+        knowledge_pages,
+        document_embeddings,
+        query_embeddings,
+        keyword_weight,
+        embedding_weight,
+    )
+
+    assert len(results) == 2
+    assert results[0]["query"] == cases[0]["query"]
+    assert results[1]["query"] == cases[1]["query"]
+
+
+def test_run_weighted_hybrid_search_evals_rejects_missing_query_embedding(
+    knowledge_pages: list[KnowledgePage],
+) -> None:
+    cases: list[EmbeddingSearchEvalCase] = [
+        {
+            "query": "доставка спорядження",
+            "expected_document_id": "dostavka",
+        },
+    ]
+    keyword_weight = 1
+    embedding_weight = 2
+
+    with pytest.raises(ValueError, match="Query embedding not found: доставка спорядження"):
+        run_weighted_hybrid_search_evals(
+            cases,
+            [],
+            {},
+            {},
+            keyword_weight,
+            embedding_weight,
         )
 
 
