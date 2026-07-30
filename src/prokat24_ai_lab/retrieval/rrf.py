@@ -27,6 +27,9 @@ def weighted_reciprocal_rank_fusion(
     document_scores: dict[str, float] = {}
 
     for ranking, weight in zip(rankings, weights, strict=True):
+        if weight == 0:
+            continue
+
         for index, document_id in enumerate(ranking, start=1):
             rrf_score = weight / (rank_constant + index)
             document_scores[document_id] = document_scores.get(document_id, 0.0) + rrf_score
