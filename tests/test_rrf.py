@@ -72,3 +72,19 @@ def test_weighted_reciprocal_rank_fusion_rejects_negative_weight() -> None:
 
     with pytest.raises(ValueError, match="Weight cannot be negative"):
         weighted_reciprocal_rank_fusion(rankings, weights)
+
+
+def test_weighted_reciprocal_rank_fusion_ignores_zero_weight_ranking() -> None:
+    rankings = [
+        ["keyword-a", "keyword-b"],
+        ["embedding-a", "embedding-b"],
+    ]
+
+    weights = [1.0, 0.0]
+
+    result = weighted_reciprocal_rank_fusion(rankings, weights)
+
+    assert [document_id for document_id, _score in result] == [
+        "keyword-a",
+        "keyword-b",
+    ]

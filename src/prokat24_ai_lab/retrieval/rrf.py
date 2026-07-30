@@ -1,6 +1,6 @@
 def reciprocal_rank_fusion(
-    rankings: list[list[str]],
-    rank_constant: int = 60,
+        rankings: list[list[str]],
+        rank_constant: int = 60,
 ) -> list[tuple[str, float]]:
     document_scores: dict[str, float] = {}
 
@@ -13,9 +13,9 @@ def reciprocal_rank_fusion(
 
 
 def weighted_reciprocal_rank_fusion(
-    rankings: list[list[str]],
-    weights: list[float],
-    rank_constant: int = 60,
+        rankings: list[list[str]],
+        weights: list[float],
+        rank_constant: int = 60,
 ) -> list[tuple[str, float]]:
     if len(weights) != len(rankings):
         raise ValueError("Weights and rankings must have same length")
@@ -27,6 +27,9 @@ def weighted_reciprocal_rank_fusion(
     document_scores: dict[str, float] = {}
 
     for ranking, weight in zip(rankings, weights, strict=True):
+        if weight == 0:
+            continue
+
         for index, document_id in enumerate(ranking, start=1):
             rrf_score = weight / (rank_constant + index)
             document_scores[document_id] = document_scores.get(document_id, 0.0) + rrf_score
