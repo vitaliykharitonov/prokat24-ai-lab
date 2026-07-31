@@ -14,6 +14,9 @@ quality gate.
 - Product search and rule-based answers
 - OpenAI embeddings and vector search
 - Offline embedding evaluation
+- Hybrid retrieval with Reciprocal Rank Fusion
+- Keyword, embedding, and hybrid retrieval benchmarks
+- Retrieval failure diagnostics and weighted RRF experiments
 - JSON eval reports with Git metadata
 - Automated checks with pytest, Ruff, mypy, and GitHub Actions
 
@@ -25,6 +28,7 @@ src/prokat24_ai_lab/
 ├── products/    # Product catalog, search, and answers
 ├── embeddings/  # Embedding indexes and vector search
 ├── evals/       # Evaluation logic and reports
+├── retrieval/   # Hybrid search and Reciprocal Rank Fusion
 └── *.py         # Shared infrastructure and utilities
 ```
 
@@ -110,6 +114,7 @@ python scripts/evals/run_search_evals.py
 python scripts/evals/run_answer_evals.py
 python scripts/evals/run_product_answer_evals.py
 python scripts/evals/run_offline_embedding_search_evals.py
+python scripts/evals/run_hybrid_search_evals.py
 ```
 
 Run embedding search evals with the OpenAI API:
@@ -119,6 +124,19 @@ python scripts/evals/run_embedding_search_evals.py
 ```
 
 JSON reports are saved in the `reports/` directory.
+
+## Retrieval results
+
+The current development benchmark contains 15 Ukrainian-language queries.
+
+| Retrieval method |           Top-1 |           Top-3 |
+|------------------|----------------:|----------------:|
+| Keyword search   |  14/15 (93.33%) | 15/15 (100.00%) |
+| Embedding search |  12/15 (80.00%) | 15/15 (100.00%) |
+| Hybrid RRF       | 15/15 (100.00%) | 15/15 (100.00%) |
+
+Equal keyword and embedding weights provide the best tested hybrid configuration.
+The benchmark is currently used as a development set, so future work will add unseen holdout cases.
 
 ## Development workflow
 
