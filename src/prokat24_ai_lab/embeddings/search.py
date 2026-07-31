@@ -3,6 +3,14 @@ from collections.abc import Callable
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.vector_search import rank_vectors_by_similarity
 
+PAGE_EMBEDDING_CONTEXT: dict[str, str] = {
+    "https://prokat24.com.ua/ua/contact-us/": (
+        "Адреси, телефони та контакти пунктів прокату. "
+        "Місця самовивозу, де можна забрати або повернути "
+        "орендоване спорядження."
+    ),
+}
+
 
 def rank_texts_by_embeddings(
     query: str,
@@ -34,8 +42,14 @@ def build_embedding_documents(pages: list[KnowledgePage]) -> dict[str, str]:
 
     for page in pages:
         url = page["url"]
-        text = page["title"] + "\n\n" + page["text"]
-        documents[url] = text
+        document_parts = [page["title"], page["text"]]
+
+        additional_context = PAGE_EMBEDDING_CONTEXT.get(url)
+
+        if additional_context is not None:
+            document_parts.append(additional_context)
+
+        documents[url] = "\n\n".join(document_parts)
 
     return documents
 

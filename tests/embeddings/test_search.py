@@ -115,7 +115,7 @@ def test_build_embedding_documents_uses_urls_and_combines_title_with_text() -> N
             "text_length": len("Доставляємо спорядження по Києву."),
         },
         {
-            "url": "https://prokat24.com.ua/ua/contact-us/",
+            "url": "https://prokat24.com.ua/ua/other-page/",
             "title": "Контакти",
             "text": "Адреса та номер телефону.",
             "text_length": len("Адреса та номер телефону."),
@@ -126,8 +126,28 @@ def test_build_embedding_documents_uses_urls_and_combines_title_with_text() -> N
 
     assert result == {
         "https://prokat24.com.ua/ua/dostavka/": "Доставка\n\nДоставляємо спорядження по Києву.",
-        "https://prokat24.com.ua/ua/contact-us/": "Контакти\n\nАдреса та номер телефону.",
+        "https://prokat24.com.ua/ua/other-page/": "Контакти\n\nАдреса та номер телефону.",
     }
+
+
+def test_build_embedding_documents_adds_page_embedding_context() -> None:
+    pages: list[KnowledgePage] = [
+        {
+            "url": "https://prokat24.com.ua/ua/contact-us/",
+            "title": "Контакти",
+            "text": "Адреса та номер телефону.",
+            "text_length": len("Адреса та номер телефону."),
+        },
+    ]
+
+    result = build_embedding_documents(pages)
+
+    contact_document = result["https://prokat24.com.ua/ua/contact-us/"]
+
+    assert "Контакти" in contact_document
+    assert "Адреса та номер телефону." in contact_document
+    assert "Адреси, телефони та контакти пунктів прокату." in contact_document
+    assert "Місця самовивозу" in contact_document
 
 
 def test_rank_query_by_document_embeddings_embeds_query_and_ranks_document_vectors() -> None:
