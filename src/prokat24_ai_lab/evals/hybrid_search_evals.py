@@ -2,7 +2,12 @@ import json
 from pathlib import Path
 from typing import TypedDict
 
-from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalCase
+from prokat24_ai_lab.evals.embedding_evals import (
+    EmbeddingSearchEvalCase,
+    RetrievalCategory,
+    RetrievalDifficulty,
+    RetrievalSplit,
+)
 from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.retrieval.hybrid_search import (
@@ -12,6 +17,10 @@ from prokat24_ai_lab.retrieval.hybrid_search import (
 
 
 class HybridSearchEvalResult(TypedDict):
+    id: str
+    category: RetrievalCategory
+    difficulty: RetrievalDifficulty
+    split: RetrievalSplit
     query: str
     expected_document_id: str
     actual_document_id: str | None
@@ -66,6 +75,10 @@ def build_hybrid_search_eval_result(
     passed = expected_document_id == actual_document_id
 
     return {
+        "id": case["id"],
+        "category": case["category"],
+        "difficulty": case["difficulty"],
+        "split": case["split"],
         "query": query,
         "expected_document_id": expected_document_id,
         "actual_document_id": actual_document_id,

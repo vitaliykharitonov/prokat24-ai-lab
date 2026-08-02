@@ -8,6 +8,10 @@ from prokat24_ai_lab.evals.hybrid_search_evals import (
     run_hybrid_search_evals,
     save_hybrid_search_eval_report,
 )
+from prokat24_ai_lab.evals.retrieval_metrics import (
+    RetrievalEvalSummary,
+    build_grouped_retrieval_eval_summaries,
+)
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.project_paths import (
@@ -21,6 +25,22 @@ from prokat24_ai_lab.project_paths import (
 RANK_CONSTANT = 60
 MIN_ACCURACY = 0.80
 MIN_TOP_3_ACCURACY = 0.90
+
+
+def print_grouped_summaries(
+    title: str,
+    summaries: dict[str, RetrievalEvalSummary],
+) -> None:
+    print(title)
+
+    for group_name, summary in sorted(summaries.items()):
+        print(
+            f"{group_name}: "
+            f"Top-1 {summary['passed_cases']}/{summary['total_cases']} "
+            f"{summary['accuracy']:.2%} | "
+            f"Top-3 {summary['top_3_passed_cases']}/{summary['total_cases']} "
+            f"{summary['top_3_accuracy']:.2%}"
+        )
 
 
 def main() -> int:
@@ -46,6 +66,25 @@ def main() -> int:
     created_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
     git_commit = get_current_git_commit()
     git_dirty = is_git_worktree_dirty()
+
+    split_summaries = build_grouped_retrieval_eval_summaries(
+        results,
+        group_by="split",
+    )
+
+    category_summaries = build_grouped_retrieval_eval_summaries(
+        results,
+        group_by="category",
+    )
+
+    difficulty_summaries = build_grouped_retrieval_eval_summaries(
+        results,
+        group_by="difficulty",
+    )
+
+    print_grouped_summaries("By split", split_summaries)
+    print_grouped_summaries("By category", category_summaries)
+    print_grouped_summaries("By difficulty", difficulty_summaries)
 
     report = build_hybrid_search_eval_report(
         results,

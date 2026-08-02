@@ -1,62 +1,122 @@
 [
   {
+    "id": "retrieval_dev_001",
     "query": "можете привезти спорядження мені додому?",
-    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/"
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/",
+    "category": "delivery",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_002",
     "query": "що потрібно залишити вам до повернення речей?",
-    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "category": "deposit",
+    "difficulty": "hard",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_003",
     "query": "за якою адресою можна забрати орендоване спорядження?",
-    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/",
+    "category": "contacts",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_004",
     "query": "чи ремонтуєте ви туристичне спорядження?",
-    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/"
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/",
+    "category": "company_services",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_005",
     "query": "що буде, якщо поверну речі пізніше?",
-    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "category": "rental_rules",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_006",
     "query": "чи можна забрати спорядження самостійно?",
-    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/"
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/",
+    "category": "delivery",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_007",
     "query": "де знаходяться ваші пункти прокату?",
-    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/",
+    "category": "contacts",
+    "difficulty": "easy",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_008",
     "query": "як порахують строк оренди, якщо я беру речі більше ніж на три дні?",
-    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "category": "rental_period",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_009",
     "query": "чи повернуть передоплату, якщо я скасую бронювання?",
-    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/"
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "category": "rental_rules",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_010",
     "query": "скільки коштуватиме доставка спорядження за межі Києва?",
-    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/"
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/",
+    "category": "delivery",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_011",
     "query": "чи потрібно завчасно погоджувати доставку?",
-    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/"
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/",
+    "category": "delivery",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_012",
     "query": "за яким номером можна зв’язатися з вами у Viber?",
-    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/",
+    "category": "contacts",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_013",
     "query": "на яку електронну адресу написати службі підтримки?",
-    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/"
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/",
+    "category": "contacts",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_014",
     "query": "чи продаєте ви нове та вживане спорядження?",
-    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/"
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/",
+    "category": "sales",
+    "difficulty": "medium",
+    "split": "dev"
   },
   {
+    "id": "retrieval_dev_015",
     "query": "як ви доглядаєте за одягом і взуттям після повернення з прокату?",
-    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/"
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/",
+    "category": "equipment_care",
+    "difficulty": "medium",
+    "split": "dev"
   }
 ]
