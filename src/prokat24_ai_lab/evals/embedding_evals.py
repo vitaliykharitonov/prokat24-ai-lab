@@ -1,7 +1,7 @@
 import json
 from collections.abc import Callable
 from pathlib import Path
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 from prokat24_ai_lab.embeddings.search import (
     rank_query_by_document_embeddings,
@@ -9,13 +9,50 @@ from prokat24_ai_lab.embeddings.search import (
 )
 from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
 
+RetrievalCategory = Literal[
+    "contacts",
+    "delivery",
+    "rental_rules",
+    "rental_period",
+    "deposit",
+    "company_services",
+    "sales",
+    "equipment_care",
+]
+
+RetrievalDifficulty = Literal["easy", "medium", "hard"]
+RetrievalSplit = Literal["dev", "holdout"]
+
+RETRIEVAL_CATEGORIES: set[str] = {
+    "contacts",
+    "delivery",
+    "rental_rules",
+    "rental_period",
+    "deposit",
+    "company_services",
+    "sales",
+    "equipment_care",
+}
+
+RETRIEVAL_DIFFICULTIES: set[str] = {"easy", "medium", "hard"}
+
+RETRIEVAL_SPLITS: set[str] = {"dev", "holdout"}
+
 
 class EmbeddingSearchEvalCase(TypedDict):
+    id: str
     query: str
     expected_document_id: str
+    category: RetrievalCategory
+    difficulty: RetrievalDifficulty
+    split: RetrievalSplit
 
 
 class EmbeddingSearchEvalResult(TypedDict):
+    id: str
+    category: RetrievalCategory
+    difficulty: RetrievalDifficulty
+    split: RetrievalSplit
     query: str
     expected_document_id: str
     actual_document_id: str | None
@@ -36,6 +73,36 @@ class EmbeddingSearchEvalReport(TypedDict):
     accuracy: float
     top_3_accuracy: float
     results: list[EmbeddingSearchEvalResult]
+
+
+def validate_embedding_search_eval_cases(
+    cases: list[EmbeddingSearchEvalCase],
+) -> None:
+    seen_ids: set[str] = set()
+
+    for case in cases:
+        if not case["id"]:
+            raise ValueError("Empty case id")
+
+        if case["id"] in seen_ids:
+            raise ValueError(f"Duplicate eval case id: {case['id']}")
+
+        if not case["query"]:
+            raise ValueError("Empty query")
+
+        if not case["expected_document_id"]:
+            raise ValueError("Empty expected document id")
+
+        if case["category"] not in RETRIEVAL_CATEGORIES:
+            raise ValueError(f"Unknown eval category: {case['category']}")
+
+        if case["difficulty"] not in RETRIEVAL_DIFFICULTIES:
+            raise ValueError(f"Unknown eval difficulty: {case['difficulty']}")
+
+        if case["split"] not in RETRIEVAL_SPLITS:
+            raise ValueError(f"Unknown eval split: {case['split']}")
+
+        seen_ids.add(case["id"])
 
 
 def evaluate_embedding_search_case(
@@ -83,6 +150,10 @@ def build_embedding_search_eval_result(
             break
 
     return {
+        "id": case["id"],
+        "category": case["category"],
+        "difficulty": case["difficulty"],
+        "split": case["split"],
         "query": case["query"],
         "expected_document_id": expected_document_id,
         "actual_document_id": actual_document_id,
@@ -209,5 +280,7 @@ def save_embedding_search_eval_report(
 def load_embedding_search_eval_cases(input_file: Path) -> list[EmbeddingSearchEvalCase]:
     with open(input_file, encoding="utf-8") as file:
         loaded_cases: list[EmbeddingSearchEvalCase] = json.load(file)
+
+        validate_embedding_search_eval_cases(loaded_cases)
 
     return loaded_cases

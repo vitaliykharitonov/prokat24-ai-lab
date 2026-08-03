@@ -27,5 +27,9 @@ def test_get_quality_check_commands_returns_project_checks() -> None:
     assert commands[4][1:] == ["scripts/evals/run_search_evals.py"]
     assert commands[5][1:] == ["scripts/evals/run_answer_evals.py"]
     assert commands[6][1:] == ["scripts/evals/run_product_answer_evals.py"]
-    assert commands[7][1:] == ["scripts/evals/run_offline_embedding_search_evals.py"]
-    assert commands[8][1:] == ["scripts/evals/run_hybrid_search_evals.py"]
+    assert commands[7][1:] == [
+        "scripts/evals/run_offline_embedding_search_evals.py",
+        "--split",
+        "dev",
+    ]
+    assert commands[8][1:] == ["scripts/evals/run_hybrid_search_evals.py", "--split", "dev"]

@@ -117,6 +117,15 @@ python scripts/evals/run_offline_embedding_search_evals.py
 python scripts/evals/run_hybrid_search_evals.py
 ```
 
+Run retrieval evals for a specific benchmark split:
+
+```powershell
+python scripts/evals/run_offline_embedding_search_evals.py --split dev
+python scripts/evals/run_offline_embedding_search_evals.py --split holdout
+python scripts/evals/run_hybrid_search_evals.py --split dev
+python scripts/evals/run_hybrid_search_evals.py --split holdout
+```
+
 Run embedding search evals with the OpenAI API:
 
 ```powershell

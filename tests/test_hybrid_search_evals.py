@@ -46,6 +46,10 @@ def knowledge_pages() -> list[KnowledgePage]:
 def results() -> list[HybridSearchEvalResult]:
     return [
         {
+            "id": "test_case_001",
+            "category": "delivery",
+            "difficulty": "easy",
+            "split": "dev",
             "query": "очікуваний документ на першому місці",
             "expected_document_id": "dostavka",
             "actual_document_id": "dostavka",
@@ -54,6 +58,10 @@ def results() -> list[HybridSearchEvalResult]:
             "passed": True,
         },
         {
+            "id": "test_case_002",
+            "category": "delivery",
+            "difficulty": "easy",
+            "split": "dev",
             "query": "очікуваний документ на другому місці",
             "expected_document_id": "contact-us",
             "actual_document_id": "dostavka",
@@ -62,6 +70,10 @@ def results() -> list[HybridSearchEvalResult]:
             "passed": False,
         },
         {
+            "id": "test_case_003",
+            "category": "delivery",
+            "difficulty": "easy",
+            "split": "dev",
             "query": "очікуваний документ на четвертому місці",
             "expected_document_id": "pravila-prokata",
             "actual_document_id": "contact-us",
@@ -70,6 +82,10 @@ def results() -> list[HybridSearchEvalResult]:
             "passed": False,
         },
         {
+            "id": "test_case_004",
+            "category": "delivery",
+            "difficulty": "easy",
+            "split": "dev",
             "query": "очікуваний документ не знайдено",
             "expected_document_id": "o-nas",
             "actual_document_id": None,
@@ -84,8 +100,12 @@ def test_evaluate_hybrid_search_case_returns_passed_result(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
     case: EmbeddingSearchEvalCase = {
+        "id": "test_case_001",
         "query": "де вас знайти",
         "expected_document_id": "contact-us",
+        "category": "contacts",
+        "difficulty": "easy",
+        "split": "dev",
     }
     document_embeddings = {
         "dostavka": [1.0, 0.0],
@@ -113,8 +133,12 @@ def test_evaluate_hybrid_search_case_returns_expected_document_rank(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
     case: EmbeddingSearchEvalCase = {
+        "id": "test_case_001",
         "query": "доставка спорядження",
         "expected_document_id": "contact-us",
+        "category": "contacts",
+        "difficulty": "easy",
+        "split": "dev",
     }
     document_embeddings = {
         "contact-us": [1.0, 0.0],
@@ -137,8 +161,12 @@ def test_evaluate_hybrid_search_case_returns_expected_document_rank(
 
 def test_evaluate_hybrid_search_case_returns_empty_result() -> None:
     case: EmbeddingSearchEvalCase = {
+        "id": "test_case_001",
         "query": "невідомий запит",
         "expected_document_id": "missing-document",
+        "category": "delivery",
+        "difficulty": "easy",
+        "split": "dev",
     }
 
     result = evaluate_hybrid_search_case(
@@ -158,8 +186,12 @@ def test_evaluate_weighted_hybrid_search_case_applies_source_weights(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
     case: EmbeddingSearchEvalCase = {
+        "id": "test_case_001",
         "query": "підкажіть контакти, щоб отримати спорядження з доставкою по Києву",
         "expected_document_id": "dostavka",
+        "category": "delivery",
+        "difficulty": "easy",
+        "split": "dev",
     }
     document_embeddings = {
         "dostavka": [1.0, 0.0],
@@ -190,12 +222,20 @@ def test_run_hybrid_search_evals_returns_results_for_all_cases(
 ) -> None:
     cases: list[EmbeddingSearchEvalCase] = [
         {
+            "id": "test_case_001",
             "query": "доставка спорядження",
             "expected_document_id": "dostavka",
+            "category": "delivery",
+            "difficulty": "easy",
+            "split": "dev",
         },
         {
+            "id": "test_case_002",
             "query": "контактний телефон",
             "expected_document_id": "contact-us",
+            "category": "contacts",
+            "difficulty": "easy",
+            "split": "dev",
         },
     ]
     document_embeddings = {
@@ -229,8 +269,12 @@ def test_run_hybrid_search_evals_returns_results_for_all_cases(
 def test_run_hybrid_search_evals_raises_error_for_missing_query_embedding() -> None:
     cases: list[EmbeddingSearchEvalCase] = [
         {
+            "id": "test_case_001",
             "query": "доставка спорядження",
             "expected_document_id": "dostavka",
+            "category": "delivery",
+            "difficulty": "easy",
+            "split": "dev",
         },
     ]
 
@@ -248,12 +292,20 @@ def test_run_weighted_hybrid_search_evals_returns_all_results(
 ) -> None:
     cases: list[EmbeddingSearchEvalCase] = [
         {
+            "id": "test_case_001",
             "query": "доставка спорядження",
             "expected_document_id": "dostavka",
+            "category": "delivery",
+            "difficulty": "easy",
+            "split": "dev",
         },
         {
+            "id": "test_case_002",
             "query": "контактний телефон",
             "expected_document_id": "contact-us",
+            "category": "contacts",
+            "difficulty": "easy",
+            "split": "dev",
         },
     ]
     document_embeddings = {
@@ -287,8 +339,12 @@ def test_run_weighted_hybrid_search_evals_rejects_missing_query_embedding(
 ) -> None:
     cases: list[EmbeddingSearchEvalCase] = [
         {
+            "id": "test_case_001",
             "query": "доставка спорядження",
             "expected_document_id": "dostavka",
+            "category": "delivery",
+            "difficulty": "easy",
+            "split": "dev",
         },
     ]
     keyword_weight = 1
@@ -367,6 +423,10 @@ def test_save_hybrid_search_eval_report_writes_json_file(tmp_path: Path) -> None
         "top_3_accuracy": 1.0,
         "results": [
             {
+                "id": "test_case_001",
+                "category": "delivery",
+                "difficulty": "easy",
+                "split": "dev",
                 "query": "чи можна замовити доставку?",
                 "expected_document_id": "dostavka",
                 "actual_document_id": "dostavka",
