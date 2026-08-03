@@ -118,5 +118,101 @@
     "category": "equipment_care",
     "difficulty": "medium",
     "split": "dev"
+  },
+  {
+    "id": "retrieval_holdout_001",
+    "query": "чи можете передати замовлення кур’єром до мого будинку?",
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/",
+    "category": "delivery",
+    "difficulty": "medium",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_002",
+    "query": "як отримати речі, якщо я не маю змоги приїхати до пункту прокату?",
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/",
+    "category": "delivery",
+    "difficulty": "hard",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_003",
+    "query": "де саме відбувається самовивіз орендованих речей?",
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/",
+    "category": "contacts",
+    "difficulty": "medium",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_004",
+    "query": "підкажіть, куди їхати, щоб особисто повернути спорядження",
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/",
+    "category": "contacts",
+    "difficulty": "hard",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_005",
+    "query": "чи треба залишати щось у забезпечення, поки спорядження в мене?",
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "category": "deposit",
+    "difficulty": "hard",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_006",
+    "query": "як нараховується оплата, якщо затримаю повернення?",
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "category": "rental_rules",
+    "difficulty": "hard",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_007",
+    "query": "чи втрачу я внесені гроші, якщо передумаю брати заброньовані речі?",
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "category": "rental_rules",
+    "difficulty": "hard",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_008",
+    "query": "з якого моменту починається і коли закінчується строк прокату?",
+    "expected_document_id": "https://prokat24.com.ua/ua/pravila-prokata/",
+    "category": "rental_period",
+    "difficulty": "medium",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_009",
+    "query": "чи займаєтесь ви ремонтом спорядження клієнтів?",
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/",
+    "category": "company_services",
+    "difficulty": "easy",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_010",
+    "query": "чи можна у вас придбати екіпірування замість оренди?",
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/",
+    "category": "sales",
+    "difficulty": "medium",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_011",
+    "query": "чи проходять речі очищення після попереднього орендаря?",
+    "expected_document_id": "https://prokat24.com.ua/ua/o-nas/",
+    "category": "equipment_care",
+    "difficulty": "medium",
+    "split": "holdout"
+  },
+  {
+    "id": "retrieval_holdout_012",
+    "query": "як зв’язатися з вами онлайн, не телефонуючи?",
+    "expected_document_id": "https://prokat24.com.ua/ua/contact-us/",
+    "category": "contacts",
+    "difficulty": "hard",
+    "split": "holdout"
   }
 ]
