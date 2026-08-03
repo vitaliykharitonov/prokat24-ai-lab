@@ -29,20 +29,6 @@ def find_document_rank(document_ids: list[str], expected_document_id: str) -> in
     return None
 
 
-def print_top_documents(title: str, document_ids: list[str], expected_document_id: str) -> None:
-    print(f"{title} Top-3:")
-
-    for index, document_id in enumerate(document_ids[:3], start=1):
-        print(f"{index}. {document_id}")
-
-    expected_rank = find_document_rank(
-        document_ids,
-        expected_document_id,
-    )
-
-    print(f"Expected rank: {expected_rank}")
-
-
 def print_top_scored_documents(
     title: str,
     results: list[tuple[str, float]],
@@ -68,13 +54,13 @@ def print_top_keyword_documents(
         print(f"{index}. {result['url']} — score: {result['score']:.2f}")
         print(f"   Matched words: {result['matched_words']}")
 
-    for word, detail in result["score_details"].items():
-        print(
-            f"   {word}: "
-            f"count={detail['count']}, "
-            f"weight={detail['weight']:.2f}, "
-            f"contribution={detail['contribution']:.2f}"
-        )
+        for word, detail in result["score_details"].items():
+            print(
+                f"   {word}: "
+                f"count={detail['count']}, "
+                f"weight={detail['weight']:.2f}, "
+                f"contribution={detail['contribution']:.2f}"
+            )
 
     document_ids = [result["url"] for result in results]
 
@@ -98,6 +84,8 @@ def main() -> int:
     if document_embedding_index["dimensions"] != query_embedding_index["dimensions"]:
         raise ValueError("Embedding dimensions do not match")
 
+    failure_count = 0
+
     for case in cases:
         query = case["query"]
         expected_document_id = case["expected_document_id"]
@@ -120,6 +108,8 @@ def main() -> int:
 
         if actual_document_id == expected_document_id:
             continue
+
+        failure_count += 1
 
         print("-" * 80)
         print(f"Query: {query}")
@@ -147,6 +137,8 @@ def main() -> int:
         )
 
         print()
+
+    print(f"Hybrid retrieval failures: {failure_count}/{len(cases)}")
 
     return 0
 

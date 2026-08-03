@@ -14,6 +14,9 @@ quality gate.
 - Product search and rule-based answers
 - OpenAI embeddings and vector search
 - Offline embedding evaluation
+- Hybrid retrieval with Reciprocal Rank Fusion
+- Keyword, embedding, and hybrid retrieval benchmarks
+- Retrieval failure diagnostics and weighted RRF experiments
 - JSON eval reports with Git metadata
 - Automated checks with pytest, Ruff, mypy, and GitHub Actions
 
@@ -25,6 +28,7 @@ src/prokat24_ai_lab/
 ├── products/    # Product catalog, search, and answers
 ├── embeddings/  # Embedding indexes and vector search
 ├── evals/       # Evaluation logic and reports
+├── retrieval/   # Hybrid search and Reciprocal Rank Fusion
 └── *.py         # Shared infrastructure and utilities
 ```
 
@@ -110,6 +114,7 @@ python scripts/evals/run_search_evals.py
 python scripts/evals/run_answer_evals.py
 python scripts/evals/run_product_answer_evals.py
 python scripts/evals/run_offline_embedding_search_evals.py
+python scripts/evals/run_hybrid_search_evals.py
 ```
 
 Run retrieval evals for a specific benchmark split:
@@ -129,16 +134,9 @@ python scripts/evals/run_embedding_search_evals.py
 
 JSON reports are saved in the `reports/` directory.
 
-## Retrieval benchmark
+## Retrieval results
 
-Retrieval Benchmark v2 contains 27 Ukrainian-language queries:
-
-- 15 development cases used for regression checks and retrieval improvements
-- 12 holdout cases used to measure generalization on previously unseen formulations
-
-Each case includes an ID, category, difficulty level, and dataset split.
-
-### Development split
+The current development benchmark contains 15 Ukrainian-language queries.
 
 | Retrieval method |           Top-1 |           Top-3 |
 |------------------|----------------:|----------------:|
@@ -146,24 +144,8 @@ Each case includes an ID, category, difficulty level, and dataset split.
 | Embedding search |  12/15 (80.00%) | 15/15 (100.00%) |
 | Hybrid RRF       | 15/15 (100.00%) | 15/15 (100.00%) |
 
-### Holdout split
-
-| Retrieval method |         Top-1 |          Top-3 |
-|------------------|--------------:|---------------:|
-| Keyword search   | 5/12 (41.67%) |  8/12 (66.67%) |
-| Embedding search | 6/12 (50.00%) | 10/12 (83.33%) |
-| Hybrid RRF       | 7/12 (58.33%) |  9/12 (75.00%) |
-
-The development split is part of the automated quality gate. Its established
-retrieval metrics are protected against regressions.
-
-The holdout split is evaluated separately and does not block regular development.
-Its results represent the first observed generalization baseline and should not be
-used for direct tuning against individual queries.
-
-Running either retrieval script without `--split` evaluates all benchmark cases.
-The automated project check runs retrieval quality gates only against the stable
-development split.
+Equal keyword and embedding weights provide the best tested hybrid configuration.
+The benchmark is currently used as a development set, so future work will add unseen holdout cases.
 
 ## Development workflow
 
