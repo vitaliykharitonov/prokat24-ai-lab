@@ -112,6 +112,15 @@ python scripts/evals/run_product_answer_evals.py
 python scripts/evals/run_offline_embedding_search_evals.py
 ```
 
+Run retrieval evals for a specific benchmark split:
+
+```powershell
+python scripts/evals/run_offline_embedding_search_evals.py --split dev
+python scripts/evals/run_offline_embedding_search_evals.py --split holdout
+python scripts/evals/run_hybrid_search_evals.py --split dev
+python scripts/evals/run_hybrid_search_evals.py --split holdout
+```
+
 Run embedding search evals with the OpenAI API:
 
 ```powershell
@@ -119,6 +128,42 @@ python scripts/evals/run_embedding_search_evals.py
 ```
 
 JSON reports are saved in the `reports/` directory.
+
+## Retrieval benchmark
+
+Retrieval Benchmark v2 contains 27 Ukrainian-language queries:
+
+- 15 development cases used for regression checks and retrieval improvements
+- 12 holdout cases used to measure generalization on previously unseen formulations
+
+Each case includes an ID, category, difficulty level, and dataset split.
+
+### Development split
+
+| Retrieval method |           Top-1 |           Top-3 |
+|------------------|----------------:|----------------:|
+| Keyword search   |  14/15 (93.33%) | 15/15 (100.00%) |
+| Embedding search |  12/15 (80.00%) | 15/15 (100.00%) |
+| Hybrid RRF       | 15/15 (100.00%) | 15/15 (100.00%) |
+
+### Holdout split
+
+| Retrieval method |         Top-1 |          Top-3 |
+|------------------|--------------:|---------------:|
+| Keyword search   | 5/12 (41.67%) |  8/12 (66.67%) |
+| Embedding search | 6/12 (50.00%) | 10/12 (83.33%) |
+| Hybrid RRF       | 7/12 (58.33%) |  9/12 (75.00%) |
+
+The development split is part of the automated quality gate. Its established
+retrieval metrics are protected against regressions.
+
+The holdout split is evaluated separately and does not block regular development.
+Its results represent the first observed generalization baseline and should not be
+used for direct tuning against individual queries.
+
+Running either retrieval script without `--split` evaluates all benchmark cases.
+The automated project check runs retrieval quality gates only against the stable
+development split.
 
 ## Development workflow
 
