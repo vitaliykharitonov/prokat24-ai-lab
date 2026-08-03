@@ -1,4 +1,5 @@
 import datetime
+from argparse import ArgumentParser, Namespace
 
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
@@ -23,8 +24,8 @@ from prokat24_ai_lab.project_paths import (
 )
 
 RANK_CONSTANT = 60
-MIN_ACCURACY = 0.80
-MIN_TOP_3_ACCURACY = 0.90
+DEV_MIN_ACCURACY = 1.0
+DEV_MIN_TOP_3_ACCURACY = 1.0
 
 
 def print_grouped_summaries(
@@ -43,9 +44,25 @@ def print_grouped_summaries(
         )
 
 
+def parse_args() -> Namespace:
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--split",
+        choices=("all", "dev", "holdout"),
+        default="all",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
     knowledge_pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
     cases = load_embedding_search_eval_cases(EMBEDDING_SEARCH_EVAL_CASES_FILE)
+
+    if args.split != "all":
+        cases = [case for case in cases if case["split"] == args.split]
+
     document_embedding_index = load_document_embedding_index(DOCUMENT_EMBEDDING_INDEX_FILE)
     query_embedding_index = load_query_embedding_index(QUERY_EMBEDDING_INDEX_FILE)
 
@@ -116,11 +133,12 @@ def main() -> int:
     print(f"Top 3 accuracy: {report['top_3_accuracy']:.2%}")
     print(f"Report saved to {HYBRID_SEARCH_EVAL_REPORT_FILE}")
 
-    if report["accuracy"] < MIN_ACCURACY:
-        return 1
+    if args.split == "dev":
+        if report["accuracy"] < DEV_MIN_ACCURACY:
+            return 1
 
-    if report["top_3_accuracy"] < MIN_TOP_3_ACCURACY:
-        return 1
+        if report["top_3_accuracy"] < DEV_MIN_TOP_3_ACCURACY:
+            return 1
 
     return 0
 

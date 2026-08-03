@@ -1,4 +1,5 @@
 import datetime
+from argparse import ArgumentParser, Namespace
 
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
@@ -16,14 +17,29 @@ from prokat24_ai_lab.project_paths import (
     QUERY_EMBEDDING_INDEX_FILE,
 )
 
-MIN_ACCURACY = 0.70
-MIN_TOP_3_ACCURACY = 0.90
+DEV_MIN_ACCURACY = 0.80
+DEV_MIN_TOP_3_ACCURACY = 1.0
+
+
+def parse_args() -> Namespace:
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--split",
+        choices=("all", "dev", "holdout"),
+        default="all",
+    )
+
+    return parser.parse_args()
 
 
 def main() -> int:
+    args = parse_args()
     document_embedding_index = load_document_embedding_index(DOCUMENT_EMBEDDING_INDEX_FILE)
     query_embedding_index = load_query_embedding_index(QUERY_EMBEDDING_INDEX_FILE)
     eval_cases = load_embedding_search_eval_cases(EMBEDDING_SEARCH_EVAL_CASES_FILE)
+
+    if args.split != "all":
+        eval_cases = [case for case in eval_cases if case["split"] == args.split]
 
     if document_embedding_index["model"] != query_embedding_index["model"]:
         raise ValueError("Embedding models do not match")
@@ -74,11 +90,12 @@ def main() -> int:
     print(f"Top-3 accuracy: {report['top_3_accuracy']:.2%}")
     print(f"Report saved to {OFFLINE_EMBEDDING_SEARCH_EVAL_REPORT_FILE}")
 
-    if report["accuracy"] < MIN_ACCURACY:
-        return 1
+    if args.split == "dev":
+        if report["accuracy"] < DEV_MIN_ACCURACY:
+            return 1
 
-    if report["top_3_accuracy"] < MIN_TOP_3_ACCURACY:
-        return 1
+        if report["top_3_accuracy"] < DEV_MIN_TOP_3_ACCURACY:
+            return 1
 
     return 0
 

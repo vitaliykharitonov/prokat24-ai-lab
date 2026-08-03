@@ -34,11 +34,16 @@ def get_quality_checks() -> list[tuple[str, list[str]]]:
         ),
         (
             "EMBEDDING SEARCH EVALS",
-            [sys.executable, "scripts/evals/run_offline_embedding_search_evals.py"],
+            [
+                sys.executable,
+                "scripts/evals/run_offline_embedding_search_evals.py",
+                "--split",
+                "dev",
+            ],
         ),
         (
             "HYBRID SEARCH EVALS",
-            [sys.executable, "scripts/evals/run_hybrid_search_evals.py"],
+            [sys.executable, "scripts/evals/run_hybrid_search_evals.py", "--split", "dev"],
         ),
     ]
 
