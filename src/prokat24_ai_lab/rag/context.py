@@ -36,3 +36,26 @@ def build_retrieved_context_documents(
         )
 
     return context_documents
+
+
+def format_retrieved_context(
+    documents: list[RetrievedContextDocument],
+) -> str:
+    if not documents:
+        raise ValueError("No context documents provided")
+
+    formatted_documents: list[str] = []
+
+    for index, document in enumerate(documents, start=1):
+        formatted_document = "\n".join(
+            (
+                f"[Document {index}]",
+                f"ID: {document['document_id']}",
+                f"Title: {document['title']}",
+                "Content:",
+                document["text"],
+            )
+        )
+        formatted_documents.append(formatted_document)
+
+    return "\n\n".join(formatted_documents)
