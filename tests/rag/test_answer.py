@@ -25,7 +25,7 @@ def test_answer_question_from_ranked_documents_builds_context_and_generates_answ
 
     received_arguments: list[tuple[str, str]] = []
 
-    def generate_text(instructions: str, prompt_input: str) -> str:
+    def fake_generate_text(instructions: str, prompt_input: str) -> str:
         received_arguments.append((instructions, prompt_input))
         return "Спорядження можна отримати за допомогою доставки."
 
@@ -33,7 +33,7 @@ def test_answer_question_from_ranked_documents_builds_context_and_generates_answ
         question=question,
         ranked_documents=ranked_documents,
         pages=pages,
-        generate_text=generate_text,
+        generate_text=fake_generate_text,
         top_k=1,
     )
 
@@ -79,7 +79,7 @@ def test_answer_question_ranks_documents_and_generates_answer() -> None:
     ]
     received_questions: list[str] = []
 
-    def rank_documents(query: str) -> list[tuple[str, float]]:
+    def fake_rank_documents(query: str) -> list[tuple[str, float]]:
         received_questions.append(query)
         return [
             ("delivery", 0.9),
@@ -88,15 +88,15 @@ def test_answer_question_ranks_documents_and_generates_answer() -> None:
 
     received_arguments: list[tuple[str, str]] = []
 
-    def generate_text(instructions: str, prompt_input: str) -> str:
+    def fake_generate_text(instructions: str, prompt_input: str) -> str:
         received_arguments.append((instructions, prompt_input))
         return "Спорядження можна отримати за допомогою доставки."
 
     result = answer_question(
         question=question,
         pages=pages,
-        rank_documents=rank_documents,
-        generate_text=generate_text,
+        rank_documents=fake_rank_documents,
+        generate_text=fake_generate_text,
         top_k=1,
     )
 
