@@ -42,3 +42,14 @@ def evaluate_rag_answer_case(
         "passed": passed,
         "answer": answer,
     }
+
+
+def run_rag_answer_evals(
+    cases: list[RagAnswerEvalCase],
+    answerer: RagAnswerer,
+) -> list[RagAnswerEvalResult]:
+    results: list[RagAnswerEvalResult] = []
+    for case in cases:
+        results.append(evaluate_rag_answer_case(case, answerer))
+
+    return results
