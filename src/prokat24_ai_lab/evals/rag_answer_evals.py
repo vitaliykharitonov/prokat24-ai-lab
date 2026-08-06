@@ -1,4 +1,6 @@
+import json
 from collections.abc import Callable
+from pathlib import Path
 from typing import TypedDict
 
 
@@ -53,3 +55,12 @@ def run_rag_answer_evals(
         results.append(evaluate_rag_answer_case(case, answerer))
 
     return results
+
+
+def load_rag_answer_eval_cases(
+    input_file: Path,
+) -> list[RagAnswerEvalCase]:
+    with open(input_file, encoding="utf-8") as file:
+        loaded_data: list[RagAnswerEvalCase] = json.load(file)
+
+    return loaded_data
