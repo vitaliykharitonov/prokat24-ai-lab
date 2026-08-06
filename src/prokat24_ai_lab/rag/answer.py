@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
 from prokat24_ai_lab.knowledge.base import KnowledgePage
+from prokat24_ai_lab.rag.citations import validate_document_citations
 from prokat24_ai_lab.rag.context import (
     RetrievedContextDocument,
     build_retrieved_context_documents,
@@ -60,5 +61,7 @@ def answer_question_from_context_documents(
     prompt = build_grounded_answer_prompt(question, formatted_context)
 
     answer = generate_grounded_answer(prompt, generate_text)
+
+    validate_document_citations(answer, len(context_documents))
 
     return answer
