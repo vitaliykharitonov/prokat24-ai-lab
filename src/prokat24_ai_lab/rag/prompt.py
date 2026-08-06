@@ -11,7 +11,12 @@ INSTRUCTIONS: str = (
     "Answer in Ukrainian.\n"
     "Do not invent prices, availability, addresses, rental terms, or other facts.\n"
     "If the context does not contain enough information, say that the provided context "
-    "is insufficient."
+    "is insufficient.\n"
+    "Answer the user's exact intent directly and concisely.\n"
+    "Do not include alternatives that conflict with the user's stated constraints.\n"
+    "Do not offer follow-up help or ask additional questions.\n"
+    "Cite supporting context documents using their labels, such as [Document 1].\n"
+    "Every factual claim must include a citation to the document that supports it."
 )
 
 
