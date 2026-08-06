@@ -57,10 +57,27 @@ def run_rag_answer_evals(
     return results
 
 
-def load_rag_answer_eval_cases(
-    input_file: Path,
-) -> list[RagAnswerEvalCase]:
+def load_rag_answer_eval_cases(input_file: Path) -> list[RagAnswerEvalCase]:
     with open(input_file, encoding="utf-8") as file:
         loaded_data: list[RagAnswerEvalCase] = json.load(file)
 
     return loaded_data
+
+
+def count_passed_rag_answer_results(results: list[RagAnswerEvalResult]) -> int:
+    count: int = 0
+    for result in results:
+        if result["passed"]:
+            count += 1
+
+    return count
+
+
+def calculate_rag_answer_accuracy(results: list[RagAnswerEvalResult]) -> float:
+    if not results:
+        return 0.0
+
+    total_cases = len(results)
+    passed_cases = count_passed_rag_answer_results(results)
+
+    return passed_cases / total_cases
