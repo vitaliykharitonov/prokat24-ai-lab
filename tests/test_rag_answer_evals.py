@@ -3,6 +3,7 @@ from pathlib import Path
 
 from prokat24_ai_lab.evals.rag_answer_evals import (
     RagAnswerEvalCase,
+    RagAnswerEvalReport,
     RagAnswerEvalResult,
     build_rag_answer_eval_report,
     calculate_rag_answer_accuracy,
@@ -10,6 +11,7 @@ from prokat24_ai_lab.evals.rag_answer_evals import (
     evaluate_rag_answer_case,
     load_rag_answer_eval_cases,
     run_rag_answer_evals,
+    save_rag_answer_eval_report,
 )
 
 TEST_RESULTS: list[RagAnswerEvalResult] = [
@@ -182,3 +184,26 @@ def test_build_rag_answer_eval_report_returns_summary_and_results() -> None:
     assert report["passed_cases"] == 2
     assert report["accuracy"] == 2 / 3
     assert report["results"] == TEST_RESULTS
+
+
+def test_save_rag_answer_eval_report_writes_json_file(tmp_path: Path) -> None:
+    report: RagAnswerEvalReport = {
+        "report_type": "rag_answer_eval_report",
+        "schema_version": 1,
+        "created_at": "2026-01-01T00:00:00+00:00",
+        "git_commit": "abc1234",
+        "git_dirty": False,
+        "total_cases": 3,
+        "passed_cases": 2,
+        "accuracy": 2 / 3,
+        "results": TEST_RESULTS,
+    }
+    output_file = tmp_path / "reports" / "rag_answer_eval_report.json"
+
+    save_rag_answer_eval_report(report, output_file)
+
+    with open(output_file, encoding="utf-8") as file:
+        loaded_report = json.load(file)
+
+    assert output_file.exists()
+    assert loaded_report == report

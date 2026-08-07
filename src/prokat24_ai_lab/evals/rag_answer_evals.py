@@ -121,3 +121,13 @@ def build_rag_answer_eval_report(
         "accuracy": accuracy,
         "results": results,
     }
+
+
+def save_rag_answer_eval_report(
+    report: RagAnswerEvalReport,
+    output_file: Path,
+) -> None:
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_file, "w", encoding="utf-8") as file:
+        json.dump(report, file, ensure_ascii=False, indent=2)
