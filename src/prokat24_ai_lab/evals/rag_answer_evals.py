@@ -3,6 +3,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
 
+from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
+
 
 class RagAnswerEvalCase(TypedDict):
     question: str
@@ -15,6 +17,18 @@ class RagAnswerEvalResult(TypedDict):
     missing_answer_fragments: list[str]
     passed: bool
     answer: str
+
+
+class RagAnswerEvalReport(TypedDict):
+    report_type: str
+    schema_version: int
+    created_at: str
+    git_commit: str | None
+    git_dirty: bool | None
+    total_cases: int
+    passed_cases: int
+    accuracy: float
+    results: list[RagAnswerEvalResult]
 
 
 RagAnswerer = Callable[[str], str]
@@ -81,3 +95,29 @@ def calculate_rag_answer_accuracy(results: list[RagAnswerEvalResult]) -> float:
     passed_cases = count_passed_rag_answer_results(results)
 
     return passed_cases / total_cases
+
+
+def build_rag_answer_eval_report(
+    results: list[RagAnswerEvalResult],
+    created_at: str,
+    git_commit: str | None = None,
+    git_dirty: bool | None = None,
+) -> RagAnswerEvalReport:
+    metadata = build_eval_report_metadata(
+        report_type="rag_answer_eval_report",
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
+
+    total_cases = len(results)
+    passed_cases = count_passed_rag_answer_results(results)
+    accuracy = calculate_rag_answer_accuracy(results)
+
+    return {
+        **metadata,
+        "total_cases": total_cases,
+        "passed_cases": passed_cases,
+        "accuracy": accuracy,
+        "results": results,
+    }

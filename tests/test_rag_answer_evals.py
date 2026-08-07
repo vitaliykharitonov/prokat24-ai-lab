@@ -4,6 +4,7 @@ from pathlib import Path
 from prokat24_ai_lab.evals.rag_answer_evals import (
     RagAnswerEvalCase,
     RagAnswerEvalResult,
+    build_rag_answer_eval_report,
     calculate_rag_answer_accuracy,
     count_passed_rag_answer_results,
     evaluate_rag_answer_case,
@@ -34,6 +35,8 @@ TEST_RESULTS: list[RagAnswerEvalResult] = [
         "answer": "Доставка по Києву коштує від 200 грн [Document 1].",
     },
 ]
+
+TEST_CREATED_AT = "2026-01-01T00:00:00+00:00"
 
 
 def test_evaluate_rag_answer_case_passes_when_answer_contains_expected_fragments() -> None:
@@ -160,3 +163,22 @@ def test_calculate_rag_answer_accuracy_returns_zero_for_empty_results() -> None:
     accuracy = calculate_rag_answer_accuracy([])
 
     assert accuracy == 0.0
+
+
+def test_build_rag_answer_eval_report_returns_summary_and_results() -> None:
+    report = build_rag_answer_eval_report(
+        TEST_RESULTS,
+        TEST_CREATED_AT,
+        git_commit="abc1234",
+        git_dirty=False,
+    )
+
+    assert report["report_type"] == "rag_answer_eval_report"
+    assert report["schema_version"] == 1
+    assert report["created_at"] == TEST_CREATED_AT
+    assert report["git_commit"] == "abc1234"
+    assert report["git_dirty"] is False
+    assert report["total_cases"] == 3
+    assert report["passed_cases"] == 2
+    assert report["accuracy"] == 2 / 3
+    assert report["results"] == TEST_RESULTS
