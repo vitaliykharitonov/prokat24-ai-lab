@@ -23,5 +23,28 @@
       "паспорт"
     ],
     "expected_answer_not_contains": []
+  },
+  {
+    "question": "Де вас знайти?",
+    "expected_answer_contains": [
+      "Табірна",
+      "Васильківська"
+    ],
+    "expected_answer_not_contains": []
+  },
+  {
+    "question": "Як з вами зв'язатись?",
+    "expected_answer_contains": [
+      "(098)",
+      "info@prokat24.com.ua"
+    ],
+    "expected_answer_not_contains": []
+  },
+  {
+    "question": "Як рахується довгострокова оренда?",
+    "expected_answer_contains": [
+      "3 дн"
+    ],
+    "expected_answer_not_contains": []
   }
 ]
