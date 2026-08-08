@@ -2,6 +2,7 @@ from prokat24_ai_lab.evals.semantic_grading import (
     JudgeInput,
     JudgeResult,
     Rubric,
+    build_judge_prompt,
     evaluate_with_judge,
 )
 
@@ -55,3 +56,36 @@ def test_evaluate_with_judge() -> None:
             },
         )
     ]
+
+
+def test_build_judge_prompt_includes_evaluation_data() -> None:
+    judge_input: JudgeInput = {
+        "question": "Чи безкоштовна доставка?",
+        "context": "Доставка по Києву — від 200 грн.",
+        "answer": "Доставка по Києву коштує від 200 грн.",
+    }
+    rubric: Rubric = {
+        "name": "delivery_answer",
+        "criteria": [
+            {
+                "name": "delivery_correctness",
+                "description": "The answer must correctly state the delivery price.",
+            },
+            {
+                "name": "groundedness",
+                "description": "The answer must not introduce facts unsupported by the context",
+            },
+        ],
+    }
+
+    prompt = build_judge_prompt(judge_input, rubric)
+
+    assert "Чи безкоштовна доставка?" in prompt
+    assert "Доставка по Києву — від 200 грн." in prompt
+    assert "Доставка по Києву коштує від 200 грн." in prompt
+    assert "delivery_answer" in prompt
+    assert "delivery_correctness" in prompt
+    assert "groundedness" in prompt
+    assert "The answer must correctly state the delivery price." in prompt
+    assert "The answer must not introduce facts unsupported by the context" in prompt
+    assert "Do not use outside knowledge." in prompt
