@@ -1,6 +1,8 @@
 from collections.abc import Callable
 from typing import TypedDict
 
+from pydantic import BaseModel, Field
+
 
 class RubricCriterion(TypedDict):
     name: str
@@ -18,8 +20,8 @@ class JudgeInput(TypedDict):
     answer: str
 
 
-class JudgeResult(TypedDict):
-    score: int
+class JudgeResult(BaseModel):
+    score: int = Field(ge=1, le=5)
     passed: bool
     reason: str
     failed_criteria: list[str]

@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from prokat24_ai_lab.evals.semantic_grading import (
     JudgeInput,
     JudgeResult,
@@ -5,6 +8,40 @@ from prokat24_ai_lab.evals.semantic_grading import (
     build_judge_prompt,
     evaluate_with_judge,
 )
+
+
+def test_judge_result_accepts_valid_score() -> None:
+    judge_result = JudgeResult(
+        score=5,
+        passed=True,
+        reason="The answer correctly states the delivery price.",
+        failed_criteria=[],
+    )
+
+    assert judge_result.score == 5
+    assert judge_result.passed is True
+    assert judge_result.reason == "The answer correctly states the delivery price."
+    assert judge_result.failed_criteria == []
+
+
+def test_judge_result_rejects_score_below_minimum() -> None:
+    with pytest.raises(ValidationError):
+        JudgeResult(
+            score=0,
+            passed=True,
+            reason="The answer correctly states the delivery price.",
+            failed_criteria=[],
+        )
+
+
+def test_judge_result_rejects_score_above_maximum() -> None:
+    with pytest.raises(ValidationError):
+        JudgeResult(
+            score=6,
+            passed=True,
+            reason="The answer correctly states the delivery price.",
+            failed_criteria=[],
+        )
 
 
 def test_evaluate_with_judge() -> None:
@@ -23,12 +60,12 @@ def test_evaluate_with_judge() -> None:
         ],
     }
 
-    judge_result: JudgeResult = {
-        "score": 5,
-        "passed": True,
-        "reason": "The answer correctly states the delivery price.",
-        "failed_criteria": [],
-    }
+    judge_result: JudgeResult = JudgeResult(
+        score=5,
+        passed=True,
+        reason="The answer correctly states the delivery price.",
+        failed_criteria=[],
+    )
     received_arguments: list[tuple[JudgeInput, Rubric]] = []
 
     def fake_judge(input_data: JudgeInput, received_rubric: Rubric) -> JudgeResult:

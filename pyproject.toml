@@ -17,6 +17,7 @@ dev = [
     "pytest",
     "ruff",
     "mypy>=2.3,<3",
+    "pydantic>=2,<3",
 ]
 
 [tool.setuptools.packages.find]
