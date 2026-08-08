@@ -26,3 +26,11 @@ class JudgeResult(TypedDict):
 
 
 Judge = Callable[[JudgeInput, Rubric], JudgeResult]
+
+
+def evaluate_with_judge(
+    judge_input: JudgeInput,
+    rubric: Rubric,
+    judge: Judge,
+) -> JudgeResult:
+    return judge(judge_input, rubric)
