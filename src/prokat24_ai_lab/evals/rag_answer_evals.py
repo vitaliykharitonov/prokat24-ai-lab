@@ -9,12 +9,15 @@ from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
 class RagAnswerEvalCase(TypedDict):
     question: str
     expected_answer_contains: list[str]
+    expected_answer_not_contains: list[str]
 
 
 class RagAnswerEvalResult(TypedDict):
     question: str
     expected_answer_contains: list[str]
     missing_answer_fragments: list[str]
+    expected_answer_not_contains: list[str]
+    unexpected_answer_fragments: list[str]
     passed: bool
     answer: str
 
@@ -44,17 +47,25 @@ def evaluate_rag_answer_case(
 
     expected_answer_contains = case["expected_answer_contains"]
     missing_answer_fragments = []
+    expected_answer_not_contains = case["expected_answer_not_contains"]
+    unexpected_answer_fragments = []
 
     for fragment in expected_answer_contains:
         if fragment.lower() not in answer.lower():
             missing_answer_fragments.append(fragment)
 
-    passed = not missing_answer_fragments
+    for fragment in expected_answer_not_contains:
+        if fragment.lower() in answer.lower():
+            unexpected_answer_fragments.append(fragment)
+
+    passed = not missing_answer_fragments and not unexpected_answer_fragments
 
     return {
-        "question": case["question"],
+        "question": question,
         "expected_answer_contains": expected_answer_contains,
         "missing_answer_fragments": missing_answer_fragments,
+        "expected_answer_not_contains": expected_answer_not_contains,
+        "unexpected_answer_fragments": unexpected_answer_fragments,
         "passed": passed,
         "answer": answer,
     }

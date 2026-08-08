@@ -19,6 +19,8 @@ TEST_RESULTS: list[RagAnswerEvalResult] = [
         "question": "Як отримати спорядження?",
         "expected_answer_contains": ["доставк", "отримати"],
         "missing_answer_fragments": [],
+        "expected_answer_not_contains": [],
+        "unexpected_answer_fragments": [],
         "passed": True,
         "answer": "Спорядження можна отримати доставкою [Document 1].",
     },
@@ -26,6 +28,8 @@ TEST_RESULTS: list[RagAnswerEvalResult] = [
         "question": "Скільки коштує доставка по Києву?",
         "expected_answer_contains": ["200 грн", "Києву"],
         "missing_answer_fragments": [],
+        "expected_answer_not_contains": [],
+        "unexpected_answer_fragments": [],
         "passed": True,
         "answer": "Доставка по Києву коштує від 200 грн [Document 1].",
     },
@@ -33,6 +37,8 @@ TEST_RESULTS: list[RagAnswerEvalResult] = [
         "question": "Чи безкоштовна доставка?",
         "expected_answer_contains": ["доставк", "безкоштовно"],
         "missing_answer_fragments": ["безкоштовно"],
+        "expected_answer_not_contains": [],
+        "unexpected_answer_fragments": [],
         "passed": False,
         "answer": "Доставка по Києву коштує від 200 грн [Document 1].",
     },
@@ -48,6 +54,7 @@ def test_evaluate_rag_answer_case_passes_when_answer_contains_expected_fragments
             "доставк",
             "попередньою домовленістю",
         ],
+        "expected_answer_not_contains": ["самовивіз"],
     }
     received_questions: list[str] = []
     expected_answer = (
@@ -73,6 +80,7 @@ def test_evaluate_rag_answer_case_reports_missing_fragments() -> None:
             "доставк",
             "безкоштовно",
         ],
+        "expected_answer_not_contains": [],
     }
     received_questions: list[str] = []
     expected_answer = (
@@ -91,6 +99,31 @@ def test_evaluate_rag_answer_case_reports_missing_fragments() -> None:
     assert result["missing_answer_fragments"] == ["безкоштовно"]
 
 
+def test_evaluate_rag_answer_case_reports_unexpected_fragments() -> None:
+    case: RagAnswerEvalCase = {
+        "question": "Як отримати спорядження, не приїжджаючи до вас?",
+        "expected_answer_contains": [
+            "доставк",
+        ],
+        "expected_answer_not_contains": [
+            "самовивіз",
+        ],
+    }
+
+    received_questions: list[str] = []
+    expected_answer = "Можна скористатися доставкою або самовивіз [Document 1]."
+
+    def fake_answerer(question: str) -> str:
+        received_questions.append(question)
+        return expected_answer
+
+    result = evaluate_rag_answer_case(case, fake_answerer)
+
+    assert result["passed"] is False
+    assert result["missing_answer_fragments"] == []
+    assert result["unexpected_answer_fragments"] == ["самовивіз"]
+
+
 def test_run_rag_answer_evals_returns_result_for_each_case() -> None:
     cases: list[RagAnswerEvalCase] = [
         {
@@ -99,6 +132,7 @@ def test_run_rag_answer_evals_returns_result_for_each_case() -> None:
                 "спорядження",
                 "отримати",
             ],
+            "expected_answer_not_contains": [],
         },
         {
             "question": "Чи безкоштовна доставка?",
@@ -106,6 +140,7 @@ def test_run_rag_answer_evals_returns_result_for_each_case() -> None:
                 "доставк",
                 "безкоштовно",
             ],
+            "expected_answer_not_contains": [],
         },
     ]
 
@@ -136,6 +171,7 @@ def test_load_rag_answer_eval_cases_reads_json_file(tmp_path: Path) -> None:
         {
             "question": "Як отримати спорядження, не приїжджаючи до вас?",
             "expected_answer_contains": ["доставк", "попередньою домовленістю"],
+            "expected_answer_not_contains": [],
         },
     ]
 
