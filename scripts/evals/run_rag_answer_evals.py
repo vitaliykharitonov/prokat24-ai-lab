@@ -68,6 +68,7 @@ def main() -> None:
         print()
         print(f"Passed: {result['passed']}")
         print(f"Missing fragments: {result['missing_answer_fragments']}")
+        print(f"Unexpected fragments: {result['unexpected_answer_fragments']}")
         print("Answer:")
         print(result["answer"])
         print()

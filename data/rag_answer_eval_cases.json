@@ -4,19 +4,24 @@
     "expected_answer_contains": [
       "доставк",
       "попередньою домовленістю"
+    ],
+    "expected_answer_not_contains": [
+      "самовив"
     ]
   },
   {
     "question": "Скільки коштує доставка по Києву?",
     "expected_answer_contains": [
       "200 грн"
-    ]
+    ],
+    "expected_answer_not_contains": []
   },
   {
     "question": "Що потрібно залишити в заставу?",
     "expected_answer_contains": [
       "застав",
       "паспорт"
-    ]
+    ],
+    "expected_answer_not_contains": []
   }
 ]
