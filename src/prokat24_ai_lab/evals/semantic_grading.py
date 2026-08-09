@@ -27,6 +27,21 @@ class JudgeResult(BaseModel):
     failed_criteria: list[str]
 
 
+class JudgeEvalCase(TypedDict):
+    judge_input: JudgeInput
+    rubric: Rubric
+    expected_passed: bool
+
+
+class JudgeEvalResult(TypedDict):
+    expected_passed: bool
+    actual_passed: bool
+    matched: bool
+    score: int
+    reason: str
+    failed_criteria: list[str]
+
+
 Judge = Callable[[JudgeInput, Rubric], JudgeResult]
 
 JUDGE_INSTRUCTIONS: str = (
@@ -80,3 +95,28 @@ def build_judge_prompt(
     lines.append(RETURN_INSTRUCTIONS)
 
     return "\n".join(lines)
+
+
+def evaluate_judge_case(case: JudgeEvalCase, judge: Judge) -> JudgeEvalResult:
+    result = judge(case["judge_input"], case["rubric"])
+    expected_passed: bool = case["expected_passed"]
+    actual_passed: bool = result.passed
+    matched = expected_passed == actual_passed
+
+    return {
+        "expected_passed": expected_passed,
+        "actual_passed": actual_passed,
+        "matched": matched,
+        "score": result.score,
+        "reason": result.reason,
+        "failed_criteria": result.failed_criteria,
+    }
+
+
+def run_judge_evals(cases: list[JudgeEvalCase], judge: Judge) -> list[JudgeEvalResult]:
+    results: list[JudgeEvalResult] = []
+
+    for case in cases:
+        results.append(evaluate_judge_case(case, judge))
+
+    return results

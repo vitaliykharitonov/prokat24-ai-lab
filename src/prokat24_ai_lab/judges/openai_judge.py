@@ -10,7 +10,7 @@ from prokat24_ai_lab.evals.semantic_grading import (
     build_judge_prompt,
 )
 
-OPENAI_JUDGE_MODEL = ""
+OPENAI_JUDGE_MODEL = "gpt-5.4-mini-2026-03-17"
 
 
 class ResponsesProtocol(Protocol):
