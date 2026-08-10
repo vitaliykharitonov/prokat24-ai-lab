@@ -1,6 +1,4 @@
-from typing import Any, Protocol
-
-from openai import OpenAI
+from typing import Protocol
 
 from prokat24_ai_lab.evals.semantic_grading import (
     Judge,
@@ -13,6 +11,20 @@ from prokat24_ai_lab.evals.semantic_grading import (
 OPENAI_JUDGE_MODEL = "gpt-5.4-mini-2026-03-17"
 
 
+class OutputTextProtocol(Protocol):
+    type: str
+    parsed: JudgeResult | None
+
+
+class MessageProtocol(Protocol):
+    type: str
+    content: list[OutputTextProtocol]
+
+
+class ResponseProtocol(Protocol):
+    output: list[MessageProtocol]
+
+
 class ResponsesProtocol(Protocol):
     def parse(
         self,
@@ -20,7 +32,7 @@ class ResponsesProtocol(Protocol):
         text_format: type[JudgeResult],
         model: str,
         input: str,
-    ) -> Any: ...
+    ) -> ResponseProtocol: ...
 
 
 class JudgeClientProtocol(Protocol):
@@ -28,7 +40,7 @@ class JudgeClientProtocol(Protocol):
 
 
 def create_openai_judge(
-    client: OpenAI,
+    client: JudgeClientProtocol,
     model: str = OPENAI_JUDGE_MODEL,
 ) -> Judge:
     def judge(judge_input: JudgeInput, rubric: Rubric) -> JudgeResult:
