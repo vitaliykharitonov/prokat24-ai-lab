@@ -1,5 +1,7 @@
+import json
 from collections.abc import Callable
-from typing import TypedDict
+from pathlib import Path
+from typing import TypedDict, cast
 
 from pydantic import BaseModel, Field
 
@@ -28,6 +30,12 @@ class JudgeResult(BaseModel):
 
 
 class JudgeEvalCase(TypedDict):
+    judge_input: JudgeInput
+    rubric: Rubric
+    expected_passed: bool
+
+
+class JudgeEvalCaseModel(BaseModel):
     judge_input: JudgeInput
     rubric: Rubric
     expected_passed: bool
@@ -120,3 +128,15 @@ def run_judge_evals(cases: list[JudgeEvalCase], judge: Judge) -> list[JudgeEvalR
         results.append(evaluate_judge_case(case, judge))
 
     return results
+
+
+def load_judge_eval_cases(input_file: Path) -> list[JudgeEvalCase]:
+    with open(input_file, encoding="utf-8") as file:
+        loaded_data = json.load(file)
+        validated_cases: list[JudgeEvalCase] = []
+
+        for case in loaded_data:
+            validated_case = JudgeEvalCaseModel.model_validate(case)
+            validated_cases.append(cast(JudgeEvalCase, validated_case.model_dump()))
+
+    return validated_cases

@@ -1,0 +1,128 @@
+[
+  {
+    "judge_input": {
+      "question": "Чи безкоштовна доставка?",
+      "context": "Доставка по Києву — від 200 грн.",
+      "answer": "Доставка коштує від 200 грн."
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    },
+    "expected_passed": true
+  },
+  {
+    "judge_input": {
+      "question": "Чи безкоштовна доставка?",
+      "context": "Доставка по Києву — від 200 грн.",
+      "answer": "Доставка по Києву безкоштовна."
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    },
+    "expected_passed": false
+  },
+  {
+    "judge_input": {
+      "question": "Чи можна залишити паспорт як заставу?",
+      "context": "Громадянський паспорт не можна залишати як заставу.",
+      "answer": "Так, паспорт можна залишити як заставу."
+    },
+    "rubric": {
+      "name": "deposit_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state whether a passport can be left as collateral."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must not contradict the provided context."
+        }
+      ]
+    },
+    "expected_passed": false
+  },
+  {
+    "judge_input": {
+      "question": "Чи можна залишити паспорт як заставу?",
+      "context": "Громадянський паспорт не можна залишати як заставу.",
+      "answer": "Ні, громадянський паспорт як заставу не приймають."
+    },
+    "rubric": {
+      "name": "deposit_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state whether a passport can be left as collateral."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must not contradict the provided context."
+        }
+      ]
+    },
+    "expected_passed": true
+  },
+  {
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву?",
+      "context": "Доставка по Києву — від 200 грн.",
+      "answer": "Доставка коштує від 200 грн і завжди виконується в день замовлення."
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price."
+        },
+        {
+          "name": "groundedness",
+          "description": "All factual claims in the answer must be supported by the provided context."
+        }
+      ]
+    },
+    "expected_passed": false
+  },
+  {
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву?",
+      "context": "Доставка по Києву — від 200 грн.",
+      "answer": "Від 200 грн."
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information supported by the provided context."
+        }
+      ]
+    },
+    "expected_passed": true
+  }
+]

@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -9,6 +12,7 @@ from prokat24_ai_lab.evals.semantic_grading import (
     build_judge_prompt,
     evaluate_judge_case,
     evaluate_with_judge,
+    load_judge_eval_cases,
     run_judge_evals,
 )
 
@@ -258,7 +262,7 @@ def test_run_judge_evals_evaluates_all_cases() -> None:
                     {
                         "name": "correctness",
                         "description": "The answer must correctly state whether a passport "
-                                       "can be left as collateral.",
+                        "can be left as collateral.",
                     }
                 ],
             },
@@ -292,3 +296,79 @@ def test_run_judge_evals_evaluates_all_cases() -> None:
     assert len(results) == 2
     assert results[0]["matched"] is True
     assert results[1]["matched"] is False
+
+
+def test_load_judge_eval_cases_reads_json_file(tmp_path: Path) -> None:
+    cases: list[JudgeEvalCase] = [
+        {
+            "judge_input": {
+                "question": "Чи безкоштовна доставка?",
+                "context": "Доставка по Києву — від 200 грн.",
+                "answer": "Доставка коштує від 200 грн.",
+            },
+            "rubric": {
+                "name": "delivery_answer",
+                "criteria": [
+                    {
+                        "name": "correctness",
+                        "description": "The answer must correctly state the delivery price.",
+                    }
+                ],
+            },
+            "expected_passed": True,
+        },
+        {
+            "judge_input": {
+                "question": "Чи можна залишити паспорт як заставу?",
+                "context": "Громадянський паспорт не можна залишати як заставу.",
+                "answer": "Так, паспорт можна залишити як заставу.",
+            },
+            "rubric": {
+                "name": "deposit_answer",
+                "criteria": [
+                    {
+                        "name": "correctness",
+                        "description": "The answer must correctly state whether a passport "
+                        "can be left as collateral.",
+                    }
+                ],
+            },
+            "expected_passed": False,
+        },
+    ]
+    input_file = tmp_path / "judge_eval_cases.json"
+
+    with open(input_file, "w", encoding="utf-8") as file:
+        json.dump(cases, file, ensure_ascii=False, indent=2)
+
+    loaded_data = load_judge_eval_cases(input_file)
+
+    assert loaded_data == cases
+
+
+def test_load_judge_eval_cases_rejects_invalid_case(tmp_path: Path) -> None:
+    cases = [
+        {
+            "judge_input": {
+                "question": "Чи безкоштовна доставка?",
+                "context": "Доставка по Києву — від 200 грн.",
+                "answer": "Доставка коштує від 200 грн.",
+            },
+            "rubric": {
+                "name": "delivery_answer",
+                "criteria": [
+                    {
+                        "name": "correctness",
+                        "description": "The answer must correctly state the delivery price.",
+                    }
+                ],
+            },
+        },
+    ]
+    input_file = tmp_path / "judge_eval_cases.json"
+
+    with open(input_file, "w", encoding="utf-8") as file:
+        json.dump(cases, file, ensure_ascii=False, indent=2)
+
+    with pytest.raises(ValidationError):
+        load_judge_eval_cases(input_file)
