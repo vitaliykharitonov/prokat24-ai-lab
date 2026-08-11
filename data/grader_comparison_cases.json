@@ -1,0 +1,245 @@
+[
+  {
+    "id": "delivery_correct_01",
+    "category": "correct",
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву?",
+      "context": "Доставка по Києву коштує від 200 грн.",
+      "answer": "Доставка по Києву коштує від 200 грн."
+    },
+    "expected_passed": true,
+    "deterministic": {
+      "required_fragments": [
+        "від 200 грн"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price in Kyiv."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "delivery_incorrect_01",
+    "category": "incorrect",
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву?",
+      "context": "Доставка по Києву коштує від 200 грн.",
+      "answer": "Доставка по Києву безкоштовна."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "від 200 грн"
+      ],
+      "forbidden_fragments": [
+        "безкоштовна"
+      ]
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price in Kyiv."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "delivery_paraphrase_01",
+    "category": "paraphrase",
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву?",
+      "context": "Доставка по Києву коштує від 200 грн.",
+      "answer": "Мінімальна вартість доставки в межах Києва — 200 гривень."
+    },
+    "expected_passed": true,
+    "deterministic": {
+      "required_fragments": [
+        "від 200 грн"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price in Kyiv."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "passport_negation_01",
+    "category": "negation",
+    "judge_input": {
+      "question": "Чи можна залишити громадянський паспорт як заставу?",
+      "context": "Громадянський паспорт не можна залишати як заставу.",
+      "answer": "Так, громадянський паспорт можна залишити як заставу."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "паспорт",
+        "заставу"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "collateral_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state whether a civil passport can be left as collateral."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "delivery_unsupported_claim_01",
+    "category": "unsupported_claim",
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву?",
+      "context": "Доставка по Києву коштує від 200 грн.",
+      "answer": "Доставка по Києву коштує від 200 грн і виконується в день замовлення."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "від 200 грн"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price in Kyiv."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context and must not add unsupported claims."
+        }
+      ]
+    }
+  },
+  {
+    "id": "delivery_short_correct_01",
+    "category": "short_correct",
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву?",
+      "context": "Доставка по Києву коштує від 200 грн.",
+      "answer": "Від 200 гривень."
+    },
+    "expected_passed": true,
+    "deterministic": {
+      "required_fragments": [
+        "від 200 грн"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price in Kyiv."
+        },
+        {
+          "name": "relevance",
+          "description": "The answer must directly answer the user's question without requiring unnecessary detail."
+        }
+      ]
+    }
+  },
+  {
+    "id": "delivery_partial_answer_01",
+    "category": "partial_answer",
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву та за межами Києва?",
+      "context": "Доставка по Києву коштує від 200 грн. За межами Києва — від 200 грн + 10 грн/км.",
+      "answer": "Доставка по Києву коштує від 200 грн."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "від 200 грн"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery prices."
+        },
+        {
+          "name": "completeness",
+          "description": "The answer must cover both delivery within Kyiv and delivery outside Kyiv."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "delivery_irrelevant_extra_01",
+    "category": "irrelevant_extra",
+    "judge_input": {
+      "question": "Скільки коштує доставка по Києву?",
+      "context": "Доставка по Києву коштує від 200 грн. Пункт прокату працює щодня з 10:00 до 19:00.",
+      "answer": "Доставка по Києву коштує від 200 грн. Пункт прокату працює щодня з 10:00 до 19:00."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "від 200 грн"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "delivery_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the delivery price in Kyiv."
+        },
+        {
+          "name": "relevance",
+          "description": "The answer must contain only information needed to answer the user's question. Additional unrelated information should fail this criterion."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  }
+]
