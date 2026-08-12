@@ -1,7 +1,7 @@
 import json
 from collections.abc import Callable
 from pathlib import Path
-from typing import TypedDict, cast
+from typing import Literal, TypedDict, cast
 
 from pydantic import BaseModel, Field
 
@@ -104,6 +104,18 @@ class GraderCategorySummary(TypedDict):
     llm_accuracy: float
 
 
+class GraderConfusionMatrix(TypedDict):
+    true_positive: int
+    true_negative: int
+    false_positive: int
+    false_negative: int
+
+
+class GraderClassificationMetrics(TypedDict):
+    precision: float
+    recall: float
+
+
 Judge = Callable[[JudgeInput, Rubric], JudgeResult]
 
 JUDGE_INSTRUCTIONS: str = (
@@ -121,6 +133,8 @@ RETURN_INSTRUCTIONS: str = (
     "- reason: concise explanation\n"
     "- failed_criteria: names of failed rubric criteria"
 )
+
+GraderKey = Literal["deterministic_passed", "llm_passed"]
 
 
 def evaluate_with_judge(
@@ -305,3 +319,52 @@ def summarize_grader_comparison_by_category(
         summaries[group] = summarize_grader_comparison(grouped_results[group])
 
     return summaries
+
+
+def build_grader_confusion_matrix(
+    results: list[GraderComparisonResult],
+    grader_key: GraderKey,
+) -> GraderConfusionMatrix:
+    true_positive = 0
+    true_negative = 0
+    false_positive = 0
+    false_negative = 0
+
+    for result in results:
+        expected = result["expected_passed"]
+        actual = result[grader_key]
+
+        if expected is True and actual is True:
+            true_positive += 1
+        elif expected is False and actual is False:
+            true_negative += 1
+        elif expected is False and actual is True:
+            false_positive += 1
+        else:
+            false_negative += 1
+
+    return {
+        "true_positive": true_positive,
+        "true_negative": true_negative,
+        "false_positive": false_positive,
+        "false_negative": false_negative,
+    }
+
+
+def calculate_grader_classification_metrics(
+    matrix: GraderConfusionMatrix,
+) -> GraderClassificationMetrics:
+    true_positive = matrix["true_positive"]
+    false_positive = matrix["false_positive"]
+    false_negative = matrix["false_negative"]
+
+    precision_denominator = true_positive + false_positive
+    recall_denominator = true_positive + false_negative
+
+    precision = true_positive / precision_denominator if precision_denominator else 0.0
+    recall = true_positive / recall_denominator if recall_denominator else 0.0
+
+    return {
+        "precision": precision,
+        "recall": recall,
+    }

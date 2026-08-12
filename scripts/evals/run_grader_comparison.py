@@ -1,6 +1,7 @@
 from openai import OpenAI
 
 from prokat24_ai_lab.evals.semantic_grading import (
+    build_grader_confusion_matrix,
     load_grader_comparison_cases,
     run_grader_comparison_evals,
     summarize_grader_comparison,
@@ -22,6 +23,16 @@ def main() -> None:
     summaries = summarize_grader_comparison_by_category(results)
 
     total_cases = summary["total_cases"]
+
+    deterministic_matrix = build_grader_confusion_matrix(
+        results,
+        "deterministic_passed",
+    )
+
+    llm_matrix = build_grader_confusion_matrix(
+        results,
+        "llm_passed",
+    )
 
     print("\nGRADER COMPARISON\n")
     print(f"Cases: {total_cases}\n")
@@ -62,6 +73,26 @@ def main() -> None:
             print(f"Score: {result['llm_score']}")
             print(f"Reason: {result['llm_reason']}")
             print(f"Failed criteria: {result['llm_failed_criteria']}")
+            print()
+
+    print("Confusion matrices:\n")
+    print("Deterministic:")
+    print("                 Human")
+    print("             PASS     FAIL")
+    print(
+        f"Grader PASS  {deterministic_matrix['true_positive']:>4} "
+        f"{deterministic_matrix['false_positive']:>8}"
+    )
+    print(
+        f"Grader FAIL  {deterministic_matrix['false_negative']:>4} "
+        f"{deterministic_matrix['true_negative']:>8}"
+    )
+    print()
+    print("LLM judge:")
+    print("                 Human")
+    print("             PASS     FAIL")
+    print(f"Grader PASS  {llm_matrix['true_positive']:>4} {llm_matrix['false_positive']:>8}")
+    print(f"Grader FAIL  {llm_matrix['false_negative']:>4} {llm_matrix['true_negative']:>8}")
 
 
 if __name__ == "__main__":

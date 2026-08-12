@@ -5,14 +5,19 @@ import pytest
 from pydantic import ValidationError
 
 from prokat24_ai_lab.evals.semantic_grading import (
+    GraderClassificationMetrics,
     GraderComparisonCase,
     GraderComparisonResult,
     GraderComparisonSummary,
+    GraderConfusionMatrix,
+    GraderKey,
     JudgeEvalCase,
     JudgeInput,
     JudgeResult,
     Rubric,
+    build_grader_confusion_matrix,
     build_judge_prompt,
+    calculate_grader_classification_metrics,
     evaluate_grader_comparison_case,
     evaluate_judge_case,
     evaluate_with_judge,
@@ -23,6 +28,57 @@ from prokat24_ai_lab.evals.semantic_grading import (
     summarize_grader_comparison,
     summarize_grader_comparison_by_category,
 )
+
+GRADER_COMPARISON_TEST_RESULTS = [
+    {
+        "id": "true_positive",
+        "category": "correct",
+        "expected_passed": True,
+        "deterministic_passed": True,
+        "deterministic_matched": True,
+        "llm_passed": True,
+        "llm_matched": False,
+        "llm_score": 1,
+        "llm_reason": "Test result",
+        "llm_failed_criteria": ["correctness"],
+    },
+    {
+        "id": "true_negative",
+        "category": "incorrect",
+        "expected_passed": False,
+        "deterministic_passed": False,
+        "deterministic_matched": True,
+        "llm_passed": False,
+        "llm_matched": False,
+        "llm_score": 5,
+        "llm_reason": "Test result",
+        "llm_failed_criteria": [],
+    },
+    {
+        "id": "false_positive",
+        "category": "negation",
+        "expected_passed": False,
+        "deterministic_passed": True,
+        "deterministic_matched": False,
+        "llm_passed": False,
+        "llm_matched": True,
+        "llm_score": 1,
+        "llm_reason": "Test result",
+        "llm_failed_criteria": ["correctness"],
+    },
+    {
+        "id": "false_negative",
+        "category": "paraphrase",
+        "expected_passed": True,
+        "deterministic_passed": False,
+        "deterministic_matched": False,
+        "llm_passed": True,
+        "llm_matched": True,
+        "llm_score": 5,
+        "llm_reason": "Test result",
+        "llm_failed_criteria": [],
+    },
+]
 
 
 def test_judge_result_accepts_valid_score() -> None:
@@ -812,3 +868,70 @@ def test_summarize_grader_comparison_by_category_empty_results() -> None:
     summaries = summarize_grader_comparison_by_category(results)
 
     assert summaries == {}
+
+
+@pytest.mark.parametrize(
+    ("grader_key", "expected_matrix"),
+    [
+        (
+            "deterministic_passed",
+            {
+                "true_positive": 1,
+                "true_negative": 1,
+                "false_positive": 1,
+                "false_negative": 1,
+            },
+        ),
+        (
+            "llm_passed",
+            {
+                "true_positive": 2,
+                "true_negative": 2,
+                "false_positive": 0,
+                "false_negative": 0,
+            },
+        ),
+    ],
+)
+def test_build_grader_confusion_matrix_for_graders(
+    grader_key: GraderKey, expected_matrix: GraderConfusionMatrix
+) -> None:
+    matrix = build_grader_confusion_matrix(
+        GRADER_COMPARISON_TEST_RESULTS,
+        grader_key,
+    )
+
+    assert matrix == expected_matrix
+
+
+def test_calculate_grader_classification_metrics() -> None:
+    matrix: GraderConfusionMatrix = {
+        "true_positive": 1,
+        "true_negative": 1,
+        "false_positive": 4,
+        "false_negative": 2,
+    }
+    expected: GraderClassificationMetrics = {
+        "precision": 0.2,
+        "recall": 1 / 3,
+    }
+    metrics = calculate_grader_classification_metrics(matrix)
+
+    assert metrics == expected
+
+
+def test_calculate_grader_classification_metrics_with_no_positive_cases() -> None:
+    matrix: GraderConfusionMatrix = {
+        "true_positive": 0,
+        "true_negative": 5,
+        "false_positive": 0,
+        "false_negative": 0,
+    }
+    expected: GraderClassificationMetrics = {
+        "precision": 0.0,
+        "recall": 0.0,
+    }
+
+    metrics = calculate_grader_classification_metrics(matrix)
+
+    assert metrics == expected
