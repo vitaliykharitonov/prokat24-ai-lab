@@ -117,6 +117,27 @@ def test_judge_result_rejects_score_above_maximum() -> None:
         )
 
 
+def test_judge_result_rejects_passed_with_failed_criteria() -> None:
+    with pytest.raises(ValidationError):
+        JudgeResult(
+            score=4,
+            passed=True,
+            reason="The answer fails relevance.",
+            failed_criteria=["relevance"],
+        )
+
+
+def test_judge_result_accepts_failed_with_failed_criteria() -> None:
+    result = JudgeResult(
+        score=4,
+        passed=False,
+        reason="The answer contains irrelevant information.",
+        failed_criteria=["relevance"],
+    )
+    assert result.passed is False
+    assert result.failed_criteria == ["relevance"]
+
+
 def test_evaluate_with_judge() -> None:
     judge_input: JudgeInput = {
         "question": "Чи безкоштовна доставка?",
@@ -199,6 +220,7 @@ def test_build_judge_prompt_includes_evaluation_data() -> None:
     assert "The answer must correctly state the delivery price." in prompt
     assert "The answer must not introduce facts unsupported by the context" in prompt
     assert "Do not use outside knowledge." in prompt
+    assert "passed must be false" in prompt
 
 
 def test_evaluate_judge_case_returns_true_when_judge_matches_expected() -> None:

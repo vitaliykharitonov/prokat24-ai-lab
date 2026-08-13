@@ -1,9 +1,9 @@
 import json
 from collections.abc import Callable
 from pathlib import Path
-from typing import Literal, TypedDict, cast
+from typing import Literal, Self, TypedDict, cast
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from prokat24_ai_lab.evals.rag_answer_evals import RagAnswerEvalCase, evaluate_rag_answer_case
 
@@ -29,6 +29,13 @@ class JudgeResult(BaseModel):
     passed: bool
     reason: str
     failed_criteria: list[str]
+
+    @model_validator(mode="after")
+    def validate_passed_with_failed_criteria(self) -> Self:
+        if self.passed and self.failed_criteria:
+            raise ValueError("Passed result cannot have failed criteria")
+
+        return self
 
 
 class JudgeEvalCase(TypedDict):
@@ -139,6 +146,10 @@ RETURN_INSTRUCTIONS: str = (
     "- passed: true or false\n"
     "- reason: concise explanation\n"
     "- failed_criteria: names of failed rubric criteria"
+    "If any rubric criterion fails:"
+    "- passed must be false"
+    "- failed_criteria must contain every failed criterion"
+    "passed may be true only when failed_criteria is empty."
 )
 
 GraderKey = Literal["deterministic_passed", "llm_passed"]
