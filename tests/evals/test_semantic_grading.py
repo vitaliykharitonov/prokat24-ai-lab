@@ -11,6 +11,7 @@ from prokat24_ai_lab.evals.semantic_grading import (
     GraderComparisonSummary,
     GraderConfusionMatrix,
     GraderKey,
+    GraderStabilityResult,
     JudgeEvalCase,
     JudgeInput,
     JudgeResult,
@@ -27,6 +28,7 @@ from prokat24_ai_lab.evals.semantic_grading import (
     run_judge_evals,
     summarize_grader_comparison,
     summarize_grader_comparison_by_category,
+    summarize_grader_stability,
 )
 
 GRADER_COMPARISON_TEST_RESULTS = [
@@ -935,3 +937,110 @@ def test_calculate_grader_classification_metrics_with_no_positive_cases() -> Non
     metrics = calculate_grader_classification_metrics(matrix)
 
     assert metrics == expected
+
+
+def test_summarize_grader_stability() -> None:
+    runs: list[list[GraderComparisonResult]] = [
+        [
+            {
+                "id": "stable_case",
+                "category": "correct",
+                "expected_passed": True,
+                "deterministic_passed": True,
+                "deterministic_matched": True,
+                "llm_passed": True,
+                "llm_matched": True,
+                "llm_score": 5,
+                "llm_reason": "Correct.",
+                "llm_failed_criteria": [],
+            },
+            {
+                "id": "unstable_case",
+                "category": "irrelevant_extra",
+                "expected_passed": False,
+                "deterministic_passed": True,
+                "deterministic_matched": False,
+                "llm_passed": True,
+                "llm_matched": False,
+                "llm_score": 5,
+                "llm_reason": "Accepted.",
+                "llm_failed_criteria": [],
+            },
+        ],
+        [
+            {
+                "id": "stable_case",
+                "category": "correct",
+                "expected_passed": True,
+                "deterministic_passed": True,
+                "deterministic_matched": True,
+                "llm_passed": True,
+                "llm_matched": True,
+                "llm_score": 5,
+                "llm_reason": "Correct.",
+                "llm_failed_criteria": [],
+            },
+            {
+                "id": "unstable_case",
+                "category": "irrelevant_extra",
+                "expected_passed": False,
+                "deterministic_passed": True,
+                "deterministic_matched": False,
+                "llm_passed": False,
+                "llm_matched": True,
+                "llm_score": 2,
+                "llm_reason": "Contains irrelevant information.",
+                "llm_failed_criteria": ["relevance"],
+            },
+        ],
+        [
+            {
+                "id": "stable_case",
+                "category": "correct",
+                "expected_passed": True,
+                "deterministic_passed": True,
+                "deterministic_matched": True,
+                "llm_passed": True,
+                "llm_matched": True,
+                "llm_score": 5,
+                "llm_reason": "Correct.",
+                "llm_failed_criteria": [],
+            },
+            {
+                "id": "unstable_case",
+                "category": "irrelevant_extra",
+                "expected_passed": False,
+                "deterministic_passed": True,
+                "deterministic_matched": False,
+                "llm_passed": False,
+                "llm_matched": True,
+                "llm_score": 2,
+                "llm_reason": "Contains irrelevant information.",
+                "llm_failed_criteria": ["relevance"],
+            },
+        ],
+    ]
+    expected: list[GraderStabilityResult] = [
+        {
+            "id": "stable_case",
+            "expected_passed": True,
+            "llm_passed_values": [True, True, True],
+            "stable": True,
+        },
+        {
+            "id": "unstable_case",
+            "expected_passed": False,
+            "llm_passed_values": [True, False, False],
+            "stable": False,
+        },
+    ]
+
+    stability_results = summarize_grader_stability(runs)
+
+    assert stability_results == expected
+
+
+def test_summarize_grader_stability_empty_runs() -> None:
+    stability_results = summarize_grader_stability([])
+
+    assert stability_results == []

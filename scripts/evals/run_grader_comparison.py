@@ -1,38 +1,51 @@
 from openai import OpenAI
 
 from prokat24_ai_lab.evals.semantic_grading import (
+    GraderComparisonResult,
     build_grader_confusion_matrix,
+    calculate_grader_classification_metrics,
     load_grader_comparison_cases,
     run_grader_comparison_evals,
     summarize_grader_comparison,
     summarize_grader_comparison_by_category,
+    summarize_grader_stability,
 )
 from prokat24_ai_lab.judges.openai_judge import create_openai_judge
 from prokat24_ai_lab.project_paths import GRADER_COMPARISON_CASES_FILE
+
+RUNS = 3
 
 
 def main() -> None:
     cases = load_grader_comparison_cases(GRADER_COMPARISON_CASES_FILE)
     client = OpenAI()
-
     judge = create_openai_judge(client)
 
-    results = run_grader_comparison_evals(cases, judge)
+    all_runs: list[list[GraderComparisonResult]] = []
 
-    summary = summarize_grader_comparison(results)
-    summaries = summarize_grader_comparison_by_category(results)
+    for _ in range(RUNS):
+        results = run_grader_comparison_evals(cases, judge)
+        all_runs.append(results)
+
+    stability_results = summarize_grader_stability(all_runs)
+
+    summary = summarize_grader_comparison(all_runs[0])
+    summaries = summarize_grader_comparison_by_category(all_runs[0])
 
     total_cases = summary["total_cases"]
 
     deterministic_matrix = build_grader_confusion_matrix(
-        results,
+        all_runs[0],
         "deterministic_passed",
     )
 
     llm_matrix = build_grader_confusion_matrix(
-        results,
+        all_runs[0],
         "llm_passed",
     )
+
+    deterministic_metrics = calculate_grader_classification_metrics(deterministic_matrix)
+    llm_metrics = calculate_grader_classification_metrics(llm_matrix)
 
     print("\nGRADER COMPARISON\n")
     print(f"Cases: {total_cases}\n")
@@ -59,7 +72,7 @@ def main() -> None:
 
     print("Mismatches:\n")
 
-    for result in results:
+    for result in all_runs[0]:
         if not result["deterministic_matched"]:
             print(f"ID: {result['id']} [{result['category']}]")
             print(f"Expected: {result['expected_passed']}")
@@ -93,6 +106,41 @@ def main() -> None:
     print("             PASS     FAIL")
     print(f"Grader PASS  {llm_matrix['true_positive']:>4} {llm_matrix['false_positive']:>8}")
     print(f"Grader FAIL  {llm_matrix['false_negative']:>4} {llm_matrix['true_negative']:>8}")
+
+    print()
+    print("Classification metrics:\n")
+    print("Deterministic:")
+    print(f"Precision: {deterministic_metrics['precision']:.2%}")
+    print(f"Recall: {deterministic_metrics['recall']:.2%}")
+    print()
+    print("LLM judge:")
+    print(f"Precision: {llm_metrics['precision']:.2%}")
+    print(f"Recall: {llm_metrics['recall']:.2%}")
+
+    print()
+    print("LLM judge stability:\n")
+    header = f"{'ID':<36} {'Expected':<10}"
+
+    for run_number in range(1, RUNS + 1):
+        header += f"{f'Run {run_number}':<8}"
+
+    header += "Stable"
+
+    print(header)
+
+    for result in stability_results:
+        expected = "PASS" if result["expected_passed"] else "FAIL"
+        stable = "YES" if result["stable"] else "NO"
+
+        row = f"{result['id']:<36} {expected:<10}"
+
+        for passed in result["llm_passed_values"]:
+            verdict = "PASS" if passed else "FAIL"
+            row += f"{verdict:<8}"
+
+        row += stable
+
+        print(row)
 
 
 if __name__ == "__main__":

@@ -116,6 +116,13 @@ class GraderClassificationMetrics(TypedDict):
     recall: float
 
 
+class GraderStabilityResult(TypedDict):
+    id: str
+    expected_passed: bool
+    llm_passed_values: list[bool]
+    stable: bool
+
+
 Judge = Callable[[JudgeInput, Rubric], JudgeResult]
 
 JUDGE_INSTRUCTIONS: str = (
@@ -368,3 +375,34 @@ def calculate_grader_classification_metrics(
         "precision": precision,
         "recall": recall,
     }
+
+
+def summarize_grader_stability(
+    runs: list[list[GraderComparisonResult]],
+) -> list[GraderStabilityResult]:
+    stability_results: list[GraderStabilityResult] = []
+
+    if not runs:
+        return stability_results
+
+    for first_run_case in runs[0]:
+        case_id = first_run_case["id"]
+        llm_passed_values: list[bool] = []
+
+        for run in runs:
+            for case in run:
+                if case["id"] == case_id:
+                    llm_passed_values.append(case["llm_passed"])
+
+        stable = len(set(llm_passed_values)) == 1
+
+        stability_results.append(
+            {
+                "id": case_id,
+                "expected_passed": first_run_case["expected_passed"],
+                "llm_passed_values": llm_passed_values,
+                "stable": stable,
+            }
+        )
+
+    return stability_results
