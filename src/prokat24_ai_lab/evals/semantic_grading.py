@@ -93,22 +93,29 @@ class GraderComparisonResult(TypedDict):
     llm_score: int
     llm_reason: str
     llm_failed_criteria: list[str]
+    criterion_llm_passed: bool
+    criterion_llm_matched: bool
+    criterion_llm_failed_criteria: list[str]
 
 
 class GraderComparisonSummary(TypedDict):
     total_cases: int
     deterministic_matched: int
     llm_matched: int
+    criterion_llm_matched: int
     deterministic_accuracy: float
     llm_accuracy: float
+    criterion_llm_accuracy: float
 
 
 class GraderCategorySummary(TypedDict):
     total_cases: int
     deterministic_matched: int
     llm_matched: int
+    criterion_llm_matched: int
     deterministic_accuracy: float
     llm_accuracy: float
+    criterion_llm_accuracy: float
 
 
 class GraderConfusionMatrix(TypedDict):
@@ -127,17 +134,49 @@ class GraderStabilityResult(TypedDict):
     id: str
     expected_passed: bool
     llm_passed_values: list[bool]
-    stable: bool
+    llm_stable: bool
+    llm_match_rate: float
+    criterion_llm_passed_values: list[bool]
+    criterion_llm_stable: bool
+    criterion_llm_match_rate: float
+
+
+class CriterionResult(BaseModel):
+    name: str
+    passed: bool
+    reason: str
+
+
+class CriterionJudgeResult(BaseModel):
+    criteria: list[CriterionResult]
+
+
+class CriterionJudgeSummary(TypedDict):
+    passed: bool
+    failed_criteria: list[str]
 
 
 Judge = Callable[[JudgeInput, Rubric], JudgeResult]
+
+CriterionJudge = Callable[[JudgeInput, Rubric], CriterionJudgeResult]
 
 JUDGE_INSTRUCTIONS: str = (
     "Judge instructions:\n"
     "You are evaluating an assistant answer.\n"
     "Evaluate it strictly using the provided rubric.\n"
     "Use only the provided context.\n"
-    "Do not use outside knowledge."
+    "Do not use outside knowledge.\n"
+    "Evaluate every rubric criterion independently.\n"
+    "Groundedness and relevance are separate criteria.\n"
+    "Information can be fully supported by the context and still "
+    "be irrelevant to the user's question.\n"
+    "If the rubric requires relevance, any information unrelated to answering the user's "
+    "question must fail the relevance criterion, even when that information is correct "
+    "and present in the context.\n"
+    "For relevance, do not ask whether information is generally related to the topic.\n"
+    "Ask whether each piece of information is necessary to answer the specific user question.\n"
+    "Information is irrelevant if the answer would remain complete and correct after removing it.\n"
+    "Related, useful, grounded, or potentially helpful information can still be irrelevant.\n"
 )
 
 RETURN_INSTRUCTIONS: str = (
@@ -145,14 +184,25 @@ RETURN_INSTRUCTIONS: str = (
     "- score: integer from 1 to 5\n"
     "- passed: true or false\n"
     "- reason: concise explanation\n"
-    "- failed_criteria: names of failed rubric criteria"
-    "If any rubric criterion fails:"
-    "- passed must be false"
-    "- failed_criteria must contain every failed criterion"
+    "- failed_criteria: names of failed rubric criteria\n"
+    "If any rubric criterion fails:\n"
+    "- passed must be false\n"
+    "- failed_criteria must contain every failed criterion\n"
     "passed may be true only when failed_criteria is empty."
 )
 
-GraderKey = Literal["deterministic_passed", "llm_passed"]
+CRITERION_RETURN_INSTRUCTIONS: str = (
+    "Return one result for every rubric criterion.\n"
+    "For each criterion return:\n"
+    "- name: exactly the criterion name from the 'Rubric criteria' list above\n"
+    "- passed: true or false\n"
+    "- reason: concise explanation\n"
+    "Evaluate every criterion independently.\n"
+    "Do not omit, rename, or add criteria.\n"
+    "Do not use the rubric name as a criterion name."
+)
+
+GraderKey = Literal["deterministic_passed", "llm_passed", "criterion_llm_passed"]
 
 
 def evaluate_with_judge(
@@ -161,6 +211,17 @@ def evaluate_with_judge(
     judge: Judge,
 ) -> JudgeResult:
     return judge(judge_input, rubric)
+
+
+def evaluate_with_criterion_judge(
+    judge_input: JudgeInput,
+    rubric: Rubric,
+    judge: CriterionJudge,
+) -> CriterionJudgeSummary:
+    criterion_results = judge(judge_input, rubric)
+    summary = summarize_criterion_judge_result(criterion_results)
+
+    return summary
 
 
 def build_judge_prompt(
@@ -173,8 +234,8 @@ def build_judge_prompt(
     lines.append("Rubric:")
     lines.append(rubric["name"])
 
-    for criteria in rubric["criteria"]:
-        lines.append(f"- {criteria['name']}: {criteria['description']}")
+    for criterion in rubric["criteria"]:
+        lines.append(f"- {criterion['name']}: {criterion['description']}")
 
     lines.append("")
     lines.append("Question:")
@@ -187,6 +248,36 @@ def build_judge_prompt(
     lines.append(judge_input["answer"])
     lines.append("")
     lines.append(RETURN_INSTRUCTIONS)
+
+    return "\n".join(lines)
+
+
+def build_criterion_judge_prompt(
+    judge_input: JudgeInput,
+    rubric: Rubric,
+) -> str:
+    lines: list[str] = []
+    lines.append(JUDGE_INSTRUCTIONS)
+    lines.append("")
+    lines.append("Rubric name:")
+    lines.append(rubric["name"])
+    lines.append("")
+    lines.append("Rubric criteria:")
+
+    for criterion in rubric["criteria"]:
+        lines.append(f"- {criterion['name']}: {criterion['description']}")
+
+    lines.append("")
+    lines.append("Question:")
+    lines.append(judge_input["question"])
+    lines.append("")
+    lines.append("Context:")
+    lines.append(judge_input["context"])
+    lines.append("")
+    lines.append("Assistant answer:")
+    lines.append(judge_input["answer"])
+    lines.append("")
+    lines.append(CRITERION_RETURN_INSTRUCTIONS)
 
     return "\n".join(lines)
 
@@ -243,6 +334,7 @@ def load_grader_comparison_cases(input_file: Path) -> list[GraderComparisonCase]
 def evaluate_grader_comparison_case(
     case: GraderComparisonCase,
     judge: Judge,
+    criterion_judge: CriterionJudge,
 ) -> GraderComparisonResult:
     rag_answer_eval_case: RagAnswerEvalCase = {
         "question": case["judge_input"]["question"],
@@ -257,8 +349,15 @@ def evaluate_grader_comparison_case(
 
     judge_result = evaluate_with_judge(case["judge_input"], case["rubric"], judge)
 
+    criterion_judge_result = evaluate_with_criterion_judge(
+        case["judge_input"],
+        case["rubric"],
+        criterion_judge,
+    )
+
     deterministic_matched = deterministic_result["passed"] == case["expected_passed"]
     llm_matched = judge_result.passed == case["expected_passed"]
+    criterion_llm_matched = criterion_judge_result["passed"] == case["expected_passed"]
 
     return {
         "id": case["id"],
@@ -271,17 +370,21 @@ def evaluate_grader_comparison_case(
         "llm_score": judge_result.score,
         "llm_reason": judge_result.reason,
         "llm_failed_criteria": judge_result.failed_criteria,
+        "criterion_llm_passed": criterion_judge_result["passed"],
+        "criterion_llm_matched": criterion_llm_matched,
+        "criterion_llm_failed_criteria": criterion_judge_result["failed_criteria"],
     }
 
 
 def run_grader_comparison_evals(
     cases: list[GraderComparisonCase],
     judge: Judge,
+    criterion_judge: CriterionJudge,
 ) -> list[GraderComparisonResult]:
     results: list[GraderComparisonResult] = []
 
     for case in cases:
-        results.append(evaluate_grader_comparison_case(case, judge))
+        results.append(evaluate_grader_comparison_case(case, judge, criterion_judge))
 
     return results
 
@@ -292,14 +395,17 @@ def summarize_grader_comparison(
     total_cases = len(results)
     deterministic_matched = 0
     llm_matched = 0
+    criterion_llm_matched = 0
 
     if not results:
         return {
             "total_cases": 0,
             "deterministic_matched": 0,
             "llm_matched": 0,
+            "criterion_llm_matched": 0,
             "deterministic_accuracy": 0.0,
             "llm_accuracy": 0.0,
+            "criterion_llm_accuracy": 0.0,
         }
 
     for result in results:
@@ -309,15 +415,21 @@ def summarize_grader_comparison(
         if result["llm_matched"]:
             llm_matched += 1
 
+        if result["criterion_llm_matched"]:
+            criterion_llm_matched += 1
+
     deterministic_accuracy = deterministic_matched / total_cases
     llm_accuracy = llm_matched / total_cases
+    criterion_llm_accuracy = criterion_llm_matched / total_cases
 
     return {
         "total_cases": total_cases,
         "deterministic_matched": deterministic_matched,
         "llm_matched": llm_matched,
+        "criterion_llm_matched": criterion_llm_matched,
         "deterministic_accuracy": deterministic_accuracy,
         "llm_accuracy": llm_accuracy,
+        "criterion_llm_accuracy": criterion_llm_accuracy,
     }
 
 
@@ -399,21 +511,79 @@ def summarize_grader_stability(
     for first_run_case in runs[0]:
         case_id = first_run_case["id"]
         llm_passed_values: list[bool] = []
+        criterion_llm_passed_values: list[bool] = []
 
         for run in runs:
             for case in run:
                 if case["id"] == case_id:
                     llm_passed_values.append(case["llm_passed"])
+                    criterion_llm_passed_values.append(case["criterion_llm_passed"])
 
-        stable = len(set(llm_passed_values)) == 1
+        llm_matched = 0
+        criterion_llm_matched = 0
+
+        for value in llm_passed_values:
+            if value == first_run_case["expected_passed"]:
+                llm_matched += 1
+
+        for value in criterion_llm_passed_values:
+            if value == first_run_case["expected_passed"]:
+                criterion_llm_matched += 1
+
+        llm_match_rate = llm_matched / len(llm_passed_values)
+        criterion_llm_match_rate = criterion_llm_matched / len(criterion_llm_passed_values)
+
+        llm_stable = len(set(llm_passed_values)) == 1
+        criterion_stable = len(set(criterion_llm_passed_values)) == 1
 
         stability_results.append(
             {
                 "id": case_id,
                 "expected_passed": first_run_case["expected_passed"],
                 "llm_passed_values": llm_passed_values,
-                "stable": stable,
+                "llm_stable": llm_stable,
+                "llm_match_rate": llm_match_rate,
+                "criterion_llm_passed_values": criterion_llm_passed_values,
+                "criterion_llm_stable": criterion_stable,
+                "criterion_llm_match_rate": criterion_llm_match_rate,
             }
         )
 
     return stability_results
+
+
+def summarize_criterion_judge_result(
+    result: CriterionJudgeResult,
+) -> CriterionJudgeSummary:
+    failed_criteria = []
+
+    for criterion in result.criteria:
+        if not criterion.passed:
+            failed_criteria.append(criterion.name)
+
+    passed = failed_criteria == []
+
+    return CriterionJudgeSummary(
+        passed=passed,
+        failed_criteria=failed_criteria,
+    )
+
+
+def validate_criterion_judge_result(
+    result: CriterionJudgeResult,
+    rubric: Rubric,
+) -> None:
+    expected_criteria: list[str] = []
+    actual_criteria: list[str] = []
+
+    for rubric_criterion in rubric["criteria"]:
+        expected_criteria.append(rubric_criterion["name"])
+
+    for result_criterion in result.criteria:
+        actual_criteria.append(result_criterion.name)
+
+    if sorted(expected_criteria) != sorted(actual_criteria):
+        raise ValueError(
+            f"Actual and expected criteria do not match: "
+            f"expected={expected_criteria}, actual={actual_criteria}"
+        )

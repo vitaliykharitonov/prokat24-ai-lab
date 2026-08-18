@@ -5,6 +5,8 @@ import pytest
 from pydantic import ValidationError
 
 from prokat24_ai_lab.evals.semantic_grading import (
+    CriterionJudgeResult,
+    CriterionResult,
     GraderClassificationMetrics,
     GraderComparisonCase,
     GraderComparisonResult,
@@ -16,60 +18,43 @@ from prokat24_ai_lab.evals.semantic_grading import (
     JudgeInput,
     JudgeResult,
     Rubric,
+    build_criterion_judge_prompt,
     build_grader_confusion_matrix,
     build_judge_prompt,
     calculate_grader_classification_metrics,
     evaluate_grader_comparison_case,
     evaluate_judge_case,
+    evaluate_with_criterion_judge,
     evaluate_with_judge,
     load_grader_comparison_cases,
     load_judge_eval_cases,
     run_grader_comparison_evals,
     run_judge_evals,
+    summarize_criterion_judge_result,
     summarize_grader_comparison,
     summarize_grader_comparison_by_category,
     summarize_grader_stability,
+    validate_criterion_judge_result,
 )
 
-GRADER_COMPARISON_TEST_RESULTS = [
+GRADER_COMPARISON_TEST_RESULTS: list[GraderComparisonResult] = [
     {
-        "id": "true_positive",
+        "id": "case_1",
         "category": "correct",
         "expected_passed": True,
         "deterministic_passed": True,
         "deterministic_matched": True,
         "llm_passed": True,
-        "llm_matched": False,
-        "llm_score": 1,
-        "llm_reason": "Test result",
-        "llm_failed_criteria": ["correctness"],
-    },
-    {
-        "id": "true_negative",
-        "category": "incorrect",
-        "expected_passed": False,
-        "deterministic_passed": False,
-        "deterministic_matched": True,
-        "llm_passed": False,
-        "llm_matched": False,
-        "llm_score": 5,
-        "llm_reason": "Test result",
-        "llm_failed_criteria": [],
-    },
-    {
-        "id": "false_positive",
-        "category": "negation",
-        "expected_passed": False,
-        "deterministic_passed": True,
-        "deterministic_matched": False,
-        "llm_passed": False,
         "llm_matched": True,
-        "llm_score": 1,
-        "llm_reason": "Test result",
-        "llm_failed_criteria": ["correctness"],
+        "llm_score": 5,
+        "llm_reason": "Correct.",
+        "llm_failed_criteria": [],
+        "criterion_llm_passed": True,
+        "criterion_llm_matched": True,
+        "criterion_llm_failed_criteria": [],
     },
     {
-        "id": "false_negative",
+        "id": "case_2",
         "category": "paraphrase",
         "expected_passed": True,
         "deterministic_passed": False,
@@ -77,8 +62,41 @@ GRADER_COMPARISON_TEST_RESULTS = [
         "llm_passed": True,
         "llm_matched": True,
         "llm_score": 5,
-        "llm_reason": "Test result",
+        "llm_reason": "Correct paraphrase.",
         "llm_failed_criteria": [],
+        "criterion_llm_passed": True,
+        "criterion_llm_matched": True,
+        "criterion_llm_failed_criteria": [],
+    },
+    {
+        "id": "case_3",
+        "category": "negation",
+        "expected_passed": False,
+        "deterministic_passed": True,
+        "deterministic_matched": False,
+        "llm_passed": False,
+        "llm_matched": True,
+        "llm_score": 1,
+        "llm_reason": "The answer contradicts the context.",
+        "llm_failed_criteria": ["correctness"],
+        "criterion_llm_passed": False,
+        "criterion_llm_matched": True,
+        "criterion_llm_failed_criteria": ["correctness"],
+    },
+    {
+        "id": "case_4",
+        "category": "incorrect",
+        "expected_passed": False,
+        "deterministic_passed": False,
+        "deterministic_matched": True,
+        "llm_passed": False,
+        "llm_matched": True,
+        "llm_score": 1,
+        "llm_reason": "The answer is incorrect.",
+        "llm_failed_criteria": ["correctness"],
+        "criterion_llm_passed": False,
+        "criterion_llm_matched": True,
+        "criterion_llm_failed_criteria": ["correctness"],
     },
 ]
 
@@ -138,6 +156,47 @@ def test_judge_result_accepts_failed_with_failed_criteria() -> None:
     assert result.failed_criteria == ["relevance"]
 
 
+def test_criterion_result_accepts_valid_parameters() -> None:
+    criterion_result = CriterionResult(
+        name="relevance",
+        passed=False,
+        reason="The answer contains information not needed to answer the question.",
+    )
+
+    assert criterion_result.name == "relevance"
+    assert criterion_result.passed is False
+    assert (
+        criterion_result.reason
+        == "The answer contains information not needed to answer the question."
+    )
+
+
+def test_criterion_judge_result_accepts_valid_parameters() -> None:
+    criterion_judge_result = CriterionJudgeResult(
+        criteria=[
+            CriterionResult(
+                name="correctness",
+                passed=True,
+                reason="The answer contains information not needed to answer the question.",
+            ),
+            CriterionResult(
+                name="relevance",
+                passed=False,
+                reason="The answer contains information not needed to answer the question.",
+            ),
+            CriterionResult(
+                name="groundedness",
+                passed=True,
+                reason="The answer contains information not needed to answer the question.",
+            ),
+        ]
+    )
+
+    assert len(criterion_judge_result.criteria) == 3
+    assert criterion_judge_result.criteria[1].name == "relevance"
+    assert criterion_judge_result.criteria[1].passed is False
+
+
 def test_evaluate_with_judge() -> None:
     judge_input: JudgeInput = {
         "question": "Чи безкоштовна доставка?",
@@ -189,6 +248,70 @@ def test_evaluate_with_judge() -> None:
     ]
 
 
+def test_evaluate_with_criterion_judge() -> None:
+    judge_input: JudgeInput = {
+        "question": "Скільки коштує доставка по Києву?",
+        "context": (
+            "Доставка по Києву коштує від 200 грн. Пункт прокату працює щодня з 10:00 до 19:00."
+        ),
+        "answer": (
+            "Доставка по Києву коштує від 200 грн. Пункт прокату працює щодня з 10:00 до 19:00."
+        ),
+    }
+
+    rubric: Rubric = {
+        "name": "delivery_answer",
+        "criteria": [
+            {
+                "name": "correctness",
+                "description": "The answer must correctly state the delivery price in Kyiv.",
+            },
+            {
+                "name": "relevance",
+                "description": "The answer must contain only information "
+                "needed to answer the question.",
+            },
+            {
+                "name": "groundedness",
+                "description": "The answer must use only information from the provided context.",
+            },
+        ],
+    }
+
+    criterion_judge_result = CriterionJudgeResult(
+        criteria=[
+            CriterionResult(
+                name="correctness",
+                passed=True,
+                reason="The delivery price is correct.",
+            ),
+            CriterionResult(
+                name="relevance",
+                passed=False,
+                reason="The opening hours are not needed to answer the question.",
+            ),
+            CriterionResult(
+                name="groundedness",
+                passed=True,
+                reason="All information is supported by the provided context.",
+            ),
+        ]
+    )
+    received_arguments: list[tuple[JudgeInput, Rubric]] = []
+
+    def fake_judge(input_data: JudgeInput, received_rubric: Rubric) -> CriterionJudgeResult:
+        received_arguments.append((input_data, received_rubric))
+        return criterion_judge_result
+
+    result = evaluate_with_criterion_judge(judge_input, rubric, fake_judge)
+
+    assert received_arguments == [(judge_input, rubric)]
+    assert result == {
+        "passed": False,
+        "failed_criteria": ["relevance"],
+    }
+
+
 def test_build_judge_prompt_includes_evaluation_data() -> None:
     judge_input: JudgeInput = {
         "question": "Чи безкоштовна доставка?",
@@ -221,6 +344,60 @@ def test_build_judge_prompt_includes_evaluation_data() -> None:
     assert "The answer must not introduce facts unsupported by the context" in prompt
     assert "Do not use outside knowledge." in prompt
     assert "passed must be false" in prompt
+    assert "Groundedness and relevance are separate criteria" in prompt
+    assert "Related, useful, grounded, or potentially helpful information" in prompt
+
+
+def test_build_criterion_judge_prompt() -> None:
+    judge_input: JudgeInput = {
+        "question": "Скільки коштує доставка по Києву?",
+        "context": (
+            "Доставка по Києву коштує від 200 грн. Пункт прокату працює щодня з 10:00 до 19:00."
+        ),
+        "answer": (
+            "Доставка по Києву коштує від 200 грн. Пункт прокату працює щодня з 10:00 до 19:00."
+        ),
+    }
+
+    rubric: Rubric = {
+        "name": "delivery_answer",
+        "criteria": [
+            {
+                "name": "correctness",
+                "description": "The answer must correctly state the delivery price in Kyiv.",
+            },
+            {
+                "name": "relevance",
+                "description": "The answer must contain only information "
+                "needed to answer the question.",
+            },
+            {
+                "name": "groundedness",
+                "description": "The answer must use only information from the provided context.",
+            },
+        ],
+    }
+
+    prompt = build_criterion_judge_prompt(judge_input, rubric)
+
+    assert "delivery_answer" in prompt
+    assert "correctness" in prompt
+    assert "relevance" in prompt
+    assert "groundedness" in prompt
+    assert "Rubric name:" in prompt
+    assert "Rubric criteria:" in prompt
+
+    assert "Скільки коштує доставка по Києву?" in prompt
+    assert "Доставка по Києву коштує від 200 грн." in prompt
+    assert "Пункт прокату працює щодня з 10:00 до 19:00." in prompt
+
+    assert "Return one result for every rubric criterion." in prompt
+    assert "- name: exactly the criterion name from the 'Rubric criteria' list above" in prompt
+    assert "- passed: true or false" in prompt
+    assert "- reason: concise explanation" in prompt
+    assert "Evaluate every criterion independently." in prompt
+    assert "Do not omit, rename, or add criteria." in prompt
+    assert "Do not use the rubric name as a criterion name." in prompt
 
 
 def test_evaluate_judge_case_returns_true_when_judge_matches_expected() -> None:
@@ -563,15 +740,33 @@ def test_evaluate_grader_comparison_case_compares_deterministic_and_llm() -> Non
         reason="Correct paraphrase",
         failed_criteria=[],
     )
+    criterion_judge_result = CriterionJudgeResult(
+        criteria=[
+            CriterionResult(
+                name="correctness",
+                passed=True,
+                reason="The delivery price is correct.",
+            ),
+        ]
+    )
 
-    received_arguments: list[tuple[JudgeInput, Rubric]] = []
+    received_judge_arguments: list[tuple[JudgeInput, Rubric]] = []
+    received_criterion_judge_arguments: list[tuple[JudgeInput, Rubric]] = []
 
     def fake_judge(judge_input: JudgeInput, rubric: Rubric) -> JudgeResult:
-        received_arguments.append((judge_input, rubric))
+        received_judge_arguments.append((judge_input, rubric))
 
         return judge_result
 
-    result = evaluate_grader_comparison_case(case, fake_judge)
+    def fake_criterion_judge(judge_input: JudgeInput, rubric: Rubric) -> CriterionJudgeResult:
+        received_criterion_judge_arguments.append((judge_input, rubric))
+
+        return criterion_judge_result
+
+    result = evaluate_grader_comparison_case(case, fake_judge, fake_criterion_judge)
+
+    assert received_judge_arguments == [(case["judge_input"], case["rubric"])]
+    assert received_criterion_judge_arguments == [(case["judge_input"], case["rubric"])]
 
     assert result["expected_passed"] is True
 
@@ -583,6 +778,10 @@ def test_evaluate_grader_comparison_case_compares_deterministic_and_llm() -> Non
     assert result["llm_score"] == 5
     assert result["llm_reason"] == "Correct paraphrase"
     assert result["llm_failed_criteria"] == []
+
+    assert result["criterion_llm_passed"] is True
+    assert result["criterion_llm_matched"] is True
+    assert result["criterion_llm_failed_criteria"] == []
 
 
 def test_evaluate_grader_comparison_case_detects_deterministic_false_positive() -> None:
@@ -617,11 +816,23 @@ def test_evaluate_grader_comparison_case_detects_deterministic_false_positive() 
         reason="The answer contradicts the context.",
         failed_criteria=["correctness"],
     )
+    criterion_judge_result = CriterionJudgeResult(
+        criteria=[
+            CriterionResult(
+                name="correctness",
+                passed=False,
+                reason="The answer contradicts the context.",
+            ),
+        ]
+    )
 
     def fake_judge(_judge_input: JudgeInput, _rubric: Rubric) -> JudgeResult:
         return judge_result
 
-    result = evaluate_grader_comparison_case(case, fake_judge)
+    def fake_criterion_judge(judge_input: JudgeInput, rubric: Rubric) -> CriterionJudgeResult:
+        return criterion_judge_result
+
+    result = evaluate_grader_comparison_case(case, fake_judge, fake_criterion_judge)
 
     assert result["expected_passed"] is False
 
@@ -633,6 +844,10 @@ def test_evaluate_grader_comparison_case_detects_deterministic_false_positive() 
     assert result["llm_score"] == 1
     assert result["llm_reason"] == "The answer contradicts the context."
     assert result["llm_failed_criteria"] == ["correctness"]
+
+    assert result["criterion_llm_passed"] is False
+    assert result["criterion_llm_matched"] is True
+    assert result["criterion_llm_failed_criteria"] == ["correctness"]
 
 
 def test_run_grader_comparison_evals() -> None:
@@ -699,18 +914,48 @@ def test_run_grader_comparison_evals() -> None:
             failed_criteria=["correctness"],
         ),
     ]
+    criterion_judge_results = [
+        CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="correctness",
+                    passed=True,
+                    reason="The answer is correct.",
+                ),
+            ]
+        ),
+        CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="correctness",
+                    passed=False,
+                    reason="The answer is incorrect.",
+                ),
+            ]
+        ),
+    ]
 
     received_arguments: list[tuple[JudgeInput, Rubric]] = []
+    received_criterion_arguments: list[tuple[JudgeInput, Rubric]] = []
 
     def fake_judge(judge_input: JudgeInput, rubric: Rubric) -> JudgeResult:
         received_arguments.append((judge_input, rubric))
 
         return judge_results[len(received_arguments) - 1]
 
-    results = run_grader_comparison_evals(cases, fake_judge)
+    def criterion_fake_judge(judge_input: JudgeInput, rubric: Rubric) -> CriterionJudgeResult:
+        received_criterion_arguments.append((judge_input, rubric))
+
+        return criterion_judge_results[len(received_criterion_arguments) - 1]
+
+    results = run_grader_comparison_evals(cases, fake_judge, criterion_fake_judge)
 
     assert len(results) == 2
     assert received_arguments == [
+        (cases[0]["judge_input"], cases[0]["rubric"]),
+        (cases[1]["judge_input"], cases[1]["rubric"]),
+    ]
+    assert received_criterion_arguments == [
         (cases[0]["judge_input"], cases[0]["rubric"]),
         (cases[1]["judge_input"], cases[1]["rubric"]),
     ]
@@ -719,11 +964,17 @@ def test_run_grader_comparison_evals() -> None:
     assert results[0]["deterministic_matched"] is True
     assert results[0]["llm_passed"] is True
     assert results[0]["llm_matched"] is True
+    assert results[0]["criterion_llm_passed"] is True
+    assert results[0]["criterion_llm_matched"] is True
+    assert results[0]["criterion_llm_failed_criteria"] == []
 
     assert results[1]["deterministic_passed"] is False
     assert results[1]["deterministic_matched"] is True
     assert results[1]["llm_passed"] is False
     assert results[1]["llm_matched"] is True
+    assert results[1]["criterion_llm_passed"] is False
+    assert results[1]["criterion_llm_matched"] is True
+    assert results[1]["criterion_llm_failed_criteria"] == ["correctness"]
 
 
 def test_summarize_grader_comparison() -> None:
@@ -739,6 +990,9 @@ def test_summarize_grader_comparison() -> None:
             "llm_score": 5,
             "llm_reason": "Test result",
             "llm_failed_criteria": [],
+            "criterion_llm_passed": True,
+            "criterion_llm_matched": True,
+            "criterion_llm_failed_criteria": [],
         },
         {
             "id": "case_2",
@@ -751,6 +1005,9 @@ def test_summarize_grader_comparison() -> None:
             "llm_score": 5,
             "llm_reason": "Test result",
             "llm_failed_criteria": [],
+            "criterion_llm_passed": True,
+            "criterion_llm_matched": True,
+            "criterion_llm_failed_criteria": [],
         },
         {
             "id": "case_3",
@@ -760,9 +1017,12 @@ def test_summarize_grader_comparison() -> None:
             "deterministic_matched": False,
             "llm_passed": False,
             "llm_matched": True,
-            "llm_score": 5,
+            "llm_score": 1,
             "llm_reason": "Test result",
-            "llm_failed_criteria": [],
+            "llm_failed_criteria": ["correctness"],
+            "criterion_llm_passed": False,
+            "criterion_llm_matched": True,
+            "criterion_llm_failed_criteria": ["correctness"],
         },
         {
             "id": "case_4",
@@ -775,14 +1035,20 @@ def test_summarize_grader_comparison() -> None:
             "llm_score": 5,
             "llm_reason": "Test result",
             "llm_failed_criteria": [],
+            "criterion_llm_passed": False,
+            "criterion_llm_matched": True,
+            "criterion_llm_failed_criteria": ["correctness"],
         },
     ]
+
     expected_summary: GraderComparisonSummary = {
         "total_cases": 4,
         "deterministic_matched": 2,
         "llm_matched": 3,
+        "criterion_llm_matched": 4,
         "deterministic_accuracy": 0.5,
         "llm_accuracy": 0.75,
+        "criterion_llm_accuracy": 1.0,
     }
 
     summary = summarize_grader_comparison(results)
@@ -797,8 +1063,10 @@ def test_summarize_grader_comparison_empty_results() -> None:
         "total_cases": 0,
         "deterministic_matched": 0,
         "llm_matched": 0,
+        "criterion_llm_matched": 0,
         "deterministic_accuracy": 0.0,
         "llm_accuracy": 0.0,
+        "criterion_llm_accuracy": 0.0,
     }
 
     summary = summarize_grader_comparison(results)
@@ -819,6 +1087,9 @@ def test_summarize_grader_comparison_by_category() -> None:
             "llm_score": 5,
             "llm_reason": "Test result",
             "llm_failed_criteria": [],
+            "criterion_llm_passed": True,
+            "criterion_llm_matched": True,
+            "criterion_llm_failed_criteria": [],
         },
         {
             "id": "case_2",
@@ -831,6 +1102,9 @@ def test_summarize_grader_comparison_by_category() -> None:
             "llm_score": 5,
             "llm_reason": "Test result",
             "llm_failed_criteria": [],
+            "criterion_llm_passed": True,
+            "criterion_llm_matched": True,
+            "criterion_llm_failed_criteria": [],
         },
         {
             "id": "case_3",
@@ -840,9 +1114,12 @@ def test_summarize_grader_comparison_by_category() -> None:
             "deterministic_matched": True,
             "llm_passed": False,
             "llm_matched": False,
-            "llm_score": 5,
+            "llm_score": 2,
             "llm_reason": "Test result",
-            "llm_failed_criteria": [],
+            "llm_failed_criteria": ["correctness"],
+            "criterion_llm_passed": True,
+            "criterion_llm_matched": True,
+            "criterion_llm_failed_criteria": [],
         },
         {
             "id": "case_4",
@@ -852,32 +1129,42 @@ def test_summarize_grader_comparison_by_category() -> None:
             "deterministic_matched": False,
             "llm_passed": False,
             "llm_matched": True,
-            "llm_score": 5,
+            "llm_score": 1,
             "llm_reason": "Test result",
-            "llm_failed_criteria": [],
+            "llm_failed_criteria": ["correctness"],
+            "criterion_llm_passed": False,
+            "criterion_llm_matched": True,
+            "criterion_llm_failed_criteria": ["correctness"],
         },
     ]
+
     expected = {
         "correct": {
             "total_cases": 1,
             "deterministic_matched": 1,
             "llm_matched": 1,
+            "criterion_llm_matched": 1,
             "deterministic_accuracy": 1.0,
             "llm_accuracy": 1.0,
+            "criterion_llm_accuracy": 1.0,
         },
         "paraphrase": {
             "total_cases": 2,
             "deterministic_matched": 1,
             "llm_matched": 1,
+            "criterion_llm_matched": 2,
             "deterministic_accuracy": 0.5,
             "llm_accuracy": 0.5,
+            "criterion_llm_accuracy": 1.0,
         },
         "negation": {
             "total_cases": 1,
             "deterministic_matched": 0,
             "llm_matched": 1,
+            "criterion_llm_matched": 1,
             "deterministic_accuracy": 0.0,
             "llm_accuracy": 1.0,
+            "criterion_llm_accuracy": 1.0,
         },
     }
 
@@ -908,6 +1195,15 @@ def test_summarize_grader_comparison_by_category_empty_results() -> None:
         ),
         (
             "llm_passed",
+            {
+                "true_positive": 2,
+                "true_negative": 2,
+                "false_positive": 0,
+                "false_negative": 0,
+            },
+        ),
+        (
+            "criterion_llm_passed",
             {
                 "true_positive": 2,
                 "true_negative": 2,
@@ -975,6 +1271,9 @@ def test_summarize_grader_stability() -> None:
                 "llm_score": 5,
                 "llm_reason": "Correct.",
                 "llm_failed_criteria": [],
+                "criterion_llm_passed": True,
+                "criterion_llm_matched": True,
+                "criterion_llm_failed_criteria": [],
             },
             {
                 "id": "unstable_case",
@@ -987,6 +1286,9 @@ def test_summarize_grader_stability() -> None:
                 "llm_score": 5,
                 "llm_reason": "Accepted.",
                 "llm_failed_criteria": [],
+                "criterion_llm_passed": False,
+                "criterion_llm_matched": True,
+                "criterion_llm_failed_criteria": ["relevance"],
             },
         ],
         [
@@ -1001,6 +1303,9 @@ def test_summarize_grader_stability() -> None:
                 "llm_score": 5,
                 "llm_reason": "Correct.",
                 "llm_failed_criteria": [],
+                "criterion_llm_passed": True,
+                "criterion_llm_matched": True,
+                "criterion_llm_failed_criteria": [],
             },
             {
                 "id": "unstable_case",
@@ -1013,6 +1318,9 @@ def test_summarize_grader_stability() -> None:
                 "llm_score": 2,
                 "llm_reason": "Contains irrelevant information.",
                 "llm_failed_criteria": ["relevance"],
+                "criterion_llm_passed": False,
+                "criterion_llm_matched": True,
+                "criterion_llm_failed_criteria": ["relevance"],
             },
         ],
         [
@@ -1027,6 +1335,9 @@ def test_summarize_grader_stability() -> None:
                 "llm_score": 5,
                 "llm_reason": "Correct.",
                 "llm_failed_criteria": [],
+                "criterion_llm_passed": True,
+                "criterion_llm_matched": True,
+                "criterion_llm_failed_criteria": [],
             },
             {
                 "id": "unstable_case",
@@ -1039,21 +1350,33 @@ def test_summarize_grader_stability() -> None:
                 "llm_score": 2,
                 "llm_reason": "Contains irrelevant information.",
                 "llm_failed_criteria": ["relevance"],
+                "criterion_llm_passed": False,
+                "criterion_llm_matched": True,
+                "criterion_llm_failed_criteria": ["relevance"],
             },
         ],
     ]
+
     expected: list[GraderStabilityResult] = [
         {
             "id": "stable_case",
             "expected_passed": True,
             "llm_passed_values": [True, True, True],
-            "stable": True,
+            "llm_stable": True,
+            "llm_match_rate": 1.0,
+            "criterion_llm_passed_values": [True, True, True],
+            "criterion_llm_stable": True,
+            "criterion_llm_match_rate": 1.0,
         },
         {
             "id": "unstable_case",
             "expected_passed": False,
             "llm_passed_values": [True, False, False],
-            "stable": False,
+            "llm_stable": False,
+            "llm_match_rate": 2 / 3,
+            "criterion_llm_passed_values": [False, False, False],
+            "criterion_llm_stable": True,
+            "criterion_llm_match_rate": 1.0,
         },
     ]
 
@@ -1066,3 +1389,136 @@ def test_summarize_grader_stability_empty_runs() -> None:
     stability_results = summarize_grader_stability([])
 
     assert stability_results == []
+
+
+def test_summarize_criterion_judge_result_with_failed_criterion() -> None:
+    criterion_judge_result = CriterionJudgeResult(
+        criteria=[
+            CriterionResult(
+                name="correctness",
+                passed=True,
+                reason="The delivery price is correct.",
+            ),
+            CriterionResult(
+                name="relevance",
+                passed=False,
+                reason="The answer contains information not needed to answer the question.",
+            ),
+            CriterionResult(
+                name="groundedness",
+                passed=True,
+                reason="All information is supported by the context.",
+            ),
+        ]
+    )
+
+    summary = summarize_criterion_judge_result(criterion_judge_result)
+
+    assert summary["passed"] is False
+    assert summary["failed_criteria"] == ["relevance"]
+
+
+def test_summarize_criterion_judge_result_with_passed_criterion() -> None:
+    criterion_judge_result = CriterionJudgeResult(
+        criteria=[
+            CriterionResult(
+                name="correctness",
+                passed=True,
+                reason="The delivery price is correct.",
+            ),
+            CriterionResult(
+                name="relevance",
+                passed=True,
+                reason="The answer is correct.",
+            ),
+            CriterionResult(
+                name="groundedness",
+                passed=True,
+                reason="All information is supported by the context.",
+            ),
+        ]
+    )
+
+    summary = summarize_criterion_judge_result(criterion_judge_result)
+
+    assert summary["passed"] is True
+    assert summary["failed_criteria"] == []
+
+
+def test_validate_criterion_judge_result_raises_when_criterion_is_missing() -> None:
+    rubric: Rubric = {
+        "name": "answer_quality",
+        "criteria": [
+            {
+                "name": "correctness",
+                "description": "The answer must be correct.",
+            },
+            {
+                "name": "relevance",
+                "description": "The answer must be relevant.",
+            },
+            {
+                "name": "groundedness",
+                "description": "The answer must use only the provided context.",
+            },
+        ],
+    }
+
+    result = CriterionJudgeResult(
+        criteria=[
+            CriterionResult(
+                name="correctness",
+                passed=True,
+                reason="The answer is correct.",
+            ),
+            CriterionResult(
+                name="groundedness",
+                passed=True,
+                reason="The answer is supported by the context.",
+            ),
+        ]
+    )
+
+    with pytest.raises(ValueError):
+        validate_criterion_judge_result(result, rubric)
+
+
+def test_validate_criterion_judge_result_accepts_matching_criteria() -> None:
+    rubric: Rubric = {
+        "name": "answer_quality",
+        "criteria": [
+            {
+                "name": "correctness",
+                "description": "The answer must be correct.",
+            },
+            {
+                "name": "relevance",
+                "description": "The answer must be relevant.",
+            },
+            {
+                "name": "groundedness",
+                "description": "The answer must use only the provided context.",
+            },
+        ],
+    }
+    result = CriterionJudgeResult(
+        criteria=[
+            CriterionResult(
+                name="correctness",
+                passed=True,
+                reason="The answer is correct.",
+            ),
+            CriterionResult(
+                name="relevance",
+                passed=False,
+                reason="The answer contains unnecessary information.",
+            ),
+            CriterionResult(
+                name="groundedness",
+                passed=True,
+                reason="The answer is supported by the context.",
+            ),
+        ]
+    )
+
+    validate_criterion_judge_result(result, rubric)
