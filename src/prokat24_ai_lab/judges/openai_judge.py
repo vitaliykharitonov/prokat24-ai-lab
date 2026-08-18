@@ -1,38 +1,52 @@
-from typing import Protocol
+from collections.abc import Sequence
+from typing import Protocol, TypeVar
 
 from prokat24_ai_lab.evals.semantic_grading import (
+    CriterionJudge,
+    CriterionJudgeResult,
     Judge,
     JudgeInput,
     JudgeResult,
     Rubric,
+    build_criterion_judge_prompt,
     build_judge_prompt,
+    validate_criterion_judge_result,
 )
 
 OPENAI_JUDGE_MODEL = "gpt-5.4-mini-2026-03-17"
 
-
-class OutputTextProtocol(Protocol):
-    type: str
-    parsed: JudgeResult | None
+JudgeResultT = TypeVar("JudgeResultT", JudgeResult, CriterionJudgeResult, covariant=True)
 
 
-class MessageProtocol(Protocol):
-    type: str
-    content: list[OutputTextProtocol]
+class OutputTextProtocol(Protocol[JudgeResultT]):
+    @property
+    def type(self) -> str: ...
+
+    @property
+    def parsed(self) -> JudgeResultT | None: ...
 
 
-class ResponseProtocol(Protocol):
-    output: list[MessageProtocol]
+class MessageProtocol(Protocol[JudgeResultT]):
+    @property
+    def type(self) -> str: ...
+
+    @property
+    def content(self) -> Sequence[OutputTextProtocol[JudgeResultT]]: ...
+
+
+class ResponseProtocol(Protocol[JudgeResultT]):
+    @property
+    def output(self) -> Sequence[MessageProtocol[JudgeResultT]]: ...
 
 
 class ResponsesProtocol(Protocol):
     def parse(
         self,
         *,
-        text_format: type[JudgeResult],
+        text_format: type[JudgeResultT],
         model: str,
         input: str,
-    ) -> ResponseProtocol: ...
+    ) -> ResponseProtocol[JudgeResultT]: ...
 
 
 class JudgeClientProtocol(Protocol):
@@ -61,6 +75,40 @@ def create_openai_judge(
 
         if parsed_result is None:
             raise ValueError("Wrong parsed result")
+
+        return parsed_result
+
+    return judge
+
+
+def create_openai_criterion_judge(
+    client: JudgeClientProtocol,
+    model: str = OPENAI_JUDGE_MODEL,
+) -> CriterionJudge:
+    def judge(judge_input: JudgeInput, rubric: Rubric) -> CriterionJudgeResult:
+        prompt = build_criterion_judge_prompt(judge_input, rubric)
+        response = client.responses.parse(
+            text_format=CriterionJudgeResult,
+            model=model,
+            input=prompt,
+        )
+
+        message = response.output[0]
+
+        if message.type != "message":
+            raise ValueError("Wrong message type")
+
+        output_text = message.content[0]
+
+        if output_text.type != "output_text":
+            raise ValueError("Wrong output text type")
+
+        parsed_result = output_text.parsed
+
+        if parsed_result is None:
+            raise ValueError("Wrong parsed result")
+
+        validate_criterion_judge_result(parsed_result, rubric)
 
         return parsed_result
 
