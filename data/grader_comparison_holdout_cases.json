@@ -1,0 +1,370 @@
+[
+  {
+    "id": "hours_correct_01",
+    "category": "correct",
+    "judge_input": {
+      "question": "Коли працює пункт прокату?",
+      "context": "Пункт прокату працює щодня з 10:00 до 19:00.",
+      "answer": "Пункт прокату працює щодня з 10:00 до 19:00."
+    },
+    "expected_passed": true,
+    "deterministic": {
+      "required_fragments": [
+        "10:00",
+        "19:00"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "working_hours_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the working hours."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "contact_correct_02",
+    "category": "correct",
+    "judge_input": {
+      "question": "Як можна зв'язатися з пунктом прокату?",
+      "context": "З пунктом прокату можна зв'язатися телефоном за номером (098) 123-45-67.",
+      "answer": "З пунктом прокату можна зв'язатися за номером (098) 123-45-67."
+    },
+    "expected_passed": true,
+    "deterministic": {
+      "required_fragments": [
+        "(098) 123-45-67"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "contact_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state how to contact the rental point."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "address_incorrect_01",
+    "category": "incorrect",
+    "judge_input": {
+      "question": "На якій вулиці знаходиться пункт прокату?",
+      "context": "Пункт прокату знаходиться на вулиці Табірній, 36.",
+      "answer": "Пункт прокату знаходиться на вулиці Табірній, 25."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "Табірній"
+      ],
+      "forbidden_fragments": [
+        "25"
+      ]
+    },
+    "rubric": {
+      "name": "address_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the rental point address."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "rental_period_incorrect_02",
+    "category": "incorrect",
+    "judge_input": {
+      "question": "Який мінімальний строк оренди намету?",
+      "context": "Мінімальний строк оренди намету становить 2 дні.",
+      "answer": "Мінімальний строк оренди намету становить 3 дні."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "2 дні"
+      ],
+      "forbidden_fragments": [
+        "3 дні"
+      ]
+    },
+    "rubric": {
+      "name": "rental_period_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the minimum rental period."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "deposit_paraphrase_01",
+    "category": "paraphrase",
+    "judge_input": {
+      "question": "Чи потрібна застава під час оренди?",
+      "context": "Для оренди частини спорядження потрібно залишити заставу.",
+      "answer": "Деяке спорядження видається лише після внесення застави."
+    },
+    "expected_passed": true,
+    "deterministic": {
+      "required_fragments": [
+        "потрібно залишити заставу"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "deposit_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state whether collateral may be required."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "pickup_paraphrase_02",
+    "category": "paraphrase",
+    "judge_input": {
+      "question": "Чи можу я сам забрати спорядження?",
+      "context": "Спорядження можна отримати самовивозом із пункту прокату.",
+      "answer": "Так, ви можете приїхати до пункту прокату та забрати спорядження самостійно."
+    },
+    "expected_passed": true,
+    "deterministic": {
+      "required_fragments": [
+        "самовивозом"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "pickup_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state whether self-pickup is available."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "return_negation_01",
+    "category": "negation",
+    "judge_input": {
+      "question": "Чи можна повернути спорядження після 19:00?",
+      "context": "Повернення спорядження після 19:00 не передбачено.",
+      "answer": "Так, спорядження можна повернути після 19:00."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "повернути",
+        "після 19:00"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "return_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state whether equipment can be returned after 19:00."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must not contradict the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "booking_unsupported_claim_01",
+    "category": "unsupported_claim",
+    "judge_input": {
+      "question": "Чи потрібно бронювати спорядження заздалегідь?",
+      "context": "Попереднє бронювання спорядження рекомендоване.",
+      "answer": "Попереднє бронювання рекомендоване і гарантує знижку 10%."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "бронювання",
+        "рекомендоване"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "booking_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly describe the booking requirement."
+        },
+        {
+          "name": "groundedness",
+          "description": "Every factual claim in the answer must be supported by the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "hours_short_correct_01",
+    "category": "short_correct",
+    "judge_input": {
+      "question": "До котрої години працює пункт прокату?",
+      "context": "Пункт прокату працює щодня з 10:00 до 19:00.",
+      "answer": "До сьомої вечора."
+    },
+    "expected_passed": true,
+    "deterministic": {
+      "required_fragments": [
+        "19:00"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "working_hours_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state when the rental point closes."
+        },
+        {
+          "name": "relevance",
+          "description": "The answer should directly answer the user's question without requiring unnecessary detail."
+        }
+      ]
+    }
+  },
+  {
+    "id": "contact_partial_answer_01",
+    "category": "partial_answer",
+    "judge_input": {
+      "question": "Які у вас є телефон та електронна пошта для зв'язку?",
+      "context": "Телефон пункту прокату: (098) 123-45-67. Електронна пошта: info@example.com.",
+      "answer": "Телефон пункту прокату: (098) 123-45-67."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "(098) 123-45-67"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "contact_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The contact information included in the answer must be correct."
+        },
+        {
+          "name": "completeness",
+          "description": "The answer must provide both the phone number and the email address requested by the user."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "address_irrelevant_extra_01",
+    "category": "irrelevant_extra",
+    "judge_input": {
+      "question": "Де знаходиться пункт прокату?",
+      "context": "Пункт прокату знаходиться на вулиці Табірній, 36. Для частини спорядження потрібна застава.",
+      "answer": "Пункт прокату знаходиться на вулиці Табірній, 36. Для частини спорядження потрібна застава."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "Табірній",
+        "36"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "address_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state where the rental point is located."
+        },
+        {
+          "name": "relevance",
+          "description": "The answer must contain only information needed to answer the user's location question. Additional unrelated rental conditions should fail this criterion."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  },
+  {
+    "id": "rental_period_irrelevant_extra_02",
+    "category": "irrelevant_extra",
+    "judge_input": {
+      "question": "Який мінімальний строк оренди намету?",
+      "context": "Мінімальний строк оренди намету становить 2 дні. Пункт прокату працює до 19:00.",
+      "answer": "Мінімальний строк оренди намету становить 2 дні. Пункт прокату працює до 19:00."
+    },
+    "expected_passed": false,
+    "deterministic": {
+      "required_fragments": [
+        "2 дні"
+      ],
+      "forbidden_fragments": []
+    },
+    "rubric": {
+      "name": "rental_period_answer",
+      "criteria": [
+        {
+          "name": "correctness",
+          "description": "The answer must correctly state the minimum rental period."
+        },
+        {
+          "name": "relevance",
+          "description": "The answer must contain only information needed to answer the user's rental period question. Additional unrelated information should fail this criterion."
+        },
+        {
+          "name": "groundedness",
+          "description": "The answer must use only information from the provided context."
+        }
+      ]
+    }
+  }
+]
