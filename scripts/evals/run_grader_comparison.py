@@ -1,3 +1,5 @@
+from argparse import ArgumentParser, Namespace
+
 from openai import OpenAI
 
 from prokat24_ai_lab.evals.semantic_grading import (
@@ -11,13 +13,34 @@ from prokat24_ai_lab.evals.semantic_grading import (
     summarize_grader_stability,
 )
 from prokat24_ai_lab.judges.openai_judge import create_openai_criterion_judge, create_openai_judge
-from prokat24_ai_lab.project_paths import GRADER_COMPARISON_CASES_FILE
+from prokat24_ai_lab.project_paths import (
+    GRADER_COMPARISON_CASES_FILE,
+    GRADER_COMPARISON_HOLDOUT_CASES_FILE,
+)
 
 RUNS = 3
 
 
+def parse_args() -> Namespace:
+    parser = ArgumentParser(description="Compare graders on dev or holdout dataset")
+    parser.add_argument(
+        "--split",
+        help="Dataset split to evaluate",
+        choices=("dev", "holdout"),
+        default="dev",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> None:
-    cases = load_grader_comparison_cases(GRADER_COMPARISON_CASES_FILE)
+    args = parse_args()
+    cases_file = GRADER_COMPARISON_CASES_FILE
+
+    if args.split == "holdout":
+        cases_file = GRADER_COMPARISON_HOLDOUT_CASES_FILE
+
+    cases = load_grader_comparison_cases(cases_file)
     client = OpenAI()
     judge = create_openai_judge(client)
     criterion_judge = create_openai_criterion_judge(client)
@@ -54,6 +77,7 @@ def main() -> None:
     llm_metrics = calculate_grader_classification_metrics(llm_matrix)
     criterion_llm_metrics = calculate_grader_classification_metrics(criterion_llm_matrix)
 
+    print(f"\nDataset: {args.split}")
     print("\nGRADER COMPARISON\n")
     print(f"Cases: {total_cases}\n")
     print("Overall:")

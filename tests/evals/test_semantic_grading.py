@@ -36,6 +36,10 @@ from prokat24_ai_lab.evals.semantic_grading import (
     summarize_grader_stability,
     validate_criterion_judge_result,
 )
+from prokat24_ai_lab.project_paths import (
+    GRADER_COMPARISON_CASES_FILE,
+    GRADER_COMPARISON_HOLDOUT_CASES_FILE,
+)
 
 GRADER_COMPARISON_TEST_RESULTS: list[GraderComparisonResult] = [
     {
@@ -1522,3 +1526,16 @@ def test_validate_criterion_judge_result_accepts_matching_criteria() -> None:
     )
 
     validate_criterion_judge_result(result, rubric)
+
+
+@pytest.mark.parametrize(
+    ("input_file", "expected_count"),
+    [
+        (GRADER_COMPARISON_CASES_FILE, 11),
+        (GRADER_COMPARISON_HOLDOUT_CASES_FILE, 12),
+    ],
+)
+def test_load_grader_comparison_datasets(input_file: str, expected_count: int) -> None:
+    loaded_cases = load_grader_comparison_cases(input_file)
+
+    assert len(loaded_cases) == expected_count
