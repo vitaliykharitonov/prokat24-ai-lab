@@ -1,3 +1,4 @@
+from argparse import ArgumentParser, Namespace
 from typing import TypedDict
 
 from deepeval.metrics import GEval
@@ -8,7 +9,10 @@ from prokat24_ai_lab.evals.semantic_grading import (
     RubricCriterion,
     load_grader_comparison_cases,
 )
-from prokat24_ai_lab.project_paths import GRADER_COMPARISON_CASES_FILE
+from prokat24_ai_lab.project_paths import (
+    GRADER_COMPARISON_CASES_FILE,
+    GRADER_COMPARISON_HOLDOUT_CASES_FILE,
+)
 
 
 class DeepEvalCriterionResult(TypedDict):
@@ -178,8 +182,26 @@ def summarize_deepeval_comparison_by_category(
     return summaries
 
 
+def parse_args() -> Namespace:
+    parser = ArgumentParser(description="Run DeepEval grader comparison on dev or holdout dataset")
+    parser.add_argument(
+        "--split",
+        help="Dataset split to evaluate",
+        choices=("dev", "holdout"),
+        default="dev",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> None:
-    cases = load_grader_comparison_cases(GRADER_COMPARISON_CASES_FILE)
+    args = parse_args()
+    cases_file = GRADER_COMPARISON_CASES_FILE
+
+    if args.split == "holdout":
+        cases_file = GRADER_COMPARISON_HOLDOUT_CASES_FILE
+
+    cases = load_grader_comparison_cases(cases_file)
 
     results = run_deepeval_comparison_evals(cases)
 
@@ -187,6 +209,7 @@ def main() -> None:
 
     summary_by_category = summarize_deepeval_comparison_by_category(results)
 
+    print(f"\nDataset: {args.split}")
     print("\nDEEPEVAL COMPARISON\n")
     print(f"Cases: {summary['total_cases']}")
     print(f"Matched: {summary['matched']}/{summary['total_cases']} ({summary['accuracy']:.2%})")

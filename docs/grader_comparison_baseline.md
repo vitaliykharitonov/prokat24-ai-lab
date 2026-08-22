@@ -1,13 +1,14 @@
 # Grader Comparison Baseline
 
-This document records the baseline comparison of three answer-evaluation approaches:
+This document compares four answer-evaluation approaches:
 
 - deterministic grader
 - holistic LLM judge
 - criterion-level LLM judge
+- DeepEval criterion-level GEval grader
 
-The development dataset was used during grader and prompt development.
-The holdout dataset was evaluated only after the grading architecture was finalized.
+The development dataset was used for grader calibration.
+The holdout dataset was evaluated only after the grader configuration was finalized.
 
 ## Development Dataset
 
@@ -19,9 +20,8 @@ Cases: 11
 | Holistic LLM  |   9/11 (81.82%) |
 | Criterion LLM | 11/11 (100.00%) |
 
-The main weakness of the holistic LLM judge was the `irrelevant_extra` category.
-It produced stable false positives for two cases even though the answers contained information that was not necessary to
-answer the user's question.
+The main weakness of the holistic LLM judge was `irrelevant_extra`: it sometimes treated grounded but unnecessary
+information as relevant.
 
 ## Holdout Dataset
 
@@ -46,52 +46,72 @@ Cases: 12
 | partial_answer    |           0/1 |          1/1 |           1/1 |
 | irrelevant_extra  |           0/2 |          1/2 |           2/2 |
 
+## DeepEval Comparison
+
+DeepEval was integrated by converting each rubric criterion into a separate `GEval` metric and aggregating criterion
+verdicts deterministically.
+
+### Development
+
+Initial result:
+
+- 9/11 matched (81.82%)
+
+Calibration on the development set:
+
+- groundedness threshold: `0.9`
+- relevance threshold: `0.9`
+- stricter relevance evaluation steps
+
+After calibration:
+
+- 11/11 matched (100.00%)
+
+### Holdout
+
+The calibrated DeepEval grader was frozen before holdout evaluation.
+
+Result:
+
+- 12/12 matched (100.00%)
+
+No further calibration was performed on the holdout dataset.
+
+The DeepEval grader uses `gpt-5.4`, while the custom criterion-level judge uses `gpt-5.4-mini-2026-03-17`, so this is
+not a strict apples-to-apples architecture comparison.
+
 ## Stability
 
-Each holdout case was evaluated three times by both LLM-based graders.
+The custom LLM graders were evaluated across three runs.
 
-The criterion-level LLM judge produced the same correct verdict in all three runs for all 12 holdout cases.
+The criterion-level judge produced correct and stable verdicts for all 12 holdout cases.
 
-The holistic LLM judge was unstable on:
+The holistic LLM judge was unstable on `address_irrelevant_extra_01`:
 
-`address_irrelevant_extra_01`
-
-Expected verdict: `FAIL`
-
-Results:
-
-- Run 1: PASS
-- Run 2: PASS
-- Run 3: FAIL
-
-Match rate: 33.33%
+- expected: FAIL
+- runs: PASS, PASS, FAIL
+- match rate: 33.33%
 
 ## Key Findings
 
-Deterministic fragment-based grading works well for simple literal checks but does not reliably evaluate semantic
-properties such as paraphrasing, negation, unsupported claims, completeness, or relevance.
+Deterministic fragment checks work for simple literal cases but fail on semantic properties such as paraphrasing,
+negation, unsupported claims, completeness, and relevance.
 
-The holistic LLM judge handles semantic evaluation substantially better than the deterministic grader, but it can
-confuse grounded information with relevant information and can produce unstable verdicts.
+Holistic LLM grading handles semantics better but can confuse groundedness with relevance.
 
-Criterion-level grading separates individual rubric decisions such as correctness, relevance, groundedness, and
-completeness. The final overall verdict is then aggregated deterministically in Python.
+Criterion-level grading separates rubric decisions and aggregates them deterministically, which performed better on the
+current datasets.
 
-On the current holdout dataset, this architecture achieved:
-
-- 100% accuracy
-- 100% precision
-- 100% recall
-- consistent verdicts across three runs
+The calibrated DeepEval criterion-level grader also matched all 12 holdout human labels.
 
 ## Limitations
 
-The holdout dataset contains only 12 cases.
+The datasets are small:
 
-Therefore, the current result does not demonstrate that criterion-level grading has 100% accuracy in general.
+- development: 11 cases
+- holdout: 12 cases
 
-The benchmark only shows that the criterion-level architecture generalized successfully from the development dataset to
-the current unseen holdout dataset.
+The current results do not demonstrate general 100% grader accuracy.
 
 Future evaluation should use larger and more diverse datasets, including product questions and additional RAG failure
 modes.
