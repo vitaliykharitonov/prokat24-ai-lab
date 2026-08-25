@@ -1,0 +1,30 @@
+[
+  {
+    "user_input": "Скільки коштує доставка по Києву?",
+    "expected_tool_call": {
+      "tool_name": "get_delivery_info",
+      "arguments": {
+        "location": "Київ"
+      }
+    }
+  },
+  {
+    "user_input": "Знайди намет",
+    "expected_tool_call": {
+      "tool_name": "search_products",
+      "arguments": {
+        "query": "намет"
+      }
+    }
+  },
+  {
+    "user_input": "Скільки коштує оренда намету на 3 дні?",
+    "expected_tool_call": {
+      "tool_name": "get_product_price",
+      "arguments": {
+        "product": "намет",
+        "days": 3
+      }
+    }
+  }
+]
