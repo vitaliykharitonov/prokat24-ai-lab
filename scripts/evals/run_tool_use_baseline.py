@@ -1,5 +1,12 @@
+import argparse
+from argparse import Namespace
+
+from openai import OpenAI
+
+from prokat24_ai_lab.agents.openai_tool_call import create_openai_tool_call_generator
 from prokat24_ai_lab.evals.tool_use import (
     ToolCall,
+    ToolCallGenerator,
     load_tool_use_eval_cases,
     run_tool_use_evals,
     summarize_tool_use_eval_results,
@@ -7,7 +14,19 @@ from prokat24_ai_lab.evals.tool_use import (
 from prokat24_ai_lab.project_paths import TOOL_USE_EVAL_CASES_FILE
 
 
+def parse_args() -> Namespace:
+    parser = argparse.ArgumentParser(description="Use real or fake tool-call")
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="Use the real OpenAI tool-call generator",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> None:
+    args = parse_args()
     cases = load_tool_use_eval_cases(TOOL_USE_EVAL_CASES_FILE)
 
     def fake_generate_tool_call(_user_input: str) -> ToolCall | None:
@@ -16,7 +35,13 @@ def main() -> None:
             "arguments": {"location": "Київ"},
         }
 
-    results = run_tool_use_evals(cases, fake_generate_tool_call)
+    generate_tool_call: ToolCallGenerator = fake_generate_tool_call
+
+    if args.live:
+        client = OpenAI()
+        generate_tool_call = create_openai_tool_call_generator(client)
+
+    results = run_tool_use_evals(cases, generate_tool_call)
 
     summary = summarize_tool_use_eval_results(results)
 
