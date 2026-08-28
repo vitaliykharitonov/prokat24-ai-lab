@@ -26,5 +26,13 @@
         "days": 3
       }
     }
+  },
+  {
+    "user_input": "Привіт!",
+    "expected_tool_call": null
+  },
+  {
+    "user_input": "Що ти вмієш?",
+    "expected_tool_call": null
   }
 ]

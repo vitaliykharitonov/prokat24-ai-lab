@@ -11,13 +11,14 @@ class ToolCall(TypedDict):
 
 class ToolUseEvalCase(TypedDict):
     user_input: str
-    expected_tool_call: ToolCall
+    expected_tool_call: ToolCall | None
 
 
 class ToolUseEvalResult(TypedDict):
     user_input: str
-    expected_tool_call: ToolCall
+    expected_tool_call: ToolCall | None
     actual_tool_call: ToolCall | None
+    tool_call_decision_match: bool
     tool_name_match: bool
     arguments_match: bool
     passed: bool
@@ -25,12 +26,15 @@ class ToolUseEvalResult(TypedDict):
 
 class ToolUseEvalSummary(TypedDict):
     total_cases: int
+    tool_call_cases: int
     passed_cases: int
     pass_rate: float
     tool_name_matches: int
     tool_name_match_rate: float
     arguments_matches: int
     arguments_match_rate: float
+    tool_call_decision_matches: int
+    tool_call_decision_match_rate: float
 
 
 ToolCallGenerator = Callable[[str], ToolCall | None]
@@ -47,15 +51,22 @@ def evaluate_tool_use_case(
     case: ToolUseEvalCase,
     actual_tool_call: ToolCall | None,
 ) -> ToolUseEvalResult:
-    if actual_tool_call is None:
+    expected_tool_call = case["expected_tool_call"]
+
+    if expected_tool_call is None:
+        tool_name_matches = actual_tool_call is None
+        arguments_match = actual_tool_call is None
+
+    elif actual_tool_call is None:
         tool_name_matches = False
         arguments_match = False
 
     else:
-        tool_name_matches = actual_tool_call["tool_name"] == case["expected_tool_call"]["tool_name"]
-        arguments_match = actual_tool_call["arguments"] == case["expected_tool_call"]["arguments"]
+        tool_name_matches = actual_tool_call["tool_name"] == expected_tool_call["tool_name"]
+        arguments_match = actual_tool_call["arguments"] == expected_tool_call["arguments"]
 
     passed = tool_name_matches and arguments_match
+    tool_call_decision_match = (expected_tool_call is None) == (actual_tool_call is None)
 
     return ToolUseEvalResult(
         user_input=case["user_input"],
@@ -64,6 +75,7 @@ def evaluate_tool_use_case(
         tool_name_match=tool_name_matches,
         arguments_match=arguments_match,
         passed=passed,
+        tool_call_decision_match=tool_call_decision_match,
     )
 
 
@@ -87,39 +99,59 @@ def summarize_tool_use_eval_results(
     if not results:
         return ToolUseEvalSummary(
             total_cases=0,
+            tool_call_cases=0,
             passed_cases=0,
             pass_rate=0.0,
             tool_name_matches=0,
             tool_name_match_rate=0.0,
             arguments_matches=0,
             arguments_match_rate=0.0,
+            tool_call_decision_matches=0,
+            tool_call_decision_match_rate=0.0,
         )
 
     total_cases = len(results)
+    tool_call_cases = 0
     passed_cases = 0
     tool_name_matches = 0
     arguments_matches = 0
+    tool_name_match_rate = 0.0
+    arguments_match_rate = 0.0
+    tool_call_decision_matches = 0
 
     for result in results:
-        if result["tool_name_match"]:
-            tool_name_matches += 1
+        if result["expected_tool_call"] is not None:
+            tool_call_cases += 1
 
-        if result["arguments_match"]:
-            arguments_matches += 1
+            if result["tool_name_match"]:
+                tool_name_matches += 1
+
+            if result["arguments_match"]:
+                arguments_matches += 1
 
         if result["passed"]:
             passed_cases += 1
 
+        if result["tool_call_decision_match"]:
+            tool_call_decision_matches += 1
+
     pass_rate = passed_cases / total_cases
-    tool_name_match_rate = tool_name_matches / total_cases
-    arguments_match_rate = arguments_matches / total_cases
+
+    if tool_call_cases:
+        tool_name_match_rate = tool_name_matches / tool_call_cases
+        arguments_match_rate = arguments_matches / tool_call_cases
+
+    tool_call_decision_match_rate = tool_call_decision_matches / total_cases
 
     return ToolUseEvalSummary(
         total_cases=total_cases,
+        tool_call_cases=tool_call_cases,
         passed_cases=passed_cases,
         pass_rate=pass_rate,
         tool_name_matches=tool_name_matches,
         tool_name_match_rate=tool_name_match_rate,
         arguments_matches=arguments_matches,
         arguments_match_rate=arguments_match_rate,
+        tool_call_decision_matches=tool_call_decision_matches,
+        tool_call_decision_match_rate=tool_call_decision_match_rate,
     )

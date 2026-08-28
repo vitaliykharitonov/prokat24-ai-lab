@@ -49,6 +49,7 @@ def main() -> None:
         print(f"User input: {result['user_input']}")
         print(f"Expected tool: {result['expected_tool_call']}")
         print(f"Actual tool: {result['actual_tool_call']}")
+        print(f"Tool-call decision match: {result['tool_call_decision_match']}")
         print(f"Tool name matches: {result['tool_name_match']}")
         print(f"Arguments matches: {result['arguments_match']}")
         print(f"Passed: {result['passed']}")
@@ -56,10 +57,26 @@ def main() -> None:
 
     print("TOOL USE SUMMARY\n")
     print(f"Cases: {summary['total_cases']}")
+    print(f"Tool-call cases: {summary['tool_call_cases']}")
     print(f"Passed: {summary['passed_cases']}/{summary['total_cases']}")
     print(f"Pass rate: {summary['pass_rate']:.2%}")
-    print(f"Tool name match rate: {summary['tool_name_match_rate']:.2%}")
-    print(f"Arguments match rate: {summary['arguments_match_rate']:.2%}")
+    print(
+        f"Tool-call decision: "
+        f"{summary['tool_call_decision_matches']}/{summary['total_cases']} "
+        f"({summary['tool_call_decision_match_rate']:.2%})"
+    )
+
+    print(
+        f"Tool name matches: "
+        f"{summary['tool_name_matches']}/{summary['tool_call_cases']} "
+        f"({summary['tool_name_match_rate']:.2%})"
+    )
+
+    print(
+        f"Arguments matches: "
+        f"{summary['arguments_matches']}/{summary['tool_call_cases']} "
+        f"({summary['arguments_match_rate']:.2%})"
+    )
 
 
 if __name__ == "__main__":

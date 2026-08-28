@@ -115,6 +115,37 @@ def test_evaluate_tool_use_case_fails_when_tool_call_is_missing() -> None:
     assert result["passed"] is False
 
 
+def test_evaluate_tool_use_case_passes_when_tool_call_is_not_expected() -> None:
+    case = {
+        "user_input": "Привіт!",
+        "expected_tool_call": None,
+    }
+    actual_tool_call = None
+
+    result = evaluate_tool_use_case(case, actual_tool_call)
+
+    assert result["tool_name_match"] is True
+    assert result["arguments_match"] is True
+    assert result["passed"] is True
+
+
+def test_evaluate_tool_use_case_fails_when_unexpected_tool_call_is_made() -> None:
+    case = {
+        "user_input": "Привіт!",
+        "expected_tool_call": None,
+    }
+    actual_tool_call = {
+        "tool_name": "get_delivery_info",
+        "arguments": {"location": "Київ"},
+    }
+
+    result = evaluate_tool_use_case(case, actual_tool_call)
+
+    assert result["tool_name_match"] is False
+    assert result["arguments_match"] is False
+    assert result["passed"] is False
+
+
 def test_run_tool_use_evals() -> None:
     cases = [
         {
@@ -169,6 +200,7 @@ def test_summarize_tool_use_eval_results() -> None:
                 "tool_name": "get_delivery_info",
                 "arguments": {"location": "Київ"},
             },
+            "tool_call_decision_match": True,
             "tool_name_match": True,
             "arguments_match": True,
             "passed": True,
@@ -183,6 +215,7 @@ def test_summarize_tool_use_eval_results() -> None:
                 "tool_name": "search_products",
                 "arguments": {"query": "лижi"},
             },
+            "tool_call_decision_match": False,
             "tool_name_match": True,
             "arguments_match": False,
             "passed": False,
@@ -202,6 +235,7 @@ def test_summarize_tool_use_eval_results() -> None:
                     "query": "намет",
                 },
             },
+            "tool_call_decision_match": True,
             "tool_name_match": False,
             "arguments_match": False,
             "passed": False,
@@ -211,6 +245,7 @@ def test_summarize_tool_use_eval_results() -> None:
     summary = summarize_tool_use_eval_results(results)
 
     assert summary["total_cases"] == 3
+    assert summary["tool_call_cases"] == 3
     assert summary["passed_cases"] == 1
     assert summary["pass_rate"] == pytest.approx(1 / 3)
 
@@ -220,6 +255,9 @@ def test_summarize_tool_use_eval_results() -> None:
     assert summary["arguments_matches"] == 1
     assert summary["arguments_match_rate"] == pytest.approx(1 / 3)
 
+    assert summary["tool_call_decision_matches"] == 2
+    assert summary["tool_call_decision_match_rate"] == pytest.approx(2 / 3)
+
 
 def test_summarize_tool_use_eval_results_handles_empty_results() -> None:
     results: list[ToolUseEvalResult] = []
@@ -227,6 +265,7 @@ def test_summarize_tool_use_eval_results_handles_empty_results() -> None:
     summary = summarize_tool_use_eval_results(results)
 
     assert summary["total_cases"] == 0
+    assert summary["tool_call_cases"] == 0
     assert summary["passed_cases"] == 0
     assert summary["pass_rate"] == 0.0
 
@@ -235,3 +274,6 @@ def test_summarize_tool_use_eval_results_handles_empty_results() -> None:
 
     assert summary["arguments_matches"] == 0
     assert summary["arguments_match_rate"] == 0.0
+
+    assert summary["tool_call_decision_matches"] == 0
+    assert summary["tool_call_decision_match_rate"] == 0.0

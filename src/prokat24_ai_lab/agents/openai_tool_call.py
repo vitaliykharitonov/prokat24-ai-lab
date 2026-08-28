@@ -54,7 +54,7 @@ def create_openai_tool_call_generator(
             model=model,
             input=user_input,
             tools=TOOLS,
-            tool_choice="required",
+            tool_choice="auto",
         )
 
         for output_item in response.output:
