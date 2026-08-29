@@ -1,0 +1,68 @@
+[
+  {
+    "user_input": "Скільки коштує доставка по Києву?",
+    "expected_tool_call": {
+      "tool_name": "get_delivery_info",
+      "arguments": {
+        "location": "Київ"
+      }
+    }
+  },
+  {
+    "user_input": "Знайди намет",
+    "expected_tool_call": {
+      "tool_name": "search_products",
+      "arguments": {
+        "query": "намет"
+      }
+    }
+  },
+  {
+    "user_input": "Скільки коштує оренда намету на 3 дні?",
+    "expected_tool_call": {
+      "tool_name": "get_product_price",
+      "arguments": {
+        "product": "намет",
+        "days": 3
+      }
+    }
+  },
+  {
+    "user_input": "Привіт!",
+    "expected_tool_call": null
+  },
+  {
+    "user_input": "Що ти вмієш?",
+    "expected_tool_call": null
+  },
+  {
+    "user_input": "Яка ціна оренди спальника на 2 дні?",
+    "expected_tool_call": {
+      "tool_name": "get_product_price",
+      "arguments": {
+        "product": "спальник",
+        "days": 2
+      }
+    }
+  },
+  {
+    "user_input": "Скільки буде коштувати взяти стіл на 5 днів?",
+    "expected_tool_call": {
+      "tool_name": "get_product_price",
+      "arguments": {
+        "product": "стіл",
+        "days": 5
+      }
+    }
+  },
+  {
+    "user_input": "Хочу орендувати стілець на один день. Яка вартість?",
+    "expected_tool_call": {
+      "tool_name": "get_product_price",
+      "arguments": {
+        "product": "стілець",
+        "days": 1
+      }
+    }
+  }
+]
