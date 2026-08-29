@@ -95,7 +95,7 @@ def test_evaluate_tool_use_case_fails_for_wrong_tool_name() -> None:
     result = evaluate_tool_use_case(case, actual_tool_call)
 
     assert result["tool_name_match"] is False
-    assert result["arguments_match"] is True
+    assert result["arguments_match"] is False
     assert result["passed"] is False
 
 
@@ -243,7 +243,7 @@ def test_summarize_tool_use_eval_results() -> None:
                 "tool_name": "search_products",
                 "arguments": {"query": "лижi"},
             },
-            "tool_call_decision_match": False,
+            "tool_call_decision_match": True,
             "tool_name_match": True,
             "arguments_match": False,
             "passed": False,
@@ -283,8 +283,8 @@ def test_summarize_tool_use_eval_results() -> None:
     assert summary["arguments_matches"] == 1
     assert summary["arguments_match_rate"] == pytest.approx(1 / 3)
 
-    assert summary["tool_call_decision_matches"] == 2
-    assert summary["tool_call_decision_match_rate"] == pytest.approx(2 / 3)
+    assert summary["tool_call_decision_matches"] == 3
+    assert summary["tool_call_decision_match_rate"] == pytest.approx(1.0)
 
 
 def test_summarize_tool_use_eval_results_handles_empty_results() -> None:

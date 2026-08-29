@@ -69,7 +69,9 @@ def evaluate_tool_use_case(
 
     else:
         tool_name_matches = actual_tool_call["tool_name"] == expected_tool_call["tool_name"]
-        arguments_match = actual_tool_call["arguments"] == expected_tool_call["arguments"]
+        arguments_match = (
+            tool_name_matches and actual_tool_call["arguments"] == expected_tool_call["arguments"]
+        )
 
     passed = tool_name_matches and arguments_match
     tool_call_decision_match = (expected_tool_call is None) == (actual_tool_call is None)
