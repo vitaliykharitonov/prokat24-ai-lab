@@ -9,6 +9,7 @@ from prokat24_ai_lab.evals.tool_use import (
     ToolUseEvalResult,
     evaluate_tool_use_case,
     load_tool_use_eval_cases,
+    run_repeated_tool_use_evals,
     run_tool_use_evals,
     summarize_tool_use_eval_results,
 )
@@ -186,6 +187,33 @@ def test_run_tool_use_evals() -> None:
     assert len(results) == 2
     assert results[0]["passed"] is True
     assert results[1]["passed"] is False
+
+
+def test_run_repeated_tool_use_evals() -> None:
+    cases = [
+        {
+            "user_input": "Скільки коштує доставка по Києву?",
+            "expected_tool_call": {
+                "tool_name": "get_delivery_info",
+                "arguments": {"location": "Київ"},
+            },
+        },
+    ]
+    correct_tool_call = {
+        "tool_name": "get_delivery_info",
+        "arguments": {"location": "Київ"},
+    }
+
+    def fake_generate_tool_call(_user_input: str) -> ToolCall | None:
+        return correct_tool_call
+
+    results = run_repeated_tool_use_evals(cases, fake_generate_tool_call, runs=3)
+
+    assert len(results) == 1
+    assert results[0]["user_input"] == cases[0]["user_input"]
+    assert len(results[0]["results"]) == 3
+    assert all(result["passed"] for result in results[0]["results"])
+    assert results[0]["expected_tool_call"] == cases[0]["expected_tool_call"]
 
 
 def test_summarize_tool_use_eval_results() -> None:

@@ -5,10 +5,12 @@ from openai import OpenAI
 
 from prokat24_ai_lab.agents.openai_tool_call import create_openai_tool_call_generator
 from prokat24_ai_lab.evals.tool_use import (
+    RepeatedToolUseEvalResult,
     ToolCall,
     ToolCallGenerator,
+    ToolUseEvalResult,
     load_tool_use_eval_cases,
-    run_tool_use_evals,
+    run_repeated_tool_use_evals,
     summarize_tool_use_eval_results,
 )
 from prokat24_ai_lab.project_paths import TOOL_USE_EVAL_CASES_FILE
@@ -21,12 +23,101 @@ def parse_args() -> Namespace:
         action="store_true",
         help="Use the real OpenAI tool-call generator",
     )
+    parser.add_argument(
+        "--runs",
+        type=int,
+        default=1,
+        help="Number of evaluation runs",
+    )
 
     return parser.parse_args()
 
 
+def format_run_result(result: ToolUseEvalResult) -> str:
+    if result["passed"]:
+        return "PASS"
+
+    if not result["tool_call_decision_match"]:
+        if result["actual_tool_call"] is None:
+            return "FAIL: no call"
+
+        return "FAIL: unexpected tool"
+
+    if not result["tool_name_match"]:
+        return "FAIL: wrong tool"
+
+    return "FAIL: arguments"
+
+
+def print_repeated_results_table(
+    results: list[RepeatedToolUseEvalResult],
+) -> None:
+    print("\nTOOL USE EVAL RESULTS")
+    print()
+
+    if not results:
+        return
+    runs = len(results[0]["results"])
+
+    header = ["Case", "Expected tool"]
+
+    for run_number in range(1, runs + 1):
+        header.append(f"Run {run_number}")
+
+    header.append("Passed")
+
+    rows: list[list[str]] = []
+
+    for case_number, repeated_result in enumerate(results, start=1):
+        row = [str(case_number)]
+        expected_tool_call = repeated_result["expected_tool_call"]
+
+        if expected_tool_call is None:
+            expected_tool_name = "None"
+        else:
+            expected_tool_name = expected_tool_call["tool_name"]
+
+        row.append(expected_tool_name)
+
+        for run_result in repeated_result["results"]:
+            row.append(format_run_result(run_result))
+
+        passed_runs = sum(run_result["passed"] for run_result in repeated_result["results"])
+
+        row.append(f"{passed_runs}/{runs}")
+
+        rows.append(row)
+
+    column_widths: list[int] = []
+    all_rows = [header, *rows]
+
+    for column_index in range(len(header)):
+        width = max(len(row[column_index]) for row in all_rows)
+        column_widths.append(width)
+
+    formatted_header = [
+        f"{value:<{width}}" for value, width in zip(header, column_widths, strict=False)
+    ]
+
+    print(" | ".join(formatted_header))
+
+    separator = "-+-".join("-" * width for width in column_widths)
+    print(separator)
+
+    for row in rows:
+        formatted_cells = [
+            f"{value:<{width}}" for value, width in zip(row, column_widths, strict=False)
+        ]
+
+        print(" | ".join(formatted_cells))
+
+
 def main() -> None:
     args = parse_args()
+
+    if args.runs < 1:
+        raise ValueError("--runs must be at least 1")
+
     cases = load_tool_use_eval_cases(TOOL_USE_EVAL_CASES_FILE)
 
     def fake_generate_tool_call(_user_input: str) -> ToolCall | None:
@@ -41,25 +132,27 @@ def main() -> None:
         client = OpenAI()
         generate_tool_call = create_openai_tool_call_generator(client)
 
-    results = run_tool_use_evals(cases, generate_tool_call)
+    results = run_repeated_tool_use_evals(cases, generate_tool_call, args.runs)
 
-    summary = summarize_tool_use_eval_results(results)
+    all_run_results = [
+        run_result for repeated_result in results for run_result in repeated_result["results"]
+    ]
 
-    for result in results:
-        print(f"User input: {result['user_input']}")
-        print(f"Expected tool: {result['expected_tool_call']}")
-        print(f"Actual tool: {result['actual_tool_call']}")
-        print(f"Tool-call decision match: {result['tool_call_decision_match']}")
-        print(f"Tool name matches: {result['tool_name_match']}")
-        print(f"Arguments matches: {result['arguments_match']}")
-        print(f"Passed: {result['passed']}")
-        print()
+    summary = summarize_tool_use_eval_results(all_run_results)
 
-    print("TOOL USE SUMMARY\n")
-    print(f"Cases: {summary['total_cases']}")
-    print(f"Tool-call cases: {summary['tool_call_cases']}")
-    print(f"Passed: {summary['passed_cases']}/{summary['total_cases']}")
-    print(f"Pass rate: {summary['pass_rate']:.2%}")
+    print_repeated_results_table(results)
+
+    print()
+    print("TOOL USE SUMMARY")
+    print()
+
+    print(f"Cases: {len(results)}")
+    print(f"Runs per case: {args.runs}")
+    print(f"Total evaluations: {len(all_run_results)}")
+
+    print(
+        f"Passed: {summary['passed_cases']}/{summary['total_cases']} ({summary['pass_rate']:.2%})"
+    )
     print(
         f"Tool-call decision: "
         f"{summary['tool_call_decision_matches']}/{summary['total_cases']} "

@@ -24,6 +24,12 @@ class ToolUseEvalResult(TypedDict):
     passed: bool
 
 
+class RepeatedToolUseEvalResult(TypedDict):
+    user_input: str
+    expected_tool_call: ToolCall | None
+    results: list[ToolUseEvalResult]
+
+
 class ToolUseEvalSummary(TypedDict):
     total_cases: int
     tool_call_cases: int
@@ -89,6 +95,31 @@ def run_tool_use_evals(
         actual_tool_call = generate_tool_call(case["user_input"])
 
         results.append(evaluate_tool_use_case(case, actual_tool_call))
+
+    return results
+
+
+def run_repeated_tool_use_evals(
+    cases: list[ToolUseEvalCase],
+    generate_tool_call: ToolCallGenerator,
+    runs: int,
+) -> list[RepeatedToolUseEvalResult]:
+    results: list[RepeatedToolUseEvalResult] = []
+
+    for case in cases:
+        case_results: list[ToolUseEvalResult] = []
+
+        for _ in range(runs):
+            actual_tool_call = generate_tool_call(case["user_input"])
+            case_results.append(evaluate_tool_use_case(case, actual_tool_call))
+
+        results.append(
+            RepeatedToolUseEvalResult(
+                user_input=case["user_input"],
+                expected_tool_call=case["expected_tool_call"],
+                results=case_results,
+            )
+        )
 
     return results
 
