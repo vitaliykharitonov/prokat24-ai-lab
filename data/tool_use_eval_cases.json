@@ -34,5 +34,35 @@
   {
     "user_input": "Що ти вмієш?",
     "expected_tool_call": null
+  },
+  {
+    "user_input": "Яка ціна оренди спальника на 2 дні?",
+    "expected_tool_call": {
+      "tool_name": "get_product_price",
+      "arguments": {
+        "product": "спальник",
+        "days": 2
+      }
+    }
+  },
+  {
+    "user_input": "Скільки буде коштувати взяти стіл на 5 днів?",
+    "expected_tool_call": {
+      "tool_name": "get_product_price",
+      "arguments": {
+        "product": "стіл",
+        "days": 5
+      }
+    }
+  },
+  {
+    "user_input": "Хочу орендувати стілець на один день. Яка вартість?",
+    "expected_tool_call": {
+      "tool_name": "get_product_price",
+      "arguments": {
+        "product": "стілець",
+        "days": 1
+      }
+    }
   }
 ]

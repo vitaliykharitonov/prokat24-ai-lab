@@ -32,6 +32,7 @@ class ResponsesProtocol(Protocol):
         *,
         model: str,
         input: str,
+        instructions: str,
         tools: list[FunctionToolParam],
         tool_choice: ToolChoiceOptions,
     ) -> ResponseProtocol: ...
@@ -44,6 +45,14 @@ class ToolCallClientProtocol(Protocol):
 
 OPENAI_TOOL_CALL_MODEL = "gpt-5-mini"
 
+TOOL_CALL_INSTRUCTIONS = (
+    "For requests about delivery, product search or product information, "
+    "and rental prices, always call the appropriate available tool. "
+    "Do not answer these requests from your own knowledge. "
+    "Call only the tool that matches the user's request. "
+    "Do not call tools for greetings or general questions about your capabilities."
+)
+
 
 def create_openai_tool_call_generator(
     client: ToolCallClientProtocol,
@@ -53,6 +62,7 @@ def create_openai_tool_call_generator(
         response = client.responses.create(
             model=model,
             input=user_input,
+            instructions=TOOL_CALL_INSTRUCTIONS,
             tools=TOOLS,
             tool_choice="auto",
         )

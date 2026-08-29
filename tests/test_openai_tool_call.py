@@ -1,6 +1,7 @@
 from openai.types.responses import FunctionToolParam, ToolChoiceOptions
 
 from prokat24_ai_lab.agents.openai_tool_call import (
+    TOOL_CALL_INSTRUCTIONS,
     ResponseProtocol,
     create_openai_tool_call_generator,
 )
@@ -32,6 +33,7 @@ class FakeResponses:
         self.response = response
         self.model: str | None = None
         self.input: str | None = None
+        self.instructions: str | None = None
         self.tools: list[FunctionToolParam] | None = None
         self.tool_choice: ToolChoiceOptions | None = None
 
@@ -40,12 +42,14 @@ class FakeResponses:
         *,
         model: str,
         input: str,
+        instructions: str,
         tools: list[FunctionToolParam],
         tool_choice: ToolChoiceOptions,
     ) -> ResponseProtocol:
         self.model = model
         self.tools = tools
         self.input = input
+        self.instructions = instructions
         self.tool_choice = tool_choice
         return self.response
 
@@ -64,6 +68,7 @@ def test_openai_tool_call_generator_returns_tool_call() -> None:
 
     assert fake_client.responses.model == "gpt-5-mini"
     assert fake_client.responses.input == "Скільки коштує доставка по Києву?"
+    assert fake_client.responses.instructions == TOOL_CALL_INSTRUCTIONS
     assert fake_client.responses.tools == TOOLS
 
     assert result == {
