@@ -14,12 +14,27 @@ class ToolUseEvalCase(TypedDict):
     expected_tool_call: ToolCall | None
 
 
+class ToolSequenceEvalCase(TypedDict):
+    user_input: str
+    expected_tool_calls: list[ToolCall]
+
+
 class ToolUseEvalResult(TypedDict):
     user_input: str
     expected_tool_call: ToolCall | None
     actual_tool_call: ToolCall | None
     tool_call_decision_match: bool
     tool_name_match: bool
+    arguments_match: bool
+    passed: bool
+
+
+class ToolSequenceEvalResult(TypedDict):
+    user_input: str
+    expected_tool_calls: list[ToolCall]
+    actual_tool_calls: list[ToolCall]
+    tool_count_match: bool
+    tool_names_match: bool
     arguments_match: bool
     passed: bool
 
@@ -45,10 +60,19 @@ class ToolUseEvalSummary(TypedDict):
 
 ToolCallGenerator = Callable[[str], ToolCall | None]
 
+ToolSequenceGenerator = Callable[[str], list[ToolCall]]
+
 
 def load_tool_use_eval_cases(input_file: Path) -> list[ToolUseEvalCase]:
     with open(input_file, encoding="utf-8") as file:
         cases: list[ToolUseEvalCase] = json.load(file)
+
+    return cases
+
+
+def load_tool_sequence_eval_cases(input_file: Path) -> list[ToolSequenceEvalCase]:
+    with open(input_file, encoding="utf-8") as file:
+        cases: list[ToolSequenceEvalCase] = json.load(file)
 
     return cases
 
@@ -87,6 +111,36 @@ def evaluate_tool_use_case(
     )
 
 
+def evaluate_tool_sequence_case(
+    case: ToolSequenceEvalCase,
+    actual_tool_calls: list[ToolCall],
+) -> ToolSequenceEvalResult:
+    expected_tool_calls = case["expected_tool_calls"]
+    tool_count_match = len(expected_tool_calls) == len(actual_tool_calls)
+
+    tool_names_match = tool_count_match and all(
+        expected_tool["tool_name"] == actual_tool["tool_name"]
+        for expected_tool, actual_tool in zip(expected_tool_calls, actual_tool_calls, strict=False)
+    )
+
+    arguments_match = tool_count_match and tool_names_match and all(
+        expected_tool["arguments"] == actual_tool["arguments"]
+        for expected_tool, actual_tool in zip(expected_tool_calls, actual_tool_calls, strict=False)
+    )
+
+    passed = expected_tool_calls == actual_tool_calls
+
+    return ToolSequenceEvalResult(
+        user_input=case["user_input"],
+        expected_tool_calls=expected_tool_calls,
+        actual_tool_calls=actual_tool_calls,
+        tool_count_match=tool_count_match,
+        tool_names_match=tool_names_match,
+        arguments_match=arguments_match,
+        passed=passed,
+    )
+
+
 def run_tool_use_evals(
     cases: list[ToolUseEvalCase],
     generate_tool_call: ToolCallGenerator,
@@ -97,6 +151,20 @@ def run_tool_use_evals(
         actual_tool_call = generate_tool_call(case["user_input"])
 
         results.append(evaluate_tool_use_case(case, actual_tool_call))
+
+    return results
+
+
+def run_tool_sequence_evals(
+    cases: list[ToolSequenceEvalCase],
+    generate_tool_sequence: ToolSequenceGenerator,
+) -> list[ToolSequenceEvalResult]:
+    results: list[ToolSequenceEvalResult] = []
+
+    for case in cases:
+        actual_tool_calls = generate_tool_sequence(case["user_input"])
+
+        results.append(evaluate_tool_sequence_case(case, actual_tool_calls))
 
     return results
 

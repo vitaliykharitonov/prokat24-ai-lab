@@ -5,11 +5,14 @@ import pytest
 
 from prokat24_ai_lab.evals.tool_use import (
     ToolCall,
+    ToolSequenceEvalCase,
     ToolUseEvalCase,
     ToolUseEvalResult,
+    evaluate_tool_sequence_case,
     evaluate_tool_use_case,
     load_tool_use_eval_cases,
     run_repeated_tool_use_evals,
+    run_tool_sequence_evals,
     run_tool_use_evals,
     summarize_tool_use_eval_results,
 )
@@ -23,6 +26,36 @@ def test_load_tool_use_eval_cases(tmp_path: Path) -> None:
                 "tool_name": "get_delivery_info",
                 "arguments": {"location": "Київ"},
             },
+        },
+    ]
+
+    input_file = tmp_path / "tool_use_eval_cases.json"
+
+    with open(input_file, "w", encoding="utf-8") as file:
+        json.dump(cases, file, ensure_ascii=False, indent=2)
+
+    loaded_data = load_tool_use_eval_cases(input_file)
+
+    assert loaded_data == cases
+
+
+def test_load_tool_sequence_eval_cases_loads_cases(tmp_path: Path) -> None:
+    cases: list[ToolSequenceEvalCase] = [
+        {
+            "user_input": "Знайди намет і скажи ціну оренди на 3 дні",
+            "expected_tool_calls": [
+                {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "намет"},
+                },
+                {
+                    "tool_name": "get_product_price",
+                    "arguments": {
+                        "product": "намет",
+                        "days": 3,
+                    },
+                },
+            ],
         },
     ]
 
@@ -147,6 +180,126 @@ def test_evaluate_tool_use_case_fails_when_unexpected_tool_call_is_made() -> Non
     assert result["passed"] is False
 
 
+def test_evaluate_tool_sequence_case_passes_for_matching_sequence() -> None:
+    case = ToolSequenceEvalCase(
+        user_input="Знайди намет і скажи ціну оренди на 3 дні",
+        expected_tool_calls=[
+            ToolCall(
+                tool_name="search_products",
+                arguments={"query": "намет"},
+            ),
+            ToolCall(
+                tool_name="get_product_price",
+                arguments={"product": "намет", "days": 3},
+            ),
+        ],
+    )
+    actual_tool_calls = [
+        ToolCall(
+            tool_name="search_products",
+            arguments={"query": "намет"},
+        ),
+        ToolCall(
+            tool_name="get_product_price",
+            arguments={"product": "намет", "days": 3},
+        ),
+    ]
+    result = evaluate_tool_sequence_case(case, actual_tool_calls)
+
+    assert result["passed"] is True
+
+
+def test_evaluate_tool_sequence_case_fails_for_wrong_tool_order() -> None:
+    case = ToolSequenceEvalCase(
+        user_input="Знайди намет і скажи ціну оренди на 3 дні",
+        expected_tool_calls=[
+            ToolCall(
+                tool_name="search_products",
+                arguments={"query": "намет"},
+            ),
+            ToolCall(
+                tool_name="get_product_price",
+                arguments={"product": "намет", "days": 3},
+            ),
+        ],
+    )
+    actual_tool_calls = [
+        ToolCall(
+            tool_name="get_product_price",
+            arguments={"product": "намет", "days": 3},
+        ),
+        ToolCall(
+            tool_name="search_products",
+            arguments={"query": "намет"},
+        ),
+    ]
+    result = evaluate_tool_sequence_case(case, actual_tool_calls)
+
+    assert result["tool_count_match"] is True
+    assert result["tool_names_match"] is False
+    assert result["arguments_match"] is False
+    assert result["passed"] is False
+
+
+def test_evaluate_tool_sequence_case_detects_missing_tool_call() -> None:
+    case = ToolSequenceEvalCase(
+        user_input="Знайди намет і скажи ціну оренди на 3 дні",
+        expected_tool_calls=[
+            ToolCall(
+                tool_name="search_products",
+                arguments={"query": "намет"},
+            ),
+            ToolCall(
+                tool_name="get_product_price",
+                arguments={"product": "намет", "days": 3},
+            ),
+        ],
+    )
+    actual_tool_calls = [
+        ToolCall(
+            tool_name="search_products",
+            arguments={"query": "намет"},
+        ),
+    ]
+
+    result = evaluate_tool_sequence_case(case, actual_tool_calls)
+
+    assert result["tool_count_match"] is False
+    assert result["passed"] is False
+
+
+def test_evaluate_tool_sequence_case_detects_wrong_arguments() -> None:
+    case = ToolSequenceEvalCase(
+        user_input="Знайди намет і скажи ціну оренди на 3 дні",
+        expected_tool_calls=[
+            ToolCall(
+                tool_name="search_products",
+                arguments={"query": "намет"},
+            ),
+            ToolCall(
+                tool_name="get_product_price",
+                arguments={"product": "намет", "days": 3},
+            ),
+        ],
+    )
+    actual_tool_calls = [
+        ToolCall(
+            tool_name="search_products",
+            arguments={"query": "намет"},
+        ),
+        ToolCall(
+            tool_name="get_product_price",
+            arguments={"product": "намет", "days": 5},
+        ),
+    ]
+    result = evaluate_tool_sequence_case(case, actual_tool_calls)
+
+    assert result["tool_count_match"] is True
+    assert result["tool_names_match"] is True
+    assert result["arguments_match"] is False
+    assert result["passed"] is False
+
+
 def test_run_tool_use_evals() -> None:
     cases = [
         {
@@ -187,6 +340,67 @@ def test_run_tool_use_evals() -> None:
     assert len(results) == 2
     assert results[0]["passed"] is True
     assert results[1]["passed"] is False
+
+
+def test_run_tool_sequence_evals_returns_results_for_all_cases() -> None:
+    cases = [
+        ToolSequenceEvalCase(
+            user_input="Знайди намет і скажи ціну оренди на 3 дні",
+            expected_tool_calls=[
+                ToolCall(
+                    tool_name="search_products",
+                    arguments={"query": "намет"},
+                ),
+                ToolCall(
+                    tool_name="get_product_price",
+                    arguments={"product": "намет", "days": 3},
+                ),
+            ],
+        ),
+        ToolSequenceEvalCase(
+            user_input="Знайди спальник і скажи ціну оренди на 2 дні",
+            expected_tool_calls=[
+                ToolCall(
+                    tool_name="search_products",
+                    arguments={"query": "спальник"},
+                ),
+                ToolCall(
+                    tool_name="get_product_price",
+                    arguments={"product": "спальник", "days": 2},
+                ),
+            ],
+        ),
+    ]
+
+    def generate_tool_sequence(user_input: str) -> list[ToolCall]:
+        if "намет" in user_input:
+            return [
+                ToolCall(
+                    tool_name="search_products",
+                    arguments={"query": "намет"},
+                ),
+                ToolCall(
+                    tool_name="get_product_price",
+                    arguments={"product": "намет", "days": 3},
+                ),
+            ]
+
+        return [
+            ToolCall(
+                tool_name="search_products",
+                arguments={"query": "спальник"},
+            ),
+            ToolCall(
+                tool_name="get_product_price",
+                arguments={"product": "спальник", "days": 2},
+            ),
+        ]
+
+    results = run_tool_sequence_evals(cases, generate_tool_sequence)
+
+    assert len(results) == 2
+    assert results[0]["passed"] is True
+    assert results[1]["passed"] is True
 
 
 def test_run_repeated_tool_use_evals() -> None:

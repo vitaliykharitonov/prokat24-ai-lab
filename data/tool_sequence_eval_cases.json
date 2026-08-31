@@ -1,0 +1,20 @@
+[
+  {
+    "user_input": "Знайди намет і скажи ціну оренди на 3 дні",
+    "expected_tool_calls": [
+      {
+        "tool_name": "search_products",
+        "arguments": {
+          "query": "намет"
+        }
+      },
+      {
+        "tool_name": "get_product_price",
+        "arguments": {
+          "product": "намет",
+          "days": 3
+        }
+      }
+    ]
+  }
+]
