@@ -3,6 +3,7 @@ from prokat24_ai_lab.evals.tool_use import (
     ToolSequenceGenerator,
     load_tool_sequence_eval_cases,
     run_tool_sequence_evals,
+    summarize_tool_sequence_eval_results,
 )
 from prokat24_ai_lab.project_paths import TOOL_SEQUENCE_EVAL_CASES_FILE
 
@@ -26,12 +27,23 @@ def main() -> None:
 
     results = run_tool_sequence_evals(cases, generate_tool_sequence)
 
+    summary = summarize_tool_sequence_eval_results(results)
+
     for result in results:
         print(result["user_input"])
         print(result["expected_tool_calls"])
         print(result["actual_tool_calls"])
         print(result["passed"])
         print()
+
+    print("TOOL SEQUENCE SUMMARY")
+    print()
+    print(f"Cases: {summary['total_cases']}")
+    print(f"Passed: {summary['passed_cases']}")
+    print(f"Pass rate: {summary['pass_rate']:.2%}")
+    print(f"Tool count match rate: {summary['tool_count_match_rate']:.2%}")
+    print(f"Tool name match rate: {summary['tool_name_match_rate']:.2%}")
+    print(f"Arguments match rate: {summary['arguments_match_rate']:.2%}")
 
 
 if __name__ == "__main__":

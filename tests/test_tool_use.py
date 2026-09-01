@@ -6,6 +6,7 @@ import pytest
 from prokat24_ai_lab.evals.tool_use import (
     ToolCall,
     ToolSequenceEvalCase,
+    ToolSequenceEvalResult,
     ToolUseEvalCase,
     ToolUseEvalResult,
     evaluate_tool_sequence_case,
@@ -14,6 +15,7 @@ from prokat24_ai_lab.evals.tool_use import (
     run_repeated_tool_use_evals,
     run_tool_sequence_evals,
     run_tool_use_evals,
+    summarize_tool_sequence_eval_results,
     summarize_tool_use_eval_results,
 )
 
@@ -519,3 +521,63 @@ def test_summarize_tool_use_eval_results_handles_empty_results() -> None:
 
     assert summary["tool_call_decision_matches"] == 0
     assert summary["tool_call_decision_match_rate"] == 0.0
+
+
+def test_summarize_tool_sequence_eval_results() -> None:
+    results: list[ToolSequenceEvalResult] = [
+        {
+            "user_input": "case 1",
+            "expected_tool_calls": [],
+            "actual_tool_calls": [],
+            "tool_count_match": True,
+            "tool_names_match": True,
+            "arguments_match": True,
+            "passed": True,
+        },
+        {
+            "user_input": "case 2",
+            "expected_tool_calls": [],
+            "actual_tool_calls": [],
+            "tool_count_match": True,
+            "tool_names_match": True,
+            "arguments_match": False,
+            "passed": False,
+        },
+        {
+            "user_input": "case 3",
+            "expected_tool_calls": [],
+            "actual_tool_calls": [],
+            "tool_count_match": False,
+            "tool_names_match": False,
+            "arguments_match": False,
+            "passed": False,
+        },
+    ]
+
+    summary = summarize_tool_sequence_eval_results(results)
+
+    assert summary["total_cases"] == 3
+    assert summary["passed_cases"] == 1
+    assert summary["pass_rate"] == pytest.approx(1 / 3)
+    assert summary["tool_count_matches"] == 2
+    assert summary["tool_count_match_rate"] == pytest.approx(2 / 3)
+    assert summary["tool_name_matches"] == 2
+    assert summary["tool_name_match_rate"] == pytest.approx(2 / 3)
+    assert summary["arguments_matches"] == 1
+    assert summary["arguments_match_rate"] == pytest.approx(1 / 3)
+
+
+def test_summarize_tool_sequence_eval_results_returns_zero_summary_for_empty_results() -> None:
+    results: list[ToolSequenceEvalResult] = []
+
+    summary = summarize_tool_sequence_eval_results(results)
+
+    assert summary["total_cases"] == 0
+    assert summary["passed_cases"] == 0
+    assert summary["pass_rate"] == 0.0
+    assert summary["tool_count_matches"] == 0
+    assert summary["tool_count_match_rate"] == 0.0
+    assert summary["tool_name_matches"] == 0
+    assert summary["tool_name_match_rate"] == 0.0
+    assert summary["arguments_matches"] == 0
+    assert summary["arguments_match_rate"] == 0.0

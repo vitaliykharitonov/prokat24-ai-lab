@@ -58,6 +58,18 @@ class ToolUseEvalSummary(TypedDict):
     tool_call_decision_match_rate: float
 
 
+class ToolSequenceEvalSummary(TypedDict):
+    total_cases: int
+    passed_cases: int
+    pass_rate: float
+    tool_count_matches: int
+    tool_count_match_rate: float
+    tool_name_matches: int
+    tool_name_match_rate: float
+    arguments_matches: int
+    arguments_match_rate: float
+
+
 ToolCallGenerator = Callable[[str], ToolCall | None]
 
 ToolSequenceGenerator = Callable[[str], list[ToolCall]]
@@ -123,9 +135,15 @@ def evaluate_tool_sequence_case(
         for expected_tool, actual_tool in zip(expected_tool_calls, actual_tool_calls, strict=False)
     )
 
-    arguments_match = tool_count_match and tool_names_match and all(
-        expected_tool["arguments"] == actual_tool["arguments"]
-        for expected_tool, actual_tool in zip(expected_tool_calls, actual_tool_calls, strict=False)
+    arguments_match = (
+        tool_count_match
+        and tool_names_match
+        and all(
+            expected_tool["arguments"] == actual_tool["arguments"]
+            for expected_tool, actual_tool in zip(
+                expected_tool_calls, actual_tool_calls, strict=False
+            )
+        )
     )
 
     passed = expected_tool_calls == actual_tool_calls
@@ -255,4 +273,57 @@ def summarize_tool_use_eval_results(
         arguments_match_rate=arguments_match_rate,
         tool_call_decision_matches=tool_call_decision_matches,
         tool_call_decision_match_rate=tool_call_decision_match_rate,
+    )
+
+
+def summarize_tool_sequence_eval_results(
+    results: list[ToolSequenceEvalResult],
+) -> ToolSequenceEvalSummary:
+    if not results:
+        return ToolSequenceEvalSummary(
+            total_cases=0,
+            passed_cases=0,
+            pass_rate=0.0,
+            tool_count_matches=0,
+            tool_count_match_rate=0.0,
+            tool_name_matches=0,
+            tool_name_match_rate=0.0,
+            arguments_matches=0,
+            arguments_match_rate=0.0,
+        )
+
+    total_cases = len(results)
+    passed_cases = 0
+    tool_count_matches = 0
+    tool_name_matches = 0
+    arguments_matches = 0
+
+    for result in results:
+        if result["passed"]:
+            passed_cases += 1
+
+        if result["tool_count_match"]:
+            tool_count_matches += 1
+
+        if result["tool_names_match"]:
+            tool_name_matches += 1
+
+        if result["arguments_match"]:
+            arguments_matches += 1
+
+    pass_rate = passed_cases / total_cases
+    tool_count_match_rate = tool_count_matches / total_cases
+    tool_name_match_rate = tool_name_matches / total_cases
+    arguments_match_rate = arguments_matches / total_cases
+
+    return ToolSequenceEvalSummary(
+        total_cases=total_cases,
+        passed_cases=passed_cases,
+        pass_rate=pass_rate,
+        tool_count_matches=tool_count_matches,
+        tool_count_match_rate=tool_count_match_rate,
+        tool_name_matches=tool_name_matches,
+        tool_name_match_rate=tool_name_match_rate,
+        arguments_matches=arguments_matches,
+        arguments_match_rate=arguments_match_rate,
     )
