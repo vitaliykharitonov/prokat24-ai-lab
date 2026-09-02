@@ -3,10 +3,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
 
-
-class ToolCall(TypedDict):
-    tool_name: str
-    arguments: dict[str, str | int | bool]
+from prokat24_ai_lab.agents.types import ToolCall
 
 
 class ToolUseEvalCase(TypedDict):

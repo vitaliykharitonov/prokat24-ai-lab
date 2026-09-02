@@ -4,8 +4,9 @@ from typing import Protocol, cast
 
 from openai.types.responses import FunctionToolParam, ToolChoiceOptions
 
-from prokat24_ai_lab.agents.tools import TOOLS
-from prokat24_ai_lab.evals.tool_use import ToolCall, ToolCallGenerator
+from prokat24_ai_lab.agents.tool_schemas import TOOLS
+from prokat24_ai_lab.agents.types import ToolCall
+from prokat24_ai_lab.evals.tool_use import ToolCallGenerator
 
 
 class OutputItemProtocol(Protocol):

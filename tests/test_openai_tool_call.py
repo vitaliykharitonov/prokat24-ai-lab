@@ -5,7 +5,7 @@ from prokat24_ai_lab.agents.openai_tool_call import (
     ResponseProtocol,
     create_openai_tool_call_generator,
 )
-from prokat24_ai_lab.agents.tools import TOOLS
+from prokat24_ai_lab.agents.tool_schemas import TOOLS
 
 
 class FakeOutputItem:
