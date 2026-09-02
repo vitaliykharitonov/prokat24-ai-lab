@@ -15,11 +15,14 @@ def main() -> None:
         return [
             ToolCall(
                 tool_name="search_products",
-                arguments={"query": "намет"},
+                arguments={"query": "2-місний намет"},
             ),
             ToolCall(
                 tool_name="get_product_price",
-                arguments={"product": "намет", "days": 3},
+                arguments={
+                    "product_url": "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/prokat-palatki-2-mestnaya/",
+                    "days": 3,
+                },
             ),
         ]
 

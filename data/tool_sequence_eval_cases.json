@@ -1,17 +1,17 @@
 [
   {
-    "user_input": "Знайди намет і скажи ціну оренди на 3 дні",
+    "user_input": "Скільки буде коштувати 2-місний намет на 3 дні?",
     "expected_tool_calls": [
       {
         "tool_name": "search_products",
         "arguments": {
-          "query": "намет"
+          "query": "2-місний намет"
         }
       },
       {
         "tool_name": "get_product_price",
         "arguments": {
-          "product": "намет",
+          "product_url": "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/prokat-palatki-2-mestnaya/",
           "days": 3
         }
       }

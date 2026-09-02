@@ -53,7 +53,7 @@ def test_load_tool_sequence_eval_cases_loads_cases(tmp_path: Path) -> None:
                 {
                     "tool_name": "get_product_price",
                     "arguments": {
-                        "product": "намет",
+                        "product_url": "https://example.com/tent/",
                         "days": 3,
                     },
                 },
@@ -192,7 +192,10 @@ def test_evaluate_tool_sequence_case_passes_for_matching_sequence() -> None:
             ),
             ToolCall(
                 tool_name="get_product_price",
-                arguments={"product": "намет", "days": 3},
+                arguments={
+                    "product_url": "https://example.com/tent/",
+                    "days": 3,
+                },
             ),
         ],
     )
@@ -203,7 +206,10 @@ def test_evaluate_tool_sequence_case_passes_for_matching_sequence() -> None:
         ),
         ToolCall(
             tool_name="get_product_price",
-            arguments={"product": "намет", "days": 3},
+            arguments={
+                "product_url": "https://example.com/tent/",
+                "days": 3,
+            },
         ),
     ]
     result = evaluate_tool_sequence_case(case, actual_tool_calls)
@@ -221,14 +227,20 @@ def test_evaluate_tool_sequence_case_fails_for_wrong_tool_order() -> None:
             ),
             ToolCall(
                 tool_name="get_product_price",
-                arguments={"product": "намет", "days": 3},
+                arguments={
+                    "product_url": "https://example.com/tent/",
+                    "days": 3,
+                },
             ),
         ],
     )
     actual_tool_calls = [
         ToolCall(
             tool_name="get_product_price",
-            arguments={"product": "намет", "days": 3},
+            arguments={
+                "product_url": "https://example.com/tent/",
+                "days": 3,
+            },
         ),
         ToolCall(
             tool_name="search_products",
@@ -253,7 +265,10 @@ def test_evaluate_tool_sequence_case_detects_missing_tool_call() -> None:
             ),
             ToolCall(
                 tool_name="get_product_price",
-                arguments={"product": "намет", "days": 3},
+                arguments={
+                    "product_url": "https://example.com/tent/",
+                    "days": 3,
+                },
             ),
         ],
     )
@@ -280,7 +295,10 @@ def test_evaluate_tool_sequence_case_detects_wrong_arguments() -> None:
             ),
             ToolCall(
                 tool_name="get_product_price",
-                arguments={"product": "намет", "days": 3},
+                arguments={
+                    "product_url": "https://example.com/tent/",
+                    "days": 3,
+                },
             ),
         ],
     )
@@ -291,7 +309,10 @@ def test_evaluate_tool_sequence_case_detects_wrong_arguments() -> None:
         ),
         ToolCall(
             tool_name="get_product_price",
-            arguments={"product": "намет", "days": 5},
+            arguments={
+                "product_url": "https://example.com/tent/",
+                "days": 5,
+            },
         ),
     ]
     result = evaluate_tool_sequence_case(case, actual_tool_calls)
@@ -355,7 +376,10 @@ def test_run_tool_sequence_evals_returns_results_for_all_cases() -> None:
                 ),
                 ToolCall(
                     tool_name="get_product_price",
-                    arguments={"product": "намет", "days": 3},
+                    arguments={
+                        "product_url": "https://example.com/tent/",
+                        "days": 3,
+                    },
                 ),
             ],
         ),
@@ -368,7 +392,10 @@ def test_run_tool_sequence_evals_returns_results_for_all_cases() -> None:
                 ),
                 ToolCall(
                     tool_name="get_product_price",
-                    arguments={"product": "спальник", "days": 2},
+                    arguments={
+                        "product_url": "https://example.com/sleeping-bag/",
+                        "days": 2,
+                    },
                 ),
             ],
         ),
@@ -383,7 +410,10 @@ def test_run_tool_sequence_evals_returns_results_for_all_cases() -> None:
                 ),
                 ToolCall(
                     tool_name="get_product_price",
-                    arguments={"product": "намет", "days": 3},
+                    arguments={
+                        "product_url": "https://example.com/tent/",
+                        "days": 3,
+                    },
                 ),
             ]
 
@@ -394,7 +424,10 @@ def test_run_tool_sequence_evals_returns_results_for_all_cases() -> None:
             ),
             ToolCall(
                 tool_name="get_product_price",
-                arguments={"product": "спальник", "days": 2},
+                arguments={
+                    "product_url": "https://example.com/sleeping-bag/",
+                    "days": 2,
+                },
             ),
         ]
 

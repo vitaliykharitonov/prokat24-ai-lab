@@ -52,14 +52,14 @@ GET_PRODUCT_PRICE_TOOL: FunctionToolParam = {
     "parameters": {
         "type": "object",
         "properties": {
-            "product": {
+            "product_url": {
                 "type": "string",
             },
             "days": {
                 "type": "integer",
             },
         },
-        "required": ["product", "days"],
+        "required": ["product_url", "days"],
     },
 }
 
