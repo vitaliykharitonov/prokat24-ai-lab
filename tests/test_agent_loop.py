@@ -1,3 +1,5 @@
+import pytest
+
 from prokat24_ai_lab.agents.agent_loop import run_agent
 from prokat24_ai_lab.agents.types import AgentStep, ToolCall, ToolExecution
 
@@ -125,3 +127,29 @@ def test_run_agent_executes_multiple_tools_before_final_answer() -> None:
             },
         },
     ]
+
+
+def test_run_agent_raises_when_max_steps_exceeded() -> None:
+    user_input = "Знайди намет"
+
+    def fake_agent_step_generator(
+        user_input: str, tool_executions: list[ToolExecution]
+    ) -> AgentStep:
+        return AgentStep(
+            final_answer=None,
+            tool_call=ToolCall(
+                tool_name="search_products",
+                arguments={"query": "намет"},
+            ),
+        )
+
+    def fake_tool_executor(tool_call: ToolCall) -> str:
+        return "Намет 2-місний"
+
+    with pytest.raises(ValueError, match="Agent exceeded maximum number of steps"):
+        run_agent(
+            user_input,
+            fake_agent_step_generator,
+            fake_tool_executor,
+            max_steps=3,
+        )
