@@ -18,6 +18,9 @@ class ResponseProtocol(Protocol):
     @property
     def output(self) -> Sequence[OutputItemProtocol]: ...
 
+    @property
+    def output_text(self) -> str: ...
+
 
 class FunctionCallProtocol(OutputItemProtocol, Protocol):
     @property
