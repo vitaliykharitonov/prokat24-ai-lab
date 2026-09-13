@@ -1,15 +1,46 @@
 from collections.abc import Callable
-from typing import TypedDict
+from typing import Literal, TypedDict
+
+ToolArgumentValue = str | int | bool
+ToolArguments = dict[str, ToolArgumentValue]
+
+
+class ToolProperty(TypedDict):
+    type: Literal["string", "integer", "boolean"]
+    description: str
+
+
+class ToolParameters(TypedDict):
+    type: Literal["object"]
+    properties: dict[str, ToolProperty]
+    required: list[str]
+
+
+class ToolDefinition(TypedDict):
+    name: str
+    description: str
+    parameters: ToolParameters
 
 
 class ToolCall(TypedDict):
     tool_name: str
-    arguments: dict[str, str | int | bool]
+    arguments: ToolArguments
 
 
 class ToolExecution(TypedDict):
     tool_call: ToolCall
     output: str
+
+
+ToolHandler = Callable[[ToolArguments], str]
+
+
+class RegisteredTool(TypedDict):
+    definition: ToolDefinition
+    handler: ToolHandler
+
+
+ToolRegistry = dict[str, RegisteredTool]
 
 
 class AgentStep(TypedDict):

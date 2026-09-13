@@ -6,7 +6,6 @@ from prokat24_ai_lab.agents.openai_agent_step import (
     create_openai_agent_step_generator,
 )
 from prokat24_ai_lab.agents.openai_tool_call import ResponseProtocol
-from prokat24_ai_lab.agents.tool_schemas import TOOLS
 from prokat24_ai_lab.agents.types import ToolCall, ToolExecution
 
 
@@ -92,7 +91,7 @@ def test_build_agent_step_input_includes_tool_execution_history() -> None:
 def test_openai_agent_step_generator_returns_tool_call() -> None:
     fake_client = FakeClient(FakeResponse())
 
-    generate_agent_step = create_openai_agent_step_generator(fake_client)
+    generate_agent_step = create_openai_agent_step_generator(fake_client, tools=[])
 
     result = generate_agent_step("Скільки буде коштувати 2-місний намет на 3 дні?", [])
 
@@ -108,14 +107,14 @@ def test_openai_agent_step_generator_returns_tool_call() -> None:
         "User request:\nСкільки буде коштувати 2-місний намет на 3 дні?"
     )
     assert fake_client.responses.instructions == AGENT_STEP_INSTRUCTIONS
-    assert fake_client.responses.tools == TOOLS
+    assert fake_client.responses.tools == []
     assert fake_client.responses.tool_choice == "auto"
 
 
 def test_openai_agent_step_generator_returns_final_answer() -> None:
     fake_client = FakeClient(FakeResponseWithoutCall())
 
-    generate_agent_step = create_openai_agent_step_generator(fake_client)
+    generate_agent_step = create_openai_agent_step_generator(fake_client, tools=[])
 
     result = generate_agent_step("Скільки буде коштувати 2-місний намет на 3 дні?", [])
 

@@ -1,12 +1,13 @@
 import json
 from typing import cast
 
+from openai.types.responses import FunctionToolParam
+
 from prokat24_ai_lab.agents.openai_tool_call import (
     OPENAI_TOOL_CALL_MODEL,
     FunctionCallProtocol,
     ToolCallClientProtocol,
 )
-from prokat24_ai_lab.agents.tool_schemas import TOOLS
 from prokat24_ai_lab.agents.types import AgentStep, AgentStepGenerator, ToolCall, ToolExecution
 
 AGENT_STEP_INSTRUCTIONS = (
@@ -15,16 +16,15 @@ AGENT_STEP_INSTRUCTIONS = (
     "rental catalog unless the user explicitly says otherwise.\n"
     "\n"
     "Use the available tools for product search, rental prices, deposits, "
-    "product information, and delivery information when the relevant tool "
-    "is available.\n"
+    "and product information when the relevant tool is available.\n"
     "For product search, rental price, deposit, or other catalog-specific "
     "questions, use the catalog tools before answering from your own "
     "knowledge.\n"
     "\n"
     "If the user's product description is sufficient to search the catalog, "
     "search first.\n"
-    "Do not ask whether the user wants to buy or rent a product; "
-    "Prokat24 provides rental services.\n"
+    "Treat product-related requests as rental catalog requests unless "
+    "the user explicitly asks about purchasing a product.\n"
     "Do not ask for the user's city, budget, intended use, or other details "
     "unless they are actually required to complete the request.\n"
     "Ask a clarifying question only when the available information and tool "
@@ -70,6 +70,7 @@ def build_agent_step_input(
 
 def create_openai_agent_step_generator(
     client: ToolCallClientProtocol,
+    tools: list[FunctionToolParam],
     model: str = OPENAI_TOOL_CALL_MODEL,
 ) -> AgentStepGenerator:
     def generate_agent_step(user_input: str, tool_executions: list[ToolExecution]) -> AgentStep:
@@ -78,7 +79,7 @@ def create_openai_agent_step_generator(
             model=model,
             input=input_text,
             instructions=AGENT_STEP_INSTRUCTIONS,
-            tools=TOOLS,
+            tools=tools,
             tool_choice="auto",
         )
 
