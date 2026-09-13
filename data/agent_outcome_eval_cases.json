@@ -1,0 +1,38 @@
+[
+  {
+    "user_input": "Скільки буде коштувати 2-місний намет на 3 дні?",
+    "expected_answer_fragments": [
+      "660 грн"
+    ],
+    "forbidden_answer_fragments": [
+      "700 грн",
+      "застава не потрібна"
+    ],
+    "required_tool_names": [
+      "search_products"
+    ]
+  },
+  {
+    "user_input": "Знайди 2-місний намет",
+    "expected_answer_fragments": [
+      "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/prokat-palatki-2-mestnaya/"
+    ],
+    "forbidden_answer_fragments": [],
+    "required_tool_names": [
+      "search_products"
+    ]
+  },
+  {
+    "user_input": "Яка застава за 2-місний намет?",
+    "expected_answer_fragments": [
+      "4000 грн"
+    ],
+    "forbidden_answer_fragments": [
+      "без застави",
+      "застава не потрібна"
+    ],
+    "required_tool_names": [
+      "search_products"
+    ]
+  }
+]
