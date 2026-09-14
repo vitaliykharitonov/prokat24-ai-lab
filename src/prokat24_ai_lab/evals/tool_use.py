@@ -3,7 +3,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
 
-from prokat24_ai_lab.agents.types import ToolCall
+from prokat24_ai_lab.agents.types import ToolCall, ToolCallGenerator
 
 
 class ToolUseEvalCase(TypedDict):
@@ -66,8 +66,6 @@ class ToolSequenceEvalSummary(TypedDict):
     arguments_matches: int
     arguments_match_rate: float
 
-
-ToolCallGenerator = Callable[[str], ToolCall | None]
 
 ToolSequenceGenerator = Callable[[str], list[ToolCall]]
 

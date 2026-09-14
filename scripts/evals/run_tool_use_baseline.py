@@ -4,16 +4,18 @@ from argparse import Namespace
 from openai import OpenAI
 
 from prokat24_ai_lab.agents.openai_tool_call import create_openai_tool_call_generator
+from prokat24_ai_lab.agents.openai_tool_schema import create_openai_tools
+from prokat24_ai_lab.agents.tool_registry import create_tool_registry
+from prokat24_ai_lab.agents.types import ToolCall, ToolCallGenerator
 from prokat24_ai_lab.evals.tool_use import (
     RepeatedToolUseEvalResult,
-    ToolCall,
-    ToolCallGenerator,
     ToolUseEvalResult,
     load_tool_use_eval_cases,
     run_repeated_tool_use_evals,
     summarize_tool_use_eval_results,
 )
-from prokat24_ai_lab.project_paths import TOOL_USE_EVAL_CASES_FILE
+from prokat24_ai_lab.products.catalog import load_products
+from prokat24_ai_lab.project_paths import PRODUCTS_FILE, TOOL_USE_EVAL_CASES_FILE
 
 
 def parse_args() -> Namespace:
@@ -122,15 +124,22 @@ def main() -> None:
 
     def fake_generate_tool_call(_user_input: str) -> ToolCall | None:
         return {
-            "tool_name": "get_delivery_info",
-            "arguments": {"location": "Київ"},
+            "tool_name": "search_products",
+            "arguments": {"query": "намет"},
         }
 
     generate_tool_call: ToolCallGenerator = fake_generate_tool_call
 
     if args.live:
+        products = load_products(PRODUCTS_FILE)
+        registry = create_tool_registry(products)
+        openai_tools = create_openai_tools(registry)
+
         client = OpenAI()
-        generate_tool_call = create_openai_tool_call_generator(client)
+        generate_tool_call = create_openai_tool_call_generator(
+            client,
+            openai_tools,
+        )
 
     results = run_repeated_tool_use_evals(cases, generate_tool_call, args.runs)
 

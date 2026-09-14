@@ -4,9 +4,7 @@ from typing import Protocol, cast
 
 from openai.types.responses import FunctionToolParam, ToolChoiceOptions
 
-from prokat24_ai_lab.agents.tool_schemas import TOOLS
-from prokat24_ai_lab.agents.types import ToolCall
-from prokat24_ai_lab.evals.tool_use import ToolCallGenerator
+from prokat24_ai_lab.agents.types import ToolCall, ToolCallGenerator
 
 
 class OutputItemProtocol(Protocol):
@@ -60,6 +58,7 @@ TOOL_CALL_INSTRUCTIONS = (
 
 def create_openai_tool_call_generator(
     client: ToolCallClientProtocol,
+    tools: list[FunctionToolParam],
     model: str = OPENAI_TOOL_CALL_MODEL,
 ) -> ToolCallGenerator:
     def generate_tool_call(user_input: str) -> ToolCall | None:
@@ -67,7 +66,7 @@ def create_openai_tool_call_generator(
             model=model,
             input=user_input,
             instructions=TOOL_CALL_INSTRUCTIONS,
-            tools=TOOLS,
+            tools=tools,
             tool_choice="auto",
         )
 

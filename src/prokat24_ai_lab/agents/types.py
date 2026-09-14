@@ -54,5 +54,6 @@ class AgentRunResult(TypedDict):
 
 
 ToolExecutor = Callable[[ToolCall], str]
+ToolCallGenerator = Callable[[str], ToolCall | None]
 AgentRunner = Callable[[str], AgentRunResult]
 AgentStepGenerator = Callable[[str, list[ToolExecution]], AgentStep]

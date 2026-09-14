@@ -1,12 +1,7 @@
 [
   {
     "user_input": "Скільки коштує доставка по Києву?",
-    "expected_tool_call": {
-      "tool_name": "get_delivery_info",
-      "arguments": {
-        "location": "Київ"
-      }
-    }
+    "expected_tool_call": null
   },
   {
     "user_input": "Знайди намет",
