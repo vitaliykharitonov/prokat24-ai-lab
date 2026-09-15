@@ -14,8 +14,13 @@ from prokat24_ai_lab.evals.tool_use import (
     run_repeated_tool_use_evals,
     summarize_tool_use_eval_results,
 )
+from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.products.catalog import load_products
-from prokat24_ai_lab.project_paths import PRODUCTS_FILE, TOOL_USE_EVAL_CASES_FILE
+from prokat24_ai_lab.project_paths import (
+    KNOWLEDGE_PAGES_FILE,
+    PRODUCTS_FILE,
+    TOOL_USE_EVAL_CASES_FILE,
+)
 
 
 def parse_args() -> Namespace:
@@ -132,7 +137,9 @@ def main() -> None:
 
     if args.live:
         products = load_products(PRODUCTS_FILE)
-        registry = create_tool_registry(products)
+        pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
+
+        registry = create_tool_registry(products, pages)
         openai_tools = create_openai_tools(registry)
 
         client = OpenAI()
@@ -150,6 +157,13 @@ def main() -> None:
     summary = summarize_tool_use_eval_results(all_run_results)
 
     print_repeated_results_table(results)
+
+    for repeated_result in results:
+        for run_result in repeated_result["results"]:
+            if run_result["tool_name_match"] and not run_result["arguments_match"]:
+                print()
+                print(f"Expected: {run_result['expected_tool_call']}")
+                print(f"Actual:   {run_result['actual_tool_call']}")
 
     print()
     print("TOOL USE SUMMARY")

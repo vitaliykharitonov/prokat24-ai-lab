@@ -11,8 +11,13 @@ from prokat24_ai_lab.evals.agent_evals import (
     run_agent_outcome_evals,
     summarize_agent_outcome_eval_results,
 )
+from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.products.catalog import load_products
-from prokat24_ai_lab.project_paths import AGENT_OUTCOME_EVAL_CASES_FILE, PRODUCTS_FILE
+from prokat24_ai_lab.project_paths import (
+    AGENT_OUTCOME_EVAL_CASES_FILE,
+    KNOWLEDGE_PAGES_FILE,
+    PRODUCTS_FILE,
+)
 
 
 def main() -> None:
@@ -22,7 +27,9 @@ def main() -> None:
     client = OpenAI()
 
     registry = create_tool_registry(products)
-    openai_tools = create_openai_tools(registry)
+    pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
+
+    openai_tools = create_openai_tools(registry, pages)
 
     generate_agent_step = create_openai_agent_step_generator(
         client,

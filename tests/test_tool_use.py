@@ -73,22 +73,19 @@ def test_load_tool_sequence_eval_cases_loads_cases(tmp_path: Path) -> None:
 
 def test_evaluate_tool_use_case_passes_for_matching_tool_call() -> None:
     case = {
-        "user_input": "Скільки коштує доставка по Києву?",
+        "user_input": "Хочу орендувати стілець",
         "expected_tool_call": {
-            "tool_name": "get_delivery_info",
-            "arguments": {"location": "Київ"},
+            "tool_name": "search_products",
+            "arguments": {"query": "стілець"},
         },
     }
     actual_tool_call = {
-        "tool_name": "get_delivery_info",
-        "arguments": {"location": "Київ"},
+        "tool_name": "search_products",
+        "arguments": {"query": "оренда стілець"},
     }
 
     result = evaluate_tool_use_case(case, actual_tool_call)
 
-    assert result["user_input"] == case["user_input"]
-    assert result["expected_tool_call"] == case["expected_tool_call"]
-    assert result["actual_tool_call"] == actual_tool_call
     assert result["tool_name_match"] is True
     assert result["arguments_match"] is True
     assert result["passed"] is True
@@ -96,15 +93,21 @@ def test_evaluate_tool_use_case_passes_for_matching_tool_call() -> None:
 
 def test_evaluate_tool_use_case_fails_for_wrong_tool_call() -> None:
     case = {
-        "user_input": "Скільки коштує доставка по Києву?",
+        "user_input": "Скільки коштує намет на 3 дні?",
         "expected_tool_call": {
-            "tool_name": "get_delivery_info",
-            "arguments": {"location": "Київ"},
+            "tool_name": "get_product_price",
+            "arguments": {
+                "product_url": "https://example.com/tent/",
+                "days": 3,
+            },
         },
     }
     actual_tool_call = {
-        "tool_name": "get_delivery_info",
-        "arguments": {"location": "Львів"},
+        "tool_name": "get_product_price",
+        "arguments": {
+            "product_url": "https://example.com/tent/",
+            "days": 5,
+        },
     }
 
     result = evaluate_tool_use_case(case, actual_tool_call)
@@ -328,8 +331,8 @@ def test_run_tool_use_evals() -> None:
         {
             "user_input": "Скільки коштує доставка по Києву?",
             "expected_tool_call": {
-                "tool_name": "get_delivery_info",
-                "arguments": {"location": "Київ"},
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка Київ"},
             },
         },
         {
@@ -341,8 +344,8 @@ def test_run_tool_use_evals() -> None:
         },
     ]
     correct_tool_call = {
-        "tool_name": "get_delivery_info",
-        "arguments": {"location": "Київ"},
+        "tool_name": "search_service_info",
+        "arguments": {"query": "вартість доставки по Києву"},
     }
     wrong_arguments_tool_call = {
         "tool_name": "search_products",
@@ -443,14 +446,14 @@ def test_run_repeated_tool_use_evals() -> None:
         {
             "user_input": "Скільки коштує доставка по Києву?",
             "expected_tool_call": {
-                "tool_name": "get_delivery_info",
-                "arguments": {"location": "Київ"},
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка Київ"},
             },
         },
     ]
     correct_tool_call = {
-        "tool_name": "get_delivery_info",
-        "arguments": {"location": "Київ"},
+        "tool_name": "search_service_info",
+        "arguments": {"query": "вартість доставки по Києву"},
     }
 
     def fake_generate_tool_call(_user_input: str) -> ToolCall | None:

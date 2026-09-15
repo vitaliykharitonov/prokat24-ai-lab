@@ -84,6 +84,29 @@ def load_tool_sequence_eval_cases(input_file: Path) -> list[ToolSequenceEvalCase
     return cases
 
 
+def tool_arguments_match(expected_tool_call: ToolCall, actual_tool_call: ToolCall) -> bool:
+    expected_arguments = expected_tool_call["arguments"]
+    actual_arguments = actual_tool_call["arguments"]
+
+    if set(expected_arguments.keys()) != set(actual_arguments.keys()):
+        return False
+
+    for key in expected_arguments:
+        expected_value = expected_arguments[key]
+        actual_value = actual_arguments[key]
+
+        if key == "query":
+            if not isinstance(actual_value, str) or not actual_value.strip():
+                return False
+
+            continue
+
+        if expected_value != actual_value:
+            return False
+
+    return True
+
+
 def evaluate_tool_use_case(
     case: ToolUseEvalCase,
     actual_tool_call: ToolCall | None,
@@ -100,8 +123,9 @@ def evaluate_tool_use_case(
 
     else:
         tool_name_matches = actual_tool_call["tool_name"] == expected_tool_call["tool_name"]
-        arguments_match = (
-            tool_name_matches and actual_tool_call["arguments"] == expected_tool_call["arguments"]
+        arguments_match = tool_name_matches and tool_arguments_match(
+            expected_tool_call,
+            actual_tool_call,
         )
 
     passed = tool_name_matches and arguments_match

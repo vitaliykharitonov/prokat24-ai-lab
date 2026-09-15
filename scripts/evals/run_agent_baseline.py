@@ -5,16 +5,19 @@ from prokat24_ai_lab.agents.openai_agent_step import create_openai_agent_step_ge
 from prokat24_ai_lab.agents.openai_tool_schema import create_openai_tools
 from prokat24_ai_lab.agents.tool_executor import create_tool_executor
 from prokat24_ai_lab.agents.tool_registry import create_tool_registry
+from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.products.catalog import load_products
-from prokat24_ai_lab.project_paths import PRODUCTS_FILE
+from prokat24_ai_lab.project_paths import KNOWLEDGE_PAGES_FILE, PRODUCTS_FILE
 
 
 def main() -> None:
-    user_input = "Скільки буде коштувати 2-місний намет на 3 дні?"
+    user_input = "Скільки коштує доставка за межі Києва?"
 
     client = OpenAI()
     products = load_products(PRODUCTS_FILE)
-    registry = create_tool_registry(products)
+    pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
+
+    registry = create_tool_registry(products, pages)
     openai_tools = create_openai_tools(registry)
 
     generate_agent_step = create_openai_agent_step_generator(

@@ -27,7 +27,7 @@ def test_tool_executor_executes_product_search() -> None:
         "arguments": {"query": "намет"},
     }
 
-    registry = create_tool_registry(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
     tool_executor = create_tool_executor(registry)
 
     result = tool_executor(tool_call)
@@ -41,7 +41,7 @@ def test_tool_executor_raises_for_unsupported_tool() -> None:
         "arguments": {"query": "намет"},
     }
 
-    registry = create_tool_registry(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
     tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Unsupported tool: unknown_tool"):
@@ -54,7 +54,7 @@ def test_tool_executor_raises_when_product_search_query_is_not_string() -> None:
         "arguments": {"query": 123},
     }
 
-    registry = create_tool_registry(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
     tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Query must be a string"):
@@ -70,7 +70,7 @@ def test_tool_executor_executes_product_price_lookup() -> None:
         },
     }
 
-    registry = create_tool_registry(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
     tool_executor = create_tool_executor(registry)
 
     result = tool_executor(tool_call)
@@ -88,7 +88,7 @@ def test_tool_executor_raises_when_product_not_found() -> None:
         },
     }
 
-    registry = create_tool_registry(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
     tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Product not found"):
@@ -104,7 +104,7 @@ def test_tool_executor_raises_when_product_url_is_not_string() -> None:
         },
     }
 
-    registry = create_tool_registry(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
     tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Product URL must be a string"):
@@ -120,7 +120,7 @@ def test_tool_executor_raises_when_days_is_not_integer() -> None:
         },
     }
 
-    registry = create_tool_registry(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
     tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Days must be integer"):
