@@ -120,6 +120,14 @@
     "split": "dev"
   },
   {
+    "id": "retrieval_dev_016",
+    "query": "доставка за межі Києва вартість доставка за межі Києва Prokat24",
+    "expected_document_id": "https://prokat24.com.ua/ua/dostavka/",
+    "category": "delivery",
+    "difficulty": "hard",
+    "split": "dev"
+  },
+  {
     "id": "retrieval_holdout_001",
     "query": "чи можете передати замовлення кур’єром до мого будинку?",
     "expected_document_id": "https://prokat24.com.ua/ua/dostavka/",

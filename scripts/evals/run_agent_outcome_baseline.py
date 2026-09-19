@@ -7,10 +7,12 @@ from prokat24_ai_lab.agents.tool_executor import create_tool_executor
 from prokat24_ai_lab.agents.tool_registry import create_tool_registry
 from prokat24_ai_lab.agents.types import AgentRunResult
 from prokat24_ai_lab.evals.agent_evals import (
+    evaluate_agent_capability,
     load_agent_outcome_eval_cases,
     run_agent_outcome_evals,
     summarize_agent_outcome_eval_results,
 )
+from prokat24_ai_lab.judges.openai_judge import create_openai_criterion_judge
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.products.catalog import load_products
 from prokat24_ai_lab.project_paths import (
@@ -23,13 +25,14 @@ from prokat24_ai_lab.project_paths import (
 def main() -> None:
     cases = load_agent_outcome_eval_cases(AGENT_OUTCOME_EVAL_CASES_FILE)
     products = load_products(PRODUCTS_FILE)
+    pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
 
     client = OpenAI()
 
-    registry = create_tool_registry(products)
-    pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
+    capability_judge = create_openai_criterion_judge(client)
 
-    openai_tools = create_openai_tools(registry, pages)
+    registry = create_tool_registry(products, pages)
+    openai_tools = create_openai_tools(registry)
 
     generate_agent_step = create_openai_agent_step_generator(
         client,
@@ -47,12 +50,37 @@ def main() -> None:
     results = run_agent_outcome_evals(cases, agent_runner)
     summary = summarize_agent_outcome_eval_results(results)
 
+    capability_results = []
+
     for result in results:
+        capability_result = evaluate_agent_capability(
+            result,
+            capability_judge,
+        )
+        capability_results.append(capability_result)
+
+    capability_passed = sum(result["passed"] for result in capability_results)
+    capability_total = len(capability_results)
+
+    capability_pass_rate = capability_passed / capability_total if capability_total else 0.0
+
+    for result, capability_result in zip(
+        results,
+        capability_results,
+        strict=True,
+    ):
         print(f"Question: {result['user_input']}")
         print(f"Passed: {result['passed']}")
         print(f"Missing fragments: {result['missing_fragments']}")
         print(f"Unexpected fragments: {result['unexpected_fragments']}")
         print(f"Missing tool names: {result['missing_tool_names']}")
+        print(f"Capability passed: {capability_result['passed']}")
+        print(f"Capability failed criteria: {capability_result['failed_criteria']}")
+
+        for criterion in capability_result["criteria"]:
+            print(f"Capability criterion: {criterion['name']} | Passed: {criterion['passed']}")
+            print(f"Capability reason: {criterion['reason']}")
+
         print(f"Answer:\n{result['final_answer']}\n")
         print(f"Tool calls:\n{result['tool_calls']}\n")
 
@@ -60,6 +88,12 @@ def main() -> None:
     print(f"Cases: {summary['total_cases']}")
     print(f"Passed: {summary['passed_cases']}")
     print(f"Pass rate: {summary['pass_rate']:.2%}")
+
+    print()
+    print("AGENT CAPABILITY SUMMARY\n")
+    print(f"Cases: {capability_total}")
+    print(f"Passed: {capability_passed}")
+    print(f"Pass rate: {capability_pass_rate:.2%}")
 
 
 if __name__ == "__main__":

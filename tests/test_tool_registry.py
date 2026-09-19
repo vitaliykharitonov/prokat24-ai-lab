@@ -4,6 +4,7 @@ from prokat24_ai_lab.agents.tool_registry import (
     create_search_service_info_handler,
     create_tool_registry,
 )
+from prokat24_ai_lab.agents.types import ToolArguments
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.products.catalog import Product
 
@@ -75,3 +76,55 @@ def test_create_tool_registry_registers_available_tools() -> None:
 
     for tool_name, registered_tool in registry.items():
         assert registered_tool["definition"]["name"] == tool_name
+
+
+def test_search_service_info_handler_returns_all_knowledge_pages() -> None:
+    pages: list[KnowledgePage] = [
+        {
+            "url": "https://prokat24.com.ua/ua/dostavka/",
+            "title": "Доставка",
+            "text": ("По Києву — від 200 грн. За межами Києва — від 200 грн + 10 грн/км."),
+            "text_length": 67,
+        },
+        {
+            "url": "https://prokat24.com.ua/ua/contact-us/",
+            "title": "Контакти",
+            "text": ("м. БЕРЕСТЕЙСЬКА, вул. Табірна, 42. Телефон: (095) 66 06 181."),
+            "text_length": 71,
+        },
+    ]
+    arguments: ToolArguments = {"query": "Скільки коштує доставка?"}
+
+    handler = create_search_service_info_handler(pages)
+
+    result = handler(arguments)
+
+    expected = (
+        "[Document 1]\n"
+        "Title: Доставка\n"
+        "Information:\n"
+        "По Києву — від 200 грн. "
+        "За межами Києва — від 200 грн + 10 грн/км.\n"
+        "URL: https://prokat24.com.ua/ua/dostavka/\n"
+        "\n"
+        "[Document 2]\n"
+        "Title: Контакти\n"
+        "Information:\n"
+        "м. БЕРЕСТЕЙСЬКА, вул. Табірна, 42. "
+        "Телефон: (095) 66 06 181.\n"
+        "URL: https://prokat24.com.ua/ua/contact-us/\n"
+    )
+
+    assert result == expected
+
+
+def test_search_service_info_handler_raises_error_when_pages_are_empty() -> None:
+    pages: list[KnowledgePage] = []
+    arguments: ToolArguments = {
+        "query": "Скільки коштує доставка?",
+    }
+
+    handler = create_search_service_info_handler(pages)
+
+    with pytest.raises(ValueError, match="Knowledge pages not found"):
+        handler(arguments)

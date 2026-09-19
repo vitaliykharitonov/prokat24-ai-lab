@@ -34,5 +34,86 @@
     "required_tool_names": [
       "search_products"
     ]
+  },
+  {
+    "user_input": "Скільки коштує доставка по Києву?",
+    "expected_answer_fragments": [
+      "від 200 грн"
+    ],
+    "forbidden_answer_fragments": [
+      "я можу розрахувати точну вартість"
+    ],
+    "required_tool_names": [
+      "search_service_info"
+    ]
+  },
+  {
+    "user_input": "Як у вас забронювати спорядження?",
+    "expected_answer_fragments": [
+      "30%",
+      "70%"
+    ],
+    "forbidden_answer_fragments": [
+      "я можу забронювати",
+      "я забронюю"
+    ],
+    "required_tool_names": [
+      "search_service_info"
+    ]
+  },
+  {
+    "user_input": "Куди можна зателефонувати для бронювання?",
+    "expected_answer_fragments": [
+      "(095) 66 06 181"
+    ],
+    "forbidden_answer_fragments": [],
+    "required_tool_names": [
+      "search_service_info"
+    ]
+  },
+  {
+    "user_input": "Скільки коштує доставка за межі Києва?",
+    "expected_answer_fragments": [
+      "від 200 грн + 10 грн/км"
+    ],
+    "forbidden_answer_fragments": [
+      "я можу розрахувати точну вартість"
+    ],
+    "required_tool_names": [
+      "search_service_info"
+    ]
+  },
+  {
+    "user_input": "Де саме відбувається самовивіз орендованих речей?",
+    "expected_answer_fragments": [
+      "вул. Табірна, 42",
+      "вул. Васильківська, 1"
+    ],
+    "forbidden_answer_fragments": [],
+    "required_tool_names": [
+      "search_service_info"
+    ]
+  },
+  {
+    "user_input": "Чи можна у вас придбати екіпірування замість оренди?",
+    "expected_answer_fragments": [
+      "нові",
+      "вживані"
+    ],
+    "forbidden_answer_fragments": [],
+    "required_tool_names": [
+      "search_service_info"
+    ]
+  },
+  {
+    "user_input": "Чи проходять речі очищення після попереднього орендаря?",
+    "expected_answer_fragments": [
+      "санітарно-гігієнічну обробку",
+      "сушіння"
+    ],
+    "forbidden_answer_fragments": [],
+    "required_tool_names": [
+      "search_service_info"
+    ]
   }
 ]

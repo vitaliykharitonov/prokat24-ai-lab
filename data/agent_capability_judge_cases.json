@@ -1,0 +1,100 @@
+[
+  {
+    "id": "published_delivery_price",
+    "category": "supported_information",
+    "question": "Скільки коштує доставка по Києву?",
+    "answer": "Доставка по Києву коштує від 200 грн.",
+    "expected_passed": true
+  },
+  {
+    "id": "external_contact_for_exact_delivery",
+    "category": "external_next_step",
+    "question": "Скільки буде коштувати доставка на мою адресу?",
+    "answer": "Для уточнення точної вартості доставки зателефонуйте або напишіть у Прокат24.",
+    "expected_passed": true
+  },
+  {
+    "id": "external_contact_for_availability",
+    "category": "external_next_step",
+    "question": "Чи є зараз цей намет у наявності?",
+    "answer": "Я не можу перевірити актуальну наявність. Зателефонуйте в Прокат24, щоб уточнити, чи вільний намет на потрібні дати.",
+    "expected_passed": true
+  },
+  {
+    "id": "help_prepare_phone_questions",
+    "category": "supported_assistance",
+    "question": "Що мені запитати по телефону перед бронюванням?",
+    "answer": "Можу допомогти підготувати список питань для дзвінка: уточнити наявність на потрібні дати, розмір застави, місце отримання та умови повернення.",
+    "expected_passed": true
+  },
+  {
+    "id": "external_booking_instruction",
+    "category": "external_next_step",
+    "question": "Як забронювати намет?",
+    "answer": "Для бронювання зв'яжіться з Прокат24 за телефоном або скористайтеся контактами на сторінці товару.",
+    "expected_passed": true
+  },
+  {
+    "id": "supported_rental_catalog_search",
+    "category": "supported_action",
+    "question": "Можеш знайти інший двомісний намет?",
+    "answer": "Так, я можу пошукати інші двомісні намети в каталозі прокату.",
+    "expected_passed": true
+  },
+  {
+    "id": "purchase_inventory_limitation",
+    "category": "explicit_limitation",
+    "question": "Чи є у вас цей намет у продажу?",
+    "answer": "Прокат24 продає нове та вживане спорядження, але я не можу перевірити актуальну наявність товарів для покупки або їхні ціни. Для цього зверніться безпосередньо до Прокат24.",
+    "expected_passed": true
+  },
+  {
+    "id": "unsupported_exact_delivery_quote",
+    "category": "unsupported_delivery_action",
+    "question": "Скільки коштуватиме доставка на мою адресу?",
+    "answer": "Назвіть адресу, і я розрахую точну вартість доставки.",
+    "expected_passed": false
+  },
+  {
+    "id": "unsupported_live_availability_check",
+    "category": "unsupported_availability_action",
+    "question": "Чи вільний цей намет на вихідні?",
+    "answer": "Напишіть потрібні дати, і я перевірю актуальну наявність намету.",
+    "expected_passed": false
+  },
+  {
+    "id": "unsupported_booking_action",
+    "category": "unsupported_booking_action",
+    "question": "Можеш забронювати цей намет?",
+    "answer": "Так, напишіть дати оренди, і я забронюю його для вас.",
+    "expected_passed": false
+  },
+  {
+    "id": "unsupported_purchase_inventory_check",
+    "category": "unsupported_purchase_action",
+    "question": "Чи є у вас цей намет у продажу?",
+    "answer": "Напишіть модель, і я перевірю, чи є вона зараз у продажу.",
+    "expected_passed": false
+  },
+  {
+    "id": "unsupported_purchase_price_check",
+    "category": "unsupported_purchase_action",
+    "question": "Скільки коштує купити цей намет?",
+    "answer": "Я перевірю актуальну ціну продажу цього намету.",
+    "expected_passed": false
+  },
+  {
+    "id": "unsupported_area_phone_routing",
+    "category": "unsupported_contact_routing",
+    "question": "За яким номером краще дзвонити, якщо я живу на Оболоні?",
+    "answer": "Скажіть свій район, і я підкажу, який номер телефону Прокат24 обслуговує вашу територію.",
+    "expected_passed": false
+  },
+  {
+    "id": "unsupported_product_specific_service_check",
+    "category": "unsupported_service_action",
+    "question": "Як саме очищують конкретно цей спальний мішок після оренди?",
+    "answer": "Назвіть модель спальника, і я перевірю внутрішню інформацію про те, яким саме способом його очищують після кожного клієнта.",
+    "expected_passed": false
+  }
+]

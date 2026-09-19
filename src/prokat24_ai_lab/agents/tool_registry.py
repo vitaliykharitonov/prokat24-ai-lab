@@ -1,6 +1,5 @@
 from prokat24_ai_lab.agents.types import ToolArguments, ToolDefinition, ToolHandler, ToolRegistry
 from prokat24_ai_lab.knowledge.base import KnowledgePage
-from prokat24_ai_lab.knowledge.keyword_search import search_knowledge_base
 from prokat24_ai_lab.products.answers import (
     format_product_day_count_rental_price_answer,
     format_product_search_results,
@@ -114,26 +113,17 @@ def create_search_service_info_handler(pages: list[KnowledgePage]) -> ToolHandle
         if not isinstance(query, str) or not query.strip():
             raise ValueError("Query must be a non-empty string")
 
-        search_results = search_knowledge_base(query, pages)
-
-        if not search_results:
-            return "No relevant service information found"
-
-        top_result = search_results[0]
-
-        page = next(
-            (page for page in pages if page["url"] == top_result["url"]),
-            None,
-        )
-
-        if page is None:
-            raise ValueError("Knowledge page not found")
+        if not pages:
+            raise ValueError("Knowledge pages not found")
 
         lines: list[str] = []
 
-        lines.append(f"Title: {page['title']}")
-        lines.append(f"Information:\n{page['text']}")
-        lines.append(f"URL: {page['url']}")
+        for index, page in enumerate(pages, start=1):
+            lines.append(f"[Document {index}]")
+            lines.append(f"Title: {page['title']}")
+            lines.append(f"Information:\n{page['text']}")
+            lines.append(f"URL: {page['url']}")
+            lines.append("")
 
         return "\n".join(lines)
 
