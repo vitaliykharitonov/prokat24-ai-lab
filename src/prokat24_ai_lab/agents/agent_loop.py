@@ -23,6 +23,7 @@ def run_agent(
         return AgentRunResult(
             final_answer=agent_step["final_answer"],
             tool_calls=tool_calls,
+            tool_executions=tool_executions,
         )
 
     while agent_step["final_answer"] is None:
@@ -49,4 +50,5 @@ def run_agent(
             return AgentRunResult(
                 final_answer=agent_step["final_answer"],
                 tool_calls=tool_calls,
+                tool_executions=tool_executions,
             )

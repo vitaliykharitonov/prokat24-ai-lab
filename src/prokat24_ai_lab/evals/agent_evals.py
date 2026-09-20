@@ -6,7 +6,7 @@ from typing import TypedDict
 
 from openai import BaseModel
 
-from prokat24_ai_lab.agents.types import AgentRunner, AgentRunResult, ToolCall
+from prokat24_ai_lab.agents.types import AgentRunner, AgentRunResult, ToolCall, ToolExecution
 from prokat24_ai_lab.evals.semantic_grading import (
     CriterionJudge,
     JudgeInput,
@@ -29,6 +29,7 @@ class AgentOutcomeEvalResult(TypedDict):
     unexpected_fragments: list[str]
     tool_calls: list[ToolCall]
     missing_tool_names: list[str]
+    tool_executions: list[ToolExecution]
     passed: bool
 
 
@@ -44,7 +45,7 @@ class AgentCapabilityCriterionResult(TypedDict):
     reason: str
 
 
-class AgentCapabilityEvalResult(TypedDict):
+class AgentCriterionEvalResult(TypedDict):
     user_input: str
     final_answer: str
     passed: bool
@@ -82,6 +83,14 @@ class AgentCapabilityJudgeSummary(TypedDict):
     total_cases: int
     matched_cases: int
     accuracy: float
+
+
+class AgentGroundingEvalResult(TypedDict):
+    user_input: str
+    final_answer: str
+    passed: bool
+    failed_criteria: list[str]
+    criteria: list[AgentCapabilityCriterionResult]
 
 
 AGENT_CAPABILITY_RUBRIC: Rubric = {
@@ -146,6 +155,30 @@ AGENT_CAPABILITY_CONTEXT = (
     "It does not evaluate factual groundedness."
 )
 
+AGENT_GROUNDING_RUBRIC: Rubric = {
+    "name": "Agent answer grounding",
+    "criteria": [
+        {
+            "name": "grounded_facts_only",
+            "description": (
+                "Every factual claim about Prokat24 products, prices, deposits, "
+                "delivery, booking rules, contacts, addresses, services, or other "
+                "business-specific information in the assistant answer must be "
+                "supported by the provided tool executions. "
+                "Claims may be paraphrased and do not need to copy the tool output "
+                "word for word. Calculations and conclusions directly derivable "
+                "from the tool outputs are allowed. "
+                "Do not fail merely because the answer omits information from the "
+                "tool outputs. "
+                "Do not evaluate whether the answer is relevant, complete, or "
+                "within the assistant's capabilities; those are evaluated separately. "
+                "Fail if the answer introduces a business-specific factual claim "
+                "that cannot be supported or derived from the provided tool outputs."
+            ),
+        },
+    ],
+}
+
 
 def normalize_eval_text(text: str) -> str:
     # Normalize compatible Unicode characters, e.g. ① -> 1.
@@ -209,6 +242,7 @@ def evaluate_agent_outcome_case(
         unexpected_fragments=unexpected_fragments,
         tool_calls=agent_result["tool_calls"],
         missing_tool_names=missing_tool_names,
+        tool_executions=agent_result["tool_executions"],
         passed=passed,
     )
 
@@ -264,7 +298,7 @@ def evaluate_capability_answer(
     question: str,
     answer: str,
     judge: CriterionJudge,
-) -> AgentCapabilityEvalResult:
+) -> AgentCriterionEvalResult:
     judge_input: JudgeInput = {
         "question": question,
         "context": AGENT_CAPABILITY_CONTEXT,
@@ -287,7 +321,7 @@ def evaluate_capability_answer(
         for criterion in criterion_result.criteria
     ]
 
-    return AgentCapabilityEvalResult(
+    return AgentCriterionEvalResult(
         user_input=question,
         final_answer=answer,
         passed=summary["passed"],
@@ -299,7 +333,7 @@ def evaluate_capability_answer(
 def evaluate_agent_capability(
     result: AgentOutcomeEvalResult,
     judge: CriterionJudge,
-) -> AgentCapabilityEvalResult:
+) -> AgentCriterionEvalResult:
     return evaluate_capability_answer(
         question=result["user_input"],
         answer=result["final_answer"],
@@ -383,4 +417,57 @@ def summarize_agent_capability_judge_results(
         total_cases=total_cases,
         matched_cases=matched_cases,
         accuracy=accuracy,
+    )
+
+
+def build_agent_grounding_context(
+    tool_executions: list[ToolExecution],
+) -> str:
+    lines: list[str] = []
+
+    for index, execution in enumerate(tool_executions, start=1):
+        lines.append(f"[Tool execution {index}]")
+        lines.append(f"Tool: {execution['tool_call']['tool_name']}")
+        lines.append(f"Arguments: {execution['tool_call']['arguments']}")
+        lines.append("Output:")
+        lines.append(execution["output"])
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def evaluate_agent_grounding(
+    result: AgentOutcomeEvalResult,
+    judge: CriterionJudge,
+) -> AgentGroundingEvalResult:
+    context = build_agent_grounding_context(result["tool_executions"])
+
+    judge_input: JudgeInput = {
+        "question": result["user_input"],
+        "context": context,
+        "answer": result["final_answer"],
+    }
+
+    criterion_result = judge(
+        judge_input,
+        AGENT_GROUNDING_RUBRIC,
+    )
+
+    summary = summarize_criterion_judge_result(criterion_result)
+
+    criteria: list[AgentCapabilityCriterionResult] = [
+        {
+            "name": criterion.name,
+            "passed": criterion.passed,
+            "reason": criterion.reason,
+        }
+        for criterion in criterion_result.criteria
+    ]
+
+    return AgentGroundingEvalResult(
+        user_input=result["user_input"],
+        final_answer=result["final_answer"],
+        passed=summary["passed"],
+        failed_criteria=summary["failed_criteria"],
+        criteria=criteria,
     )

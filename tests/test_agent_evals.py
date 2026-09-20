@@ -3,14 +3,16 @@ from pathlib import Path
 
 import pytest
 
-from prokat24_ai_lab.agents.types import AgentRunResult, ToolCall
+from prokat24_ai_lab.agents.types import AgentRunResult, ToolCall, ToolExecution
 from prokat24_ai_lab.evals.agent_evals import (
     AgentCapabilityJudgeCase,
     AgentCapabilityJudgeResult,
     AgentOutcomeEvalCase,
     AgentOutcomeEvalResult,
+    build_agent_grounding_context,
     evaluate_agent_capability,
     evaluate_agent_capability_judge_case,
+    evaluate_agent_grounding,
     evaluate_agent_outcome_case,
     load_agent_capability_judge_cases,
     load_agent_outcome_eval_cases,
@@ -63,6 +65,15 @@ def test_evaluate_agent_outcome_case_passes_when_expected_fragments_are_present(
                 arguments={"query": "2-місний намет"},
             )
         ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
+        ],
     )
 
     result = evaluate_agent_outcome_case(case, agent_result)
@@ -70,6 +81,7 @@ def test_evaluate_agent_outcome_case_passes_when_expected_fragments_are_present(
     assert result["missing_fragments"] == []
     assert result["passed"] is True
     assert result["tool_calls"] == agent_result["tool_calls"]
+    assert result["tool_executions"] == agent_result["tool_executions"]
     assert result["user_input"] == case["user_input"]
     assert result["final_answer"] == agent_result["final_answer"]
 
@@ -93,6 +105,15 @@ def test_evaluate_agent_outcome_case_fails_when_expected_fragment_is_missing() -
                 arguments={"query": "2-місний намет"},
             )
         ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
+        ],
     )
 
     result = evaluate_agent_outcome_case(case, agent_result)
@@ -100,6 +121,7 @@ def test_evaluate_agent_outcome_case_fails_when_expected_fragment_is_missing() -
     assert result["missing_fragments"] == ["660 грн"]
     assert result["passed"] is False
     assert result["tool_calls"] == agent_result["tool_calls"]
+    assert result["tool_executions"] == agent_result["tool_executions"]
     assert result["user_input"] == case["user_input"]
     assert result["final_answer"] == agent_result["final_answer"]
 
@@ -122,6 +144,15 @@ def test_evaluate_agent_outcome_case_fails_when_forbidden_fragment_is_present() 
                 tool_name="search_products",
                 arguments={"query": "2-місний намет"},
             )
+        ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
         ],
     )
 
@@ -148,6 +179,15 @@ def test_evaluate_agent_outcome_case_passes_when_required_tool_is_called() -> No
                 arguments={"query": "2-місний намет"},
             )
         ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
+        ],
     )
 
     result = evaluate_agent_outcome_case(case, agent_result)
@@ -169,6 +209,7 @@ def test_evaluate_agent_outcome_case_fails_when_required_tool_is_missing() -> No
     agent_result = AgentRunResult(
         final_answer="Можу допомогти знайти 2-місний намет.",
         tool_calls=[],
+        tool_executions=[],
     )
 
     result = evaluate_agent_outcome_case(case, agent_result)
@@ -194,6 +235,15 @@ def test_evaluate_agent_outcome_case_normalizes_answer_fragments() -> None:
                 tool_name="search_products",
                 arguments={"query": "2-місний намет"},
             )
+        ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
         ],
     )
 
@@ -229,6 +279,15 @@ def test_run_agent_outcome_evals_returns_results_for_all_cases() -> None:
                         arguments={"query": "2-місний намет"},
                     )
                 ],
+                tool_executions=[
+                    {
+                        "tool_call": {
+                            "tool_name": "search_products",
+                            "arguments": {"query": "2-місний намет"},
+                        },
+                        "output": "Намет 2-місний",
+                    }
+                ],
             )
 
         return AgentRunResult(
@@ -239,6 +298,15 @@ def test_run_agent_outcome_evals_returns_results_for_all_cases() -> None:
                     arguments={"query": "спальник"},
                 )
             ],
+            tool_executions=[
+                {
+                    "tool_call": {
+                        "tool_name": "search_products",
+                        "arguments": {"query": "спальник"},
+                    },
+                    "output": "Туристичний спальник",
+                }
+            ],
         )
 
     results = run_agent_outcome_evals(cases, fake_agent_runner)
@@ -246,6 +314,8 @@ def test_run_agent_outcome_evals_returns_results_for_all_cases() -> None:
     assert len(results) == 2
     assert results[0]["passed"] is True
     assert results[1]["passed"] is True
+    assert results[0]["tool_executions"]
+    assert results[1]["tool_executions"]
 
 
 def test_summarize_agent_outcome_eval_results() -> None:
@@ -262,6 +332,15 @@ def test_summarize_agent_outcome_eval_results() -> None:
                 }
             ],
             "missing_tool_names": [],
+            "tool_executions": [
+                {
+                    "tool_call": {
+                        "tool_name": "search_products",
+                        "arguments": {"query": "2-місний намет"},
+                    },
+                    "output": "Намет 2-місний",
+                }
+            ],
             "passed": True,
         },
         {
@@ -276,6 +355,15 @@ def test_summarize_agent_outcome_eval_results() -> None:
                 }
             ],
             "missing_tool_names": [],
+            "tool_executions": [
+                {
+                    "tool_call": {
+                        "tool_name": "search_products",
+                        "arguments": {"query": "спальник"},
+                    },
+                    "output": "Туристичний спальник",
+                }
+            ],
             "passed": True,
         },
         {
@@ -285,11 +373,20 @@ def test_summarize_agent_outcome_eval_results() -> None:
             "unexpected_fragments": [],
             "tool_calls": [
                 {
-                    "tool_name": "get_delivery_info",
-                    "arguments": {"location": "Київ"},
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка по Києву"},
                 }
             ],
             "missing_tool_names": [],
+            "tool_executions": [
+                {
+                    "tool_call": {
+                        "tool_name": "search_service_info",
+                        "arguments": {"query": "доставка по Києву"},
+                    },
+                    "output": "Доставка по Києву — від 200 грн.",
+                }
+            ],
             "passed": False,
         },
     ]
@@ -358,6 +455,15 @@ def test_evaluate_agent_capability_passes_supported_answer() -> None:
             }
         ],
         "missing_tool_names": [],
+        "tool_executions": [
+            {
+                "tool_call": {
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка за межі Києва"},
+                },
+                "output": "Доставка за межі Києва — від 200 грн + 10 грн/км.",
+            }
+        ],
         "passed": True,
     }
 
@@ -395,6 +501,15 @@ def test_evaluate_agent_capability_fails_unsupported_action_offer() -> None:
             }
         ],
         "missing_tool_names": [],
+        "tool_executions": [
+            {
+                "tool_call": {
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка за межі Києва"},
+                },
+                "output": "Доставка за межі Києва — від 200 грн + 10 грн/км.",
+            }
+        ],
         "passed": True,
     }
 
@@ -616,3 +731,118 @@ def test_summarize_agent_capability_judge_results_returns_zero_summary_for_empty
     assert summary["total_cases"] == 0
     assert summary["matched_cases"] == 0
     assert summary["accuracy"] == 0.0
+
+
+def test_build_agent_grounding_context() -> None:
+    tool_executions: list[ToolExecution] = [
+        {
+            "tool_call": {
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка по Києву"},
+            },
+            "output": "Доставка по Києву — від 200 грн.",
+        }
+    ]
+
+    context = build_agent_grounding_context(tool_executions)
+
+    assert context == (
+        "[Tool execution 1]\n"
+        "Tool: search_service_info\n"
+        "Arguments: {'query': 'доставка по Києву'}\n"
+        "Output:\n"
+        "Доставка по Києву — від 200 грн.\n"
+    )
+
+
+def test_evaluate_agent_grounding_passes_supported_answer() -> None:
+    result: AgentOutcomeEvalResult = {
+        "user_input": "Скільки коштує доставка по Києву?",
+        "final_answer": "Доставка по Києву — від 200 грн.",
+        "missing_fragments": [],
+        "unexpected_fragments": [],
+        "tool_calls": [
+            {
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка по Києву"},
+            }
+        ],
+        "tool_executions": [
+            {
+                "tool_call": {
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка по Києву"},
+                },
+                "output": "Доставка по Києву — від 200 грн.",
+            }
+        ],
+        "missing_tool_names": [],
+        "passed": True,
+    }
+
+    def fake_judge(
+        _judge_input: JudgeInput,
+        _rubric: Rubric,
+    ) -> CriterionJudgeResult:
+        return CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="grounded_facts_only",
+                    passed=True,
+                    reason="The delivery price is directly supported by the tool output.",
+                )
+            ]
+        )
+
+    grounding_result = evaluate_agent_grounding(result, fake_judge)
+
+    assert grounding_result["passed"] is True
+    assert grounding_result["failed_criteria"] == []
+
+
+def test_evaluate_agent_grounding_fails_unsupported_fact() -> None:
+    result: AgentOutcomeEvalResult = {
+        "user_input": "Скільки коштує доставка по Києву?",
+        "final_answer": "Доставка по Києву — 300 грн.",
+        "missing_fragments": [],
+        "unexpected_fragments": [],
+        "tool_calls": [
+            {
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка по Києву"},
+            }
+        ],
+        "tool_executions": [
+            {
+                "tool_call": {
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка по Києву"},
+                },
+                "output": "Доставка по Києву — від 200 грн.",
+            }
+        ],
+        "missing_tool_names": [],
+        "passed": False,
+    }
+
+    def fake_judge(
+        _judge_input: JudgeInput,
+        _rubric: Rubric,
+    ) -> CriterionJudgeResult:
+        return CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="grounded_facts_only",
+                    passed=False,
+                    reason=(
+                        "The answer states 300 UAH, but the tool output only supports "
+                        "a price starting from 200 UAH."
+                    ),
+                )
+            ]
+        )
+
+    grounding_result = evaluate_agent_grounding(result, fake_judge)
+
+    assert grounding_result["passed"] is False
+    assert grounding_result["failed_criteria"] == ["grounded_facts_only"]

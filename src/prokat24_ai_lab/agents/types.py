@@ -51,6 +51,7 @@ class AgentStep(TypedDict):
 class AgentRunResult(TypedDict):
     final_answer: str
     tool_calls: list[ToolCall]
+    tool_executions: list[ToolExecution]
 
 
 ToolExecutor = Callable[[ToolCall], str]
