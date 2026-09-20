@@ -2,9 +2,9 @@
   {
     "user_input": "Скільки коштує доставка по Києву?",
     "expected_tool_call": {
-      "tool_name": "get_delivery_info",
+      "tool_name": "search_service_info",
       "arguments": {
-        "location": "Київ"
+        "query": "доставка Київ"
       }
     }
   },

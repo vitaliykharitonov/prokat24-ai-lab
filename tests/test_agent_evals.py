@@ -3,15 +3,29 @@ from pathlib import Path
 
 import pytest
 
-from prokat24_ai_lab.agents.types import AgentRunResult, ToolCall
+from prokat24_ai_lab.agents.types import AgentRunResult, ToolCall, ToolExecution
 from prokat24_ai_lab.evals.agent_evals import (
+    AgentCapabilityJudgeCase,
+    AgentCapabilityJudgeResult,
     AgentOutcomeEvalCase,
     AgentOutcomeEvalResult,
+    build_agent_grounding_context,
+    evaluate_agent_capability,
+    evaluate_agent_capability_judge_case,
+    evaluate_agent_grounding,
     evaluate_agent_outcome_case,
+    load_agent_capability_judge_cases,
     load_agent_outcome_eval_cases,
     normalize_eval_text,
     run_agent_outcome_evals,
+    summarize_agent_capability_judge_results,
     summarize_agent_outcome_eval_results,
+)
+from prokat24_ai_lab.evals.semantic_grading import (
+    CriterionJudgeResult,
+    CriterionResult,
+    JudgeInput,
+    Rubric,
 )
 
 
@@ -51,6 +65,15 @@ def test_evaluate_agent_outcome_case_passes_when_expected_fragments_are_present(
                 arguments={"query": "2-місний намет"},
             )
         ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
+        ],
     )
 
     result = evaluate_agent_outcome_case(case, agent_result)
@@ -58,6 +81,7 @@ def test_evaluate_agent_outcome_case_passes_when_expected_fragments_are_present(
     assert result["missing_fragments"] == []
     assert result["passed"] is True
     assert result["tool_calls"] == agent_result["tool_calls"]
+    assert result["tool_executions"] == agent_result["tool_executions"]
     assert result["user_input"] == case["user_input"]
     assert result["final_answer"] == agent_result["final_answer"]
 
@@ -81,6 +105,15 @@ def test_evaluate_agent_outcome_case_fails_when_expected_fragment_is_missing() -
                 arguments={"query": "2-місний намет"},
             )
         ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
+        ],
     )
 
     result = evaluate_agent_outcome_case(case, agent_result)
@@ -88,6 +121,7 @@ def test_evaluate_agent_outcome_case_fails_when_expected_fragment_is_missing() -
     assert result["missing_fragments"] == ["660 грн"]
     assert result["passed"] is False
     assert result["tool_calls"] == agent_result["tool_calls"]
+    assert result["tool_executions"] == agent_result["tool_executions"]
     assert result["user_input"] == case["user_input"]
     assert result["final_answer"] == agent_result["final_answer"]
 
@@ -110,6 +144,15 @@ def test_evaluate_agent_outcome_case_fails_when_forbidden_fragment_is_present() 
                 tool_name="search_products",
                 arguments={"query": "2-місний намет"},
             )
+        ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
         ],
     )
 
@@ -136,6 +179,15 @@ def test_evaluate_agent_outcome_case_passes_when_required_tool_is_called() -> No
                 arguments={"query": "2-місний намет"},
             )
         ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
+        ],
     )
 
     result = evaluate_agent_outcome_case(case, agent_result)
@@ -157,6 +209,7 @@ def test_evaluate_agent_outcome_case_fails_when_required_tool_is_missing() -> No
     agent_result = AgentRunResult(
         final_answer="Можу допомогти знайти 2-місний намет.",
         tool_calls=[],
+        tool_executions=[],
     )
 
     result = evaluate_agent_outcome_case(case, agent_result)
@@ -182,6 +235,15 @@ def test_evaluate_agent_outcome_case_normalizes_answer_fragments() -> None:
                 tool_name="search_products",
                 arguments={"query": "2-місний намет"},
             )
+        ],
+        tool_executions=[
+            {
+                "tool_call": {
+                    "tool_name": "search_products",
+                    "arguments": {"query": "2-місний намет"},
+                },
+                "output": "Намет 2-місний",
+            }
         ],
     )
 
@@ -217,6 +279,15 @@ def test_run_agent_outcome_evals_returns_results_for_all_cases() -> None:
                         arguments={"query": "2-місний намет"},
                     )
                 ],
+                tool_executions=[
+                    {
+                        "tool_call": {
+                            "tool_name": "search_products",
+                            "arguments": {"query": "2-місний намет"},
+                        },
+                        "output": "Намет 2-місний",
+                    }
+                ],
             )
 
         return AgentRunResult(
@@ -227,6 +298,15 @@ def test_run_agent_outcome_evals_returns_results_for_all_cases() -> None:
                     arguments={"query": "спальник"},
                 )
             ],
+            tool_executions=[
+                {
+                    "tool_call": {
+                        "tool_name": "search_products",
+                        "arguments": {"query": "спальник"},
+                    },
+                    "output": "Туристичний спальник",
+                }
+            ],
         )
 
     results = run_agent_outcome_evals(cases, fake_agent_runner)
@@ -234,6 +314,8 @@ def test_run_agent_outcome_evals_returns_results_for_all_cases() -> None:
     assert len(results) == 2
     assert results[0]["passed"] is True
     assert results[1]["passed"] is True
+    assert results[0]["tool_executions"]
+    assert results[1]["tool_executions"]
 
 
 def test_summarize_agent_outcome_eval_results() -> None:
@@ -250,6 +332,15 @@ def test_summarize_agent_outcome_eval_results() -> None:
                 }
             ],
             "missing_tool_names": [],
+            "tool_executions": [
+                {
+                    "tool_call": {
+                        "tool_name": "search_products",
+                        "arguments": {"query": "2-місний намет"},
+                    },
+                    "output": "Намет 2-місний",
+                }
+            ],
             "passed": True,
         },
         {
@@ -264,6 +355,15 @@ def test_summarize_agent_outcome_eval_results() -> None:
                 }
             ],
             "missing_tool_names": [],
+            "tool_executions": [
+                {
+                    "tool_call": {
+                        "tool_name": "search_products",
+                        "arguments": {"query": "спальник"},
+                    },
+                    "output": "Туристичний спальник",
+                }
+            ],
             "passed": True,
         },
         {
@@ -273,11 +373,20 @@ def test_summarize_agent_outcome_eval_results() -> None:
             "unexpected_fragments": [],
             "tool_calls": [
                 {
-                    "tool_name": "get_delivery_info",
-                    "arguments": {"location": "Київ"},
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка по Києву"},
                 }
             ],
             "missing_tool_names": [],
+            "tool_executions": [
+                {
+                    "tool_call": {
+                        "tool_name": "search_service_info",
+                        "arguments": {"query": "доставка по Києву"},
+                    },
+                    "output": "Доставка по Києву — від 200 грн.",
+                }
+            ],
             "passed": False,
         },
     ]
@@ -328,3 +437,412 @@ def test_load_agent_outcome_eval_cases(tmp_path: Path) -> None:
     loaded_cases = load_agent_outcome_eval_cases(input_file)
 
     assert loaded_cases == cases
+
+
+def test_evaluate_agent_capability_passes_supported_answer() -> None:
+    result: AgentOutcomeEvalResult = {
+        "user_input": "Скільки коштує доставка за межі Києва?",
+        "final_answer": (
+            "Доставка за межі Києва — від 200 грн + 10 грн/км. "
+            "Для уточнення точної вартості зверніться до Прокат24 за телефоном."
+        ),
+        "missing_fragments": [],
+        "unexpected_fragments": [],
+        "tool_calls": [
+            {
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка за межі Києва"},
+            }
+        ],
+        "missing_tool_names": [],
+        "tool_executions": [
+            {
+                "tool_call": {
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка за межі Києва"},
+                },
+                "output": "Доставка за межі Києва — від 200 грн + 10 грн/км.",
+            }
+        ],
+        "passed": True,
+    }
+
+    def fake_judge(_judge_input: JudgeInput, _rubric: Rubric) -> CriterionJudgeResult:
+        return CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="supported_actions_only",
+                    passed=True,
+                    reason="The assistant gives a grounded external next step and does not "
+                    "claim it can calculate the quote itself.",
+                )
+            ]
+        )
+
+    capability_result = evaluate_agent_capability(result, fake_judge)
+
+    assert capability_result["passed"] is True
+    assert capability_result["failed_criteria"] == []
+
+
+def test_evaluate_agent_capability_fails_unsupported_action_offer() -> None:
+    result: AgentOutcomeEvalResult = {
+        "user_input": "Скільки коштує доставка за межі Києва?",
+        "final_answer": (
+            "Доставка за межі Києва — від 200 грн + 10 грн/км. "
+            "Назвіть адресу, і я розрахую точну вартість доставки."
+        ),
+        "missing_fragments": [],
+        "unexpected_fragments": [],
+        "tool_calls": [
+            {
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка за межі Києва"},
+            }
+        ],
+        "missing_tool_names": [],
+        "tool_executions": [
+            {
+                "tool_call": {
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка за межі Києва"},
+                },
+                "output": "Доставка за межі Києва — від 200 грн + 10 грн/км.",
+            }
+        ],
+        "passed": True,
+    }
+
+    def fake_judge(_judge_input: JudgeInput, _rubric: Rubric) -> CriterionJudgeResult:
+        return CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="supported_actions_only",
+                    passed=False,
+                    reason="The assistant offers to calculate an exact delivery quote, "
+                    "which is not supported by the available tools.",
+                )
+            ]
+        )
+
+    capability_result = evaluate_agent_capability(result, fake_judge)
+
+    assert capability_result["passed"] is False
+    assert capability_result["failed_criteria"] == ["supported_actions_only"]
+
+
+def test_load_agent_capability_judge_cases(tmp_path: Path) -> None:
+    cases = [
+        AgentCapabilityJudgeCase(
+            id="unsupported_booking",
+            category="unsupported_booking_action",
+            question="Можеш забронювати намет?",
+            answer="Так, я забронюю його для вас.",
+            expected_passed=False,
+        ),
+        AgentCapabilityJudgeCase(
+            id="external_booking_instruction",
+            category="external_next_step",
+            question="Як забронювати намет?",
+            answer=(
+                "Для бронювання зв'яжіться з Прокат24 за телефоном або через контакти на сайті."
+            ),
+            expected_passed=True,
+        ),
+    ]
+
+    input_file = tmp_path / "agent_capability_judge_cases.json"
+
+    with open(input_file, "w", encoding="utf-8") as file:
+        json.dump(cases, file, ensure_ascii=False, indent=2)
+
+    loaded_cases = load_agent_capability_judge_cases(input_file)
+
+    assert loaded_cases == cases
+
+
+def test_evaluate_agent_capability_judge_case_matches_expected_result() -> None:
+    case = AgentCapabilityJudgeCase(
+        id="unsupported_booking",
+        category="unsupported_booking_action",
+        question="Можеш забронювати намет?",
+        answer="Так, я забронюю його для вас.",
+        expected_passed=False,
+    )
+
+    def fake_judge(
+        _judge_input: JudgeInput,
+        _rubric: Rubric,
+    ) -> CriterionJudgeResult:
+        return CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="supported_actions_only",
+                    passed=False,
+                    reason="Booking is not supported.",
+                )
+            ]
+        )
+
+    result = evaluate_agent_capability_judge_case(
+        case,
+        fake_judge,
+    )
+
+    assert result["id"] == "unsupported_booking"
+    assert result["category"] == "unsupported_booking_action"
+    assert result["expected_passed"] is False
+    assert result["actual_passed"] is False
+    assert result["matched"] is True
+    assert result["failed_criteria"] == ["supported_actions_only"]
+    assert result["criteria"] == [
+        {
+            "name": "supported_actions_only",
+            "passed": False,
+            "reason": "Booking is not supported.",
+        }
+    ]
+
+
+def test_evaluate_agent_capability_judge_case_matches_expected_pass() -> None:
+    case = AgentCapabilityJudgeCase(
+        id="external_booking_instruction",
+        category="external_next_step",
+        question="Як забронювати намет?",
+        answer="Для бронювання зателефонуйте в Прокат24.",
+        expected_passed=True,
+    )
+
+    def fake_judge(
+        _judge_input: JudgeInput,
+        _rubric: Rubric,
+    ) -> CriterionJudgeResult:
+        return CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="supported_actions_only",
+                    passed=True,
+                    reason="The user is instructed to contact Prokat24 directly.",
+                )
+            ]
+        )
+
+    result = evaluate_agent_capability_judge_case(
+        case,
+        fake_judge,
+    )
+
+    assert result["expected_passed"] is True
+    assert result["actual_passed"] is True
+    assert result["matched"] is True
+    assert result["failed_criteria"] == []
+
+
+def test_summarize_agent_capability_judge_results() -> None:
+    results: list[AgentCapabilityJudgeResult] = [
+        {
+            "id": "case-1",
+            "category": "supported_action",
+            "expected_passed": True,
+            "actual_passed": True,
+            "matched": True,
+            "failed_criteria": [],
+            "criteria": [
+                {
+                    "name": "supported_actions_only",
+                    "passed": True,
+                    "reason": "Supported action.",
+                }
+            ],
+        },
+        {
+            "id": "case-2",
+            "category": "unsupported_booking_action",
+            "expected_passed": False,
+            "actual_passed": False,
+            "matched": True,
+            "failed_criteria": ["supported_actions_only"],
+            "criteria": [
+                {
+                    "name": "supported_actions_only",
+                    "passed": False,
+                    "reason": "Booking is not supported.",
+                }
+            ],
+        },
+        {
+            "id": "case-3",
+            "category": "external_next_step",
+            "expected_passed": True,
+            "actual_passed": False,
+            "matched": False,
+            "failed_criteria": ["supported_actions_only"],
+            "criteria": [
+                {
+                    "name": "supported_actions_only",
+                    "passed": False,
+                    "reason": "Judge incorrectly treated an external next step as unsupported.",
+                }
+            ],
+        },
+    ]
+
+    summary = summarize_agent_capability_judge_results(results)
+
+    assert summary["total_cases"] == 3
+    assert summary["matched_cases"] == 2
+    assert summary["accuracy"] == pytest.approx(2 / 3)
+
+
+def test_summarize_agent_capability_judge_results_returns_full_accuracy_when_all_match() -> None:
+    results: list[AgentCapabilityJudgeResult] = [
+        {
+            "id": "case-1",
+            "category": "supported_action",
+            "expected_passed": True,
+            "actual_passed": True,
+            "matched": True,
+            "failed_criteria": [],
+            "criteria": [],
+        },
+        {
+            "id": "case-2",
+            "category": "unsupported_booking_action",
+            "expected_passed": False,
+            "actual_passed": False,
+            "matched": True,
+            "failed_criteria": ["supported_actions_only"],
+            "criteria": [],
+        },
+    ]
+
+    summary = summarize_agent_capability_judge_results(results)
+
+    assert summary["total_cases"] == 2
+    assert summary["matched_cases"] == 2
+    assert summary["accuracy"] == 1.0
+
+
+def test_summarize_agent_capability_judge_results_returns_zero_summary_for_empty_results() -> None:
+    results: list[AgentCapabilityJudgeResult] = []
+
+    summary = summarize_agent_capability_judge_results(results)
+
+    assert summary["total_cases"] == 0
+    assert summary["matched_cases"] == 0
+    assert summary["accuracy"] == 0.0
+
+
+def test_build_agent_grounding_context() -> None:
+    tool_executions: list[ToolExecution] = [
+        {
+            "tool_call": {
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка по Києву"},
+            },
+            "output": "Доставка по Києву — від 200 грн.",
+        }
+    ]
+
+    context = build_agent_grounding_context(tool_executions)
+
+    assert context == (
+        "[Tool execution 1]\n"
+        "Tool: search_service_info\n"
+        "Arguments: {'query': 'доставка по Києву'}\n"
+        "Output:\n"
+        "Доставка по Києву — від 200 грн.\n"
+    )
+
+
+def test_evaluate_agent_grounding_passes_supported_answer() -> None:
+    result: AgentOutcomeEvalResult = {
+        "user_input": "Скільки коштує доставка по Києву?",
+        "final_answer": "Доставка по Києву — від 200 грн.",
+        "missing_fragments": [],
+        "unexpected_fragments": [],
+        "tool_calls": [
+            {
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка по Києву"},
+            }
+        ],
+        "tool_executions": [
+            {
+                "tool_call": {
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка по Києву"},
+                },
+                "output": "Доставка по Києву — від 200 грн.",
+            }
+        ],
+        "missing_tool_names": [],
+        "passed": True,
+    }
+
+    def fake_judge(
+        _judge_input: JudgeInput,
+        _rubric: Rubric,
+    ) -> CriterionJudgeResult:
+        return CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="grounded_facts_only",
+                    passed=True,
+                    reason="The delivery price is directly supported by the tool output.",
+                )
+            ]
+        )
+
+    grounding_result = evaluate_agent_grounding(result, fake_judge)
+
+    assert grounding_result["passed"] is True
+    assert grounding_result["failed_criteria"] == []
+
+
+def test_evaluate_agent_grounding_fails_unsupported_fact() -> None:
+    result: AgentOutcomeEvalResult = {
+        "user_input": "Скільки коштує доставка по Києву?",
+        "final_answer": "Доставка по Києву — 300 грн.",
+        "missing_fragments": [],
+        "unexpected_fragments": [],
+        "tool_calls": [
+            {
+                "tool_name": "search_service_info",
+                "arguments": {"query": "доставка по Києву"},
+            }
+        ],
+        "tool_executions": [
+            {
+                "tool_call": {
+                    "tool_name": "search_service_info",
+                    "arguments": {"query": "доставка по Києву"},
+                },
+                "output": "Доставка по Києву — від 200 грн.",
+            }
+        ],
+        "missing_tool_names": [],
+        "passed": False,
+    }
+
+    def fake_judge(
+        _judge_input: JudgeInput,
+        _rubric: Rubric,
+    ) -> CriterionJudgeResult:
+        return CriterionJudgeResult(
+            criteria=[
+                CriterionResult(
+                    name="grounded_facts_only",
+                    passed=False,
+                    reason=(
+                        "The answer states 300 UAH, but the tool output only supports "
+                        "a price starting from 200 UAH."
+                    ),
+                )
+            ]
+        )
+
+    grounding_result = evaluate_agent_grounding(result, fake_judge)
+
+    assert grounding_result["passed"] is False
+    assert grounding_result["failed_criteria"] == ["grounded_facts_only"]

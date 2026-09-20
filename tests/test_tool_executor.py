@@ -1,6 +1,7 @@
 import pytest
 
 from prokat24_ai_lab.agents.tool_executor import create_tool_executor
+from prokat24_ai_lab.agents.tool_registry import create_tool_registry
 from prokat24_ai_lab.agents.types import ToolCall
 from prokat24_ai_lab.products.catalog import Product
 
@@ -26,7 +27,8 @@ def test_tool_executor_executes_product_search() -> None:
         "arguments": {"query": "намет"},
     }
 
-    tool_executor = create_tool_executor(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
+    tool_executor = create_tool_executor(registry)
 
     result = tool_executor(tool_call)
 
@@ -39,7 +41,8 @@ def test_tool_executor_raises_for_unsupported_tool() -> None:
         "arguments": {"query": "намет"},
     }
 
-    tool_executor = create_tool_executor(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
+    tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Unsupported tool: unknown_tool"):
         tool_executor(tool_call)
@@ -51,7 +54,8 @@ def test_tool_executor_raises_when_product_search_query_is_not_string() -> None:
         "arguments": {"query": 123},
     }
 
-    tool_executor = create_tool_executor(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
+    tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Query must be a string"):
         tool_executor(tool_call)
@@ -66,7 +70,8 @@ def test_tool_executor_executes_product_price_lookup() -> None:
         },
     }
 
-    tool_executor = create_tool_executor(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
+    tool_executor = create_tool_executor(registry)
 
     result = tool_executor(tool_call)
 
@@ -83,7 +88,8 @@ def test_tool_executor_raises_when_product_not_found() -> None:
         },
     }
 
-    tool_executor = create_tool_executor(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
+    tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Product not found"):
         tool_executor(tool_call)
@@ -98,7 +104,8 @@ def test_tool_executor_raises_when_product_url_is_not_string() -> None:
         },
     }
 
-    tool_executor = create_tool_executor(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
+    tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Product URL must be a string"):
         tool_executor(tool_call)
@@ -113,7 +120,8 @@ def test_tool_executor_raises_when_days_is_not_integer() -> None:
         },
     }
 
-    tool_executor = create_tool_executor(TEST_PRODUCTS)
+    registry = create_tool_registry(TEST_PRODUCTS, [])
+    tool_executor = create_tool_executor(registry)
 
     with pytest.raises(ValueError, match="Days must be integer"):
         tool_executor(tool_call)

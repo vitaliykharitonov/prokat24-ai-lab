@@ -5,13 +5,12 @@ from prokat24_ai_lab.agents.openai_tool_call import (
     ResponseProtocol,
     create_openai_tool_call_generator,
 )
-from prokat24_ai_lab.agents.tool_schemas import TOOLS
 
 
 class FakeOutputItem:
     type = "function_call"
-    name = "get_delivery_info"
-    arguments = '{"location": "Київ"}'
+    name = "search_products"
+    arguments = '{"query": "намет"}'
 
 
 class FakeMessageOutputItem:
@@ -62,26 +61,27 @@ class FakeClient:
 def test_openai_tool_call_generator_returns_tool_call() -> None:
     fake_client = FakeClient(FakeResponse())
 
-    generate_tool_call = create_openai_tool_call_generator(fake_client)
+    generate_tool_call = create_openai_tool_call_generator(fake_client, tools=[])
 
-    result = generate_tool_call("Скільки коштує доставка по Києву?")
+    result = generate_tool_call("Знайди намет")
 
     assert fake_client.responses.model == "gpt-5-mini"
-    assert fake_client.responses.input == "Скільки коштує доставка по Києву?"
+    assert fake_client.responses.input == "Знайди намет"
     assert fake_client.responses.instructions == TOOL_CALL_INSTRUCTIONS
-    assert fake_client.responses.tools == TOOLS
+    assert fake_client.responses.tools == []
+    assert fake_client.responses.tool_choice == "auto"
 
     assert result == {
-        "tool_name": "get_delivery_info",
-        "arguments": {"location": "Київ"},
+        "tool_name": "search_products",
+        "arguments": {"query": "намет"},
     }
 
 
 def test_openai_tool_call_generator_returns_none_when_tool_call_is_missing() -> None:
     fake_client = FakeClient(FakeResponseWithoutToolCall())
 
-    generate_tool_call = create_openai_tool_call_generator(fake_client)
+    generate_tool_call = create_openai_tool_call_generator(fake_client, tools=[])
 
-    result = generate_tool_call("Скільки коштує доставка по Києву?")
+    result = generate_tool_call("Привіт!")
 
     assert result is None

@@ -26,6 +26,7 @@ def test_run_agent_returns_final_answer_without_tool_calls() -> None:
 
     assert result["final_answer"] == "Привіт!"
     assert result["tool_calls"] == []
+    assert result["tool_executions"] == []
 
 
 def test_run_agent_executes_tool_and_returns_final_answer() -> None:
@@ -62,6 +63,15 @@ def test_run_agent_executes_tool_and_returns_final_answer() -> None:
         {
             "tool_name": "search_products",
             "arguments": {"query": "намет"},
+        }
+    ]
+    assert result["tool_executions"] == [
+        {
+            "tool_call": {
+                "tool_name": "search_products",
+                "arguments": {"query": "намет"},
+            },
+            "output": "Намет 2-місний",
         }
     ]
 
@@ -125,6 +135,25 @@ def test_run_agent_executes_multiple_tools_before_final_answer() -> None:
                 "product_url": "https://example.com/tent/",
                 "days": 3,
             },
+        },
+    ]
+    assert result["tool_executions"] == [
+        {
+            "tool_call": {
+                "tool_name": "search_products",
+                "arguments": {"query": "2-місний намет"},
+            },
+            "output": "https://example.com/tent/",
+        },
+        {
+            "tool_call": {
+                "tool_name": "get_product_price",
+                "arguments": {
+                    "product_url": "https://example.com/tent/",
+                    "days": 3,
+                },
+            },
+            "output": "Оренда 2-місного намету на 3 дні коштує 900 грн",
         },
     ]
 
