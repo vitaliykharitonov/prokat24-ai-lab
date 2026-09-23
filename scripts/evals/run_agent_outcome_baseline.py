@@ -1,26 +1,36 @@
+import datetime
+
 from openai import OpenAI
 
 from prokat24_ai_lab.agents.agent_loop import run_agent
 from prokat24_ai_lab.agents.openai_agent_step import create_openai_agent_step_generator
+from prokat24_ai_lab.agents.openai_tool_call import OPENAI_TOOL_CALL_MODEL
 from prokat24_ai_lab.agents.openai_tool_schema import create_openai_tools
 from prokat24_ai_lab.agents.tool_executor import create_tool_executor
 from prokat24_ai_lab.agents.tool_registry import create_tool_registry
 from prokat24_ai_lab.agents.types import AgentRunResult
 from prokat24_ai_lab.evals.agent_evals import (
+    AgentEvalConfiguration,
+    build_agent_eval_report,
     evaluate_agent_capability,
     evaluate_agent_grounding,
     load_agent_outcome_eval_cases,
     run_agent_outcome_evals,
-    summarize_agent_outcome_eval_results,
+    save_agent_eval_report,
 )
-from prokat24_ai_lab.judges.openai_judge import create_openai_criterion_judge
+from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
+from prokat24_ai_lab.judges.openai_judge import OPENAI_JUDGE_MODEL, create_openai_criterion_judge
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.products.catalog import load_products
 from prokat24_ai_lab.project_paths import (
+    AGENT_EVAL_REPORTS_DIR,
     AGENT_OUTCOME_EVAL_CASES_FILE,
     KNOWLEDGE_PAGES_FILE,
     PRODUCTS_FILE,
+    PROJECT_ROOT,
 )
+
+MAX_AGENT_STEPS = 5
 
 
 def main() -> None:
@@ -46,10 +56,10 @@ def main() -> None:
             user_input,
             generate_agent_step,
             execute_tool_call,
+            max_steps=MAX_AGENT_STEPS,
         )
 
     results = run_agent_outcome_evals(cases, agent_runner)
-    summary = summarize_agent_outcome_eval_results(results)
 
     capability_results = []
 
@@ -57,21 +67,44 @@ def main() -> None:
         capability_result = evaluate_agent_capability(result, criterion_judge)
         capability_results.append(capability_result)
 
-    capability_passed = sum(result["passed"] for result in capability_results)
-    capability_total = len(capability_results)
-
-    capability_pass_rate = capability_passed / capability_total if capability_total else 0.0
-
     grounding_results = []
 
     for result in results:
         grounding_result = evaluate_agent_grounding(result, criterion_judge)
         grounding_results.append(grounding_result)
 
-    grounding_passed = sum(result["passed"] for result in grounding_results)
-    grounding_total = len(grounding_results)
+    run_time = datetime.datetime.now(datetime.UTC)
 
-    grounding_pass_rate = grounding_passed / grounding_total if grounding_total else 0.0
+    created_at = run_time.isoformat(timespec="seconds")
+    run_timestamp = run_time.strftime("%Y%m%dT%H%M%SZ")
+
+    git_commit = get_current_git_commit()
+    git_dirty = is_git_worktree_dirty()
+
+    short_commit = git_commit[:7] if git_commit is not None else "no-git"
+    run_id = f"{run_timestamp}_{short_commit}"
+
+    configuration = AgentEvalConfiguration(
+        agent_model=OPENAI_TOOL_CALL_MODEL,
+        judge_model=OPENAI_JUDGE_MODEL,
+        max_agent_steps=MAX_AGENT_STEPS,
+        eval_cases_file=AGENT_OUTCOME_EVAL_CASES_FILE.relative_to(PROJECT_ROOT).as_posix(),
+    )
+
+    report = build_agent_eval_report(
+        results,
+        capability_results,
+        grounding_results,
+        configuration=configuration,
+        run_id=run_id,
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
+
+    summary = report["summary"]
+
+    historical_file, latest_file = save_agent_eval_report(report, AGENT_EVAL_REPORTS_DIR)
 
     for result, capability_result, grounding_result in zip(
         results,
@@ -127,21 +160,25 @@ def main() -> None:
     print()
 
     print("AGENT OUTCOME")
-    print(f"Cases: {summary['total_cases']}")
-    print(f"Passed: {summary['passed_cases']}")
-    print(f"Pass rate: {summary['pass_rate']:.2%}")
+    print(f"Cases: {summary['outcome']['total_cases']}")
+    print(f"Passed: {summary['outcome']['passed_cases']}")
+    print(f"Pass rate: {summary['outcome']['pass_rate']:.2%}")
     print()
 
     print("AGENT CAPABILITY")
-    print(f"Cases: {capability_total}")
-    print(f"Passed: {capability_passed}")
-    print(f"Pass rate: {capability_pass_rate:.2%}")
+    print(f"Cases: {summary['capability']['total_cases']}")
+    print(f"Passed: {summary['capability']['passed_cases']}")
+    print(f"Pass rate: {summary['capability']['pass_rate']:.2%}")
     print()
 
     print("AGENT GROUNDING")
-    print(f"Cases: {grounding_total}")
-    print(f"Passed: {grounding_passed}")
-    print(f"Pass rate: {grounding_pass_rate:.2%}")
+    print(f"Cases: {summary['grounding']['total_cases']}")
+    print(f"Passed: {summary['grounding']['passed_cases']}")
+    print(f"Pass rate: {summary['grounding']['pass_rate']:.2%}")
+
+    print()
+    print(f"Historical report saved to {historical_file}")
+    print(f"Latest report saved to {latest_file}")
 
 
 if __name__ == "__main__":

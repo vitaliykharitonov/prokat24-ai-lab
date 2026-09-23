@@ -1,5 +1,6 @@
 [
   {
+    "id": "tent_price_3_days",
     "user_input": "Скільки буде коштувати 2-місний намет на 3 дні?",
     "expected_answer_fragments": [
       "660 грн"
@@ -13,6 +14,7 @@
     ]
   },
   {
+    "id": "tent_search",
     "user_input": "Знайди 2-місний намет",
     "expected_answer_fragments": [
       "https://prokat24.com.ua/ua/turisticheskoe-snaryazhenie/prokat-palatok/prokat-palatki-2-mestnaya/"
@@ -23,6 +25,7 @@
     ]
   },
   {
+    "id": "tent_deposit",
     "user_input": "Яка застава за 2-місний намет?",
     "expected_answer_fragments": [
       "4000 грн"
@@ -36,6 +39,7 @@
     ]
   },
   {
+    "id": "kyiv_delivery",
     "user_input": "Скільки коштує доставка по Києву?",
     "expected_answer_fragments": [
       "від 200 грн"
@@ -48,6 +52,7 @@
     ]
   },
   {
+    "id": "booking_rules",
     "user_input": "Як у вас забронювати спорядження?",
     "expected_answer_fragments": [
       "30%",
@@ -62,6 +67,7 @@
     ]
   },
   {
+    "id": "booking_contact",
     "user_input": "Куди можна зателефонувати для бронювання?",
     "expected_answer_fragments": [
       "(095) 66 06 181"
@@ -72,6 +78,7 @@
     ]
   },
   {
+    "id": "outside_kyiv_delivery",
     "user_input": "Скільки коштує доставка за межі Києва?",
     "expected_answer_fragments": [
       "від 200 грн + 10 грн/км"
@@ -84,6 +91,7 @@
     ]
   },
   {
+    "id": "pickup_locations",
     "user_input": "Де саме відбувається самовивіз орендованих речей?",
     "expected_answer_fragments": [
       "вул. Табірна, 42",
@@ -95,6 +103,7 @@
     ]
   },
   {
+    "id": "equipment_purchase",
     "user_input": "Чи можна у вас придбати екіпірування замість оренди?",
     "expected_answer_fragments": [
       "нові",
@@ -106,6 +115,7 @@
     ]
   },
   {
+    "id": "equipment_cleaning",
     "user_input": "Чи проходять речі очищення після попереднього орендаря?",
     "expected_answer_fragments": [
       "санітарно-гігієнічну обробку",
