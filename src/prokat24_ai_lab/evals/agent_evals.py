@@ -1,12 +1,14 @@
 import json
 import re
 import unicodedata
+from collections.abc import Sequence
 from pathlib import Path
 from typing import TypedDict
 
 from openai import BaseModel
 
 from prokat24_ai_lab.agents.types import AgentRunner, AgentRunResult, ToolCall, ToolExecution
+from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
 from prokat24_ai_lab.evals.semantic_grading import (
     CriterionJudge,
     JudgeInput,
@@ -16,6 +18,7 @@ from prokat24_ai_lab.evals.semantic_grading import (
 
 
 class AgentOutcomeEvalCase(TypedDict):
+    id: str
     user_input: str
     expected_answer_fragments: list[str]
     forbidden_answer_fragments: list[str]
@@ -23,6 +26,7 @@ class AgentOutcomeEvalCase(TypedDict):
 
 
 class AgentOutcomeEvalResult(TypedDict):
+    id: str
     user_input: str
     final_answer: str
     missing_fragments: list[str]
@@ -33,13 +37,7 @@ class AgentOutcomeEvalResult(TypedDict):
     passed: bool
 
 
-class AgentOutcomeEvalSummary(TypedDict):
-    total_cases: int
-    passed_cases: int
-    pass_rate: float
-
-
-class AgentCapabilityCriterionResult(TypedDict):
+class AgentCriterionResult(TypedDict):
     name: str
     passed: bool
     reason: str
@@ -50,7 +48,7 @@ class AgentCriterionEvalResult(TypedDict):
     final_answer: str
     passed: bool
     failed_criteria: list[str]
-    criteria: list[AgentCapabilityCriterionResult]
+    criteria: list[AgentCriterionResult]
 
 
 class AgentCapabilityJudgeCase(TypedDict):
@@ -76,7 +74,7 @@ class AgentCapabilityJudgeResult(TypedDict):
     actual_passed: bool
     matched: bool
     failed_criteria: list[str]
-    criteria: list[AgentCapabilityCriterionResult]
+    criteria: list[AgentCriterionResult]
 
 
 class AgentCapabilityJudgeSummary(TypedDict):
@@ -90,7 +88,66 @@ class AgentGroundingEvalResult(TypedDict):
     final_answer: str
     passed: bool
     failed_criteria: list[str]
-    criteria: list[AgentCapabilityCriterionResult]
+    criteria: list[AgentCriterionResult]
+
+
+class AgentEvalConfiguration(TypedDict):
+    agent_model: str
+    judge_model: str
+    max_agent_steps: int
+    eval_cases_file: str
+
+
+class AgentMetricSummary(TypedDict):
+    total_cases: int
+    passed_cases: int
+    pass_rate: float
+
+
+class AgentEvalSummary(TypedDict):
+    outcome: AgentMetricSummary
+    capability: AgentMetricSummary
+    grounding: AgentMetricSummary
+
+
+class AgentOutcomeCaseEvaluation(TypedDict):
+    passed: bool
+    missing_fragments: list[str]
+    unexpected_fragments: list[str]
+    missing_tool_names: list[str]
+
+
+class AgentCriterionCaseEvaluation(TypedDict):
+    passed: bool
+    failed_criteria: list[str]
+    criteria: list[AgentCriterionResult]
+
+
+class AgentEvalCaseResult(TypedDict):
+    id: str
+    user_input: str
+    final_answer: str
+    tool_calls: list[ToolCall]
+    tool_executions: list[ToolExecution]
+    outcome: AgentOutcomeCaseEvaluation
+    capability: AgentCriterionCaseEvaluation
+    grounding: AgentCriterionCaseEvaluation
+
+
+class AgentEvalReport(TypedDict):
+    report_type: str
+    schema_version: int
+    created_at: str
+    git_commit: str | None
+    git_dirty: bool | None
+    run_id: str
+    configuration: AgentEvalConfiguration
+    summary: AgentEvalSummary
+    results: list[AgentEvalCaseResult]
+
+
+class AgentPassFailResult(TypedDict):
+    passed: bool
 
 
 AGENT_CAPABILITY_RUBRIC: Rubric = {
@@ -236,6 +293,7 @@ def evaluate_agent_outcome_case(
     passed = not missing_fragments and not unexpected_fragments and not missing_tool_names
 
     return AgentOutcomeEvalResult(
+        id=case["id"],
         user_input=user_input,
         final_answer=final_answer,
         missing_fragments=missing_fragments,
@@ -258,33 +316,6 @@ def run_agent_outcome_evals(
         agent_results.append(evaluate_agent_outcome_case(case, agent_result))
 
     return agent_results
-
-
-def summarize_agent_outcome_eval_results(
-    results: list[AgentOutcomeEvalResult],
-) -> AgentOutcomeEvalSummary:
-    total_cases = len(results)
-
-    if total_cases == 0:
-        return AgentOutcomeEvalSummary(
-            total_cases=0,
-            passed_cases=0,
-            pass_rate=0.0,
-        )
-
-    passed_cases = 0
-
-    for result in results:
-        if result["passed"]:
-            passed_cases += 1
-
-    pass_rate = passed_cases / total_cases
-
-    return AgentOutcomeEvalSummary(
-        total_cases=total_cases,
-        passed_cases=passed_cases,
-        pass_rate=pass_rate,
-    )
 
 
 def load_agent_outcome_eval_cases(input_file: Path) -> list[AgentOutcomeEvalCase]:
@@ -312,7 +343,7 @@ def evaluate_capability_answer(
 
     summary = summarize_criterion_judge_result(criterion_result)
 
-    criteria: list[AgentCapabilityCriterionResult] = [
+    criteria: list[AgentCriterionResult] = [
         {
             "name": criterion.name,
             "passed": criterion.passed,
@@ -455,7 +486,7 @@ def evaluate_agent_grounding(
 
     summary = summarize_criterion_judge_result(criterion_result)
 
-    criteria: list[AgentCapabilityCriterionResult] = [
+    criteria: list[AgentCriterionResult] = [
         {
             "name": criterion.name,
             "passed": criterion.passed,
@@ -471,3 +502,143 @@ def evaluate_agent_grounding(
         failed_criteria=summary["failed_criteria"],
         criteria=criteria,
     )
+
+
+def build_agent_eval_case_results(
+    results: list[AgentOutcomeEvalResult],
+    capability_results: list[AgentCriterionEvalResult],
+    grounding_results: list[AgentGroundingEvalResult],
+) -> list[AgentEvalCaseResult]:
+    eval_results: list[AgentEvalCaseResult] = []
+
+    for result, capability_result, grounding_result in zip(
+        results,
+        capability_results,
+        grounding_results,
+        strict=True,
+    ):
+        eval_results.append(
+            AgentEvalCaseResult(
+                id=result["id"],
+                user_input=result["user_input"],
+                final_answer=result["final_answer"],
+                tool_calls=result["tool_calls"],
+                tool_executions=result["tool_executions"],
+                outcome=AgentOutcomeCaseEvaluation(
+                    passed=result["passed"],
+                    missing_fragments=result["missing_fragments"],
+                    unexpected_fragments=result["unexpected_fragments"],
+                    missing_tool_names=result["missing_tool_names"],
+                ),
+                capability=AgentCriterionCaseEvaluation(
+                    passed=capability_result["passed"],
+                    failed_criteria=capability_result["failed_criteria"],
+                    criteria=capability_result["criteria"],
+                ),
+                grounding=AgentCriterionCaseEvaluation(
+                    passed=grounding_result["passed"],
+                    failed_criteria=grounding_result["failed_criteria"],
+                    criteria=grounding_result["criteria"],
+                ),
+            )
+        )
+
+    return eval_results
+
+
+def summarize_agent_metric_results(
+    results: Sequence[AgentPassFailResult],
+) -> AgentMetricSummary:
+    total_cases = len(results)
+
+    if total_cases == 0:
+        return AgentMetricSummary(
+            total_cases=0,
+            passed_cases=0,
+            pass_rate=0.0,
+        )
+
+    passed_cases = 0
+
+    for result in results:
+        if result["passed"]:
+            passed_cases += 1
+
+    pass_rate = passed_cases / total_cases
+
+    return AgentMetricSummary(
+        total_cases=total_cases,
+        passed_cases=passed_cases,
+        pass_rate=pass_rate,
+    )
+
+
+def build_agent_eval_summary(
+    outcome_results: Sequence[AgentOutcomeEvalResult],
+    capability_results: Sequence[AgentCriterionEvalResult],
+    grounding_results: Sequence[AgentGroundingEvalResult],
+) -> AgentEvalSummary:
+    outcome = summarize_agent_metric_results(outcome_results)
+    capability = summarize_agent_metric_results(capability_results)
+    grounding = summarize_agent_metric_results(grounding_results)
+
+    return AgentEvalSummary(
+        outcome=outcome,
+        capability=capability,
+        grounding=grounding,
+    )
+
+
+def build_agent_eval_report(
+    outcome_results: list[AgentOutcomeEvalResult],
+    capability_results: list[AgentCriterionEvalResult],
+    grounding_results: list[AgentGroundingEvalResult],
+    configuration: AgentEvalConfiguration,
+    run_id: str,
+    created_at: str,
+    git_commit: str | None = None,
+    git_dirty: bool | None = None,
+) -> AgentEvalReport:
+    metadata = build_eval_report_metadata(
+        report_type="agent_eval_report",
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
+    summary = build_agent_eval_summary(
+        outcome_results=outcome_results,
+        capability_results=capability_results,
+        grounding_results=grounding_results,
+    )
+    results = build_agent_eval_case_results(
+        results=outcome_results,
+        capability_results=capability_results,
+        grounding_results=grounding_results,
+    )
+
+    return AgentEvalReport(
+        **metadata,
+        run_id=run_id,
+        configuration=configuration,
+        summary=summary,
+        results=results,
+    )
+
+
+def save_agent_eval_report(
+    report: AgentEvalReport,
+    output_dir: Path,
+) -> tuple[Path, Path]:
+    historical_path = output_dir / "runs"
+    historical_file = historical_path / f"{report['run_id']}.json"
+    latest_file = output_dir / "latest.json"
+
+    historical_path.mkdir(parents=True, exist_ok=True)
+
+    with open(historical_file, "w", encoding="utf-8") as file:
+        json.dump(report, file, ensure_ascii=False, indent=2)
+
+    with open(latest_file, "w", encoding="utf-8") as file:
+        json.dump(report, file, ensure_ascii=False, indent=2)
+
+    return historical_file, latest_file
