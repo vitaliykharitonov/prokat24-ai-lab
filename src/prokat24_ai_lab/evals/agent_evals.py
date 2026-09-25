@@ -3,7 +3,7 @@ import re
 import unicodedata
 from collections.abc import Sequence
 from pathlib import Path
-from typing import TypedDict
+from typing import Literal, TypedDict, cast
 
 from openai import BaseModel
 
@@ -149,6 +149,30 @@ class AgentEvalReport(TypedDict):
 class AgentPassFailResult(TypedDict):
     passed: bool
 
+
+class AgentMetricComparison(TypedDict):
+    previous_pass_rate: float
+    current_pass_rate: float
+    pass_rate_delta: float
+
+    improved_case_ids: list[str]
+    worsened_case_ids: list[str]
+    unchanged_case_ids: list[str]
+
+    added_case_ids: list[str]
+    removed_case_ids: list[str]
+
+
+class AgentEvalComparison(TypedDict):
+    previous_run_id: str
+    current_run_id: str
+
+    outcome: AgentMetricComparison
+    capability: AgentMetricComparison
+    grounding: AgentMetricComparison
+
+
+AgentMetricName = Literal["outcome", "capability", "grounding"]
 
 AGENT_CAPABILITY_RUBRIC: Rubric = {
     "name": "Agent capability boundaries",
@@ -642,3 +666,138 @@ def save_agent_eval_report(
         json.dump(report, file, ensure_ascii=False, indent=2)
 
     return historical_file, latest_file
+
+
+def compare_agent_metric_results(
+    previous_result: AgentEvalReport,
+    current_result: AgentEvalReport,
+    metric_name: AgentMetricName,
+) -> AgentMetricComparison:
+    previous_passed_by_id: dict[str, bool] = {}
+    current_passed_by_id: dict[str, bool] = {}
+
+    for result in previous_result["results"]:
+        case_id = result["id"]
+        passed = result[metric_name]["passed"]
+
+        previous_passed_by_id[case_id] = passed
+
+    for result in current_result["results"]:
+        case_id = result["id"]
+        passed = result[metric_name]["passed"]
+
+        current_passed_by_id[case_id] = passed
+
+    previous_case_ids = set(previous_passed_by_id)
+    current_case_ids = set(current_passed_by_id)
+
+    common_case_ids = sorted(previous_case_ids & current_case_ids)
+    added_case_ids = sorted(current_case_ids - previous_case_ids)
+    removed_case_ids = sorted(previous_case_ids - current_case_ids)
+
+    improved_case_ids: list[str] = []
+    worsened_case_ids: list[str] = []
+    unchanged_case_ids: list[str] = []
+
+    for case in common_case_ids:
+        previous_passed = previous_passed_by_id[case]
+        current_passed = current_passed_by_id[case]
+
+        if not previous_passed and current_passed:
+            improved_case_ids.append(case)
+
+        elif previous_passed and not current_passed:
+            worsened_case_ids.append(case)
+
+        else:
+            unchanged_case_ids.append(case)
+
+    previous_summary = previous_result["summary"][metric_name]
+    current_summary = current_result["summary"][metric_name]
+
+    previous_pass_rate = previous_summary["pass_rate"]
+    current_pass_rate = current_summary["pass_rate"]
+    pass_rate_delta = current_pass_rate - previous_pass_rate
+
+    return AgentMetricComparison(
+        previous_pass_rate=previous_pass_rate,
+        current_pass_rate=current_pass_rate,
+        pass_rate_delta=pass_rate_delta,
+        improved_case_ids=improved_case_ids,
+        worsened_case_ids=worsened_case_ids,
+        unchanged_case_ids=unchanged_case_ids,
+        added_case_ids=added_case_ids,
+        removed_case_ids=removed_case_ids,
+    )
+
+
+def compare_agent_eval_reports(
+    previous_report: AgentEvalReport,
+    current_report: AgentEvalReport,
+) -> AgentEvalComparison:
+    outcome_comparison = compare_agent_metric_results(
+        previous_result=previous_report,
+        current_result=current_report,
+        metric_name="outcome",
+    )
+    capability_comparison = compare_agent_metric_results(
+        previous_result=previous_report,
+        current_result=current_report,
+        metric_name="capability",
+    )
+    grounding_comparison = compare_agent_metric_results(
+        previous_result=previous_report,
+        current_result=current_report,
+        metric_name="grounding",
+    )
+
+    return AgentEvalComparison(
+        previous_run_id=previous_report["run_id"],
+        current_run_id=current_report["run_id"],
+        outcome=outcome_comparison,
+        capability=capability_comparison,
+        grounding=grounding_comparison,
+    )
+
+
+def load_agent_eval_report(
+    report_file: Path,
+) -> AgentEvalReport:
+    with open(report_file, encoding="utf-8") as file:
+        report = json.load(file)
+
+    return cast(AgentEvalReport, report)
+
+
+def list_agent_eval_report_files(
+    reports_dir: Path,
+) -> list[Path]:
+    runs_dir = reports_dir / "runs"
+    reports = sorted(runs_dir.glob("*.json"))
+
+    return reports
+
+
+def get_latest_agent_eval_report_files(
+    reports_dir: Path,
+) -> tuple[Path, Path]:
+    report_files = list_agent_eval_report_files(reports_dir)
+
+    if len(report_files) < 2:
+        raise ValueError("At least two agent eval reports are required for comparison")
+
+    return report_files[-2], report_files[-1]
+
+
+def compare_latest_agent_eval_reports(
+    reports_dir: Path,
+) -> AgentEvalComparison:
+    previous_file, current_file = get_latest_agent_eval_report_files(reports_dir)
+
+    previous_report = load_agent_eval_report(previous_file)
+    current_report = load_agent_eval_report(current_file)
+
+    return compare_agent_eval_reports(
+        previous_report=previous_report,
+        current_report=current_report,
+    )
