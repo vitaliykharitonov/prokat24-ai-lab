@@ -26,6 +26,9 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python scripts/evals/run_agent_outcome_baseline.py
 
+      - name: Write agent eval summary
+        run: python scripts/evals/write_agent_eval_summary.py
+
       - name: Upload agent eval reports
         if: always()
         uses: actions/upload-artifact@v7
