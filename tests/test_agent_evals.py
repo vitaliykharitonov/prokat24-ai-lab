@@ -10,14 +10,17 @@ from prokat24_ai_lab.evals.agent_evals import (
     AgentCriterionCaseEvaluation,
     AgentCriterionEvalResult,
     AgentEvalCaseResult,
+    AgentEvalComparison,
     AgentEvalConfiguration,
     AgentEvalReport,
     AgentEvalSummary,
     AgentGroundingEvalResult,
+    AgentMetricComparison,
     AgentMetricSummary,
     AgentOutcomeCaseEvaluation,
     AgentOutcomeEvalCase,
     AgentOutcomeEvalResult,
+    build_agent_eval_comparison_markdown_summary,
     build_agent_eval_markdown_summary,
     build_agent_eval_report,
     build_agent_grounding_context,
@@ -1397,3 +1400,67 @@ def test_build_agent_eval_markdown_summary_formats_report() -> None:
     markdown_summary = build_agent_eval_markdown_summary(report)
 
     assert markdown_summary == expected
+
+
+def test_build_agent_eval_comparison_markdown_summary_formats_changes() -> None:
+    comparison = AgentEvalComparison(
+        previous_run_id="previous_run",
+        current_run_id="current_run",
+        outcome=AgentMetricComparison(
+            previous_pass_rate=0.8,
+            current_pass_rate=0.9,
+            pass_rate_delta=0.1,
+            improved_case_ids=["equipment_purchase"],
+            worsened_case_ids=[],
+            unchanged_case_ids=["case_1"],
+            added_case_ids=[],
+            removed_case_ids=[],
+        ),
+        capability=AgentMetricComparison(
+            previous_pass_rate=1.0,
+            current_pass_rate=0.9,
+            pass_rate_delta=-0.1,
+            improved_case_ids=[],
+            worsened_case_ids=["booking_rules"],
+            unchanged_case_ids=["case_1"],
+            added_case_ids=[],
+            removed_case_ids=[],
+        ),
+        grounding=AgentMetricComparison(
+            previous_pass_rate=0.8,
+            current_pass_rate=0.8,
+            pass_rate_delta=0.0,
+            improved_case_ids=[],
+            worsened_case_ids=[],
+            unchanged_case_ids=["case_1"],
+            added_case_ids=[],
+            removed_case_ids=[],
+        ),
+    )
+
+    expected = (
+        "## Comparison with previous run\n"
+        "\n"
+        "Previous: `previous_run`\n"
+        "Current: `current_run`\n"
+        "\n"
+        "| Metric | Previous | Current | Delta |\n"
+        "|---|---:|---:|---:|\n"
+        "| Outcome | 80.00% | 90.00% | +10.00% |\n"
+        "| Capability | 100.00% | 90.00% | -10.00% |\n"
+        "| Grounding | 80.00% | 80.00% | +0.00% |\n"
+        "\n"
+        "### OUTCOME changes\n"
+        "\n"
+        "Improved:\n"
+        "- equipment_purchase\n"
+        "\n"
+        "### CAPABILITY changes\n"
+        "\n"
+        "Worsened:\n"
+        "- booking_rules\n"
+    )
+
+    markdown = build_agent_eval_comparison_markdown_summary(comparison)
+
+    assert markdown == expected

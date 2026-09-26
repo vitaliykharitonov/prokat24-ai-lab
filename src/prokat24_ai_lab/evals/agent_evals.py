@@ -841,3 +841,72 @@ def build_agent_eval_markdown_summary(report: AgentEvalReport) -> str:
     lines.append(f"Git commit: `{git_commit}`")
 
     return "\n".join(lines)
+
+
+def build_agent_eval_comparison_markdown_summary(
+    comparison: AgentEvalComparison,
+) -> str:
+    lines: list[str] = []
+
+    lines.append("## Comparison with previous run")
+    lines.append("")
+    lines.append(f"Previous: `{comparison['previous_run_id']}`")
+    lines.append(f"Current: `{comparison['current_run_id']}`")
+
+    lines.append("")
+    lines.append("| Metric | Previous | Current | Delta |")
+    lines.append("|---|---:|---:|---:|")
+
+    lines.append(
+        f"| Outcome | "
+        f"{comparison['outcome']['previous_pass_rate']:.2%} | "
+        f"{comparison['outcome']['current_pass_rate']:.2%} | "
+        f"{comparison['outcome']['pass_rate_delta']:+.2%} |"
+    )
+    lines.append(
+        f"| Capability | "
+        f"{comparison['capability']['previous_pass_rate']:.2%} | "
+        f"{comparison['capability']['current_pass_rate']:.2%} | "
+        f"{comparison['capability']['pass_rate_delta']:+.2%} |"
+    )
+    lines.append(
+        f"| Grounding | "
+        f"{comparison['grounding']['previous_pass_rate']:.2%} | "
+        f"{comparison['grounding']['current_pass_rate']:.2%} | "
+        f"{comparison['grounding']['pass_rate_delta']:+.2%} |"
+    )
+    lines.append("")
+
+    def append_case_changes(
+        lines: list[str],
+        metric_name: AgentMetricName,
+        metric_comparison: AgentMetricComparison,
+    ) -> None:
+        if (
+            not metric_comparison["worsened_case_ids"]
+            and not metric_comparison["improved_case_ids"]
+        ):
+            return
+
+        lines.append(f"### {metric_name.upper()} changes")
+        lines.append("")
+
+        if metric_comparison["improved_case_ids"]:
+            lines.append("Improved:")
+            for case_id in metric_comparison["improved_case_ids"]:
+                lines.append(f"- {case_id}")
+
+            lines.append("")
+
+        if metric_comparison["worsened_case_ids"]:
+            lines.append("Worsened:")
+            for case_id in metric_comparison["worsened_case_ids"]:
+                lines.append(f"- {case_id}")
+
+            lines.append("")
+
+    append_case_changes(lines, "outcome", comparison["outcome"])
+    append_case_changes(lines, "capability", comparison["capability"])
+    append_case_changes(lines, "grounding", comparison["grounding"])
+
+    return "\n".join(lines)
