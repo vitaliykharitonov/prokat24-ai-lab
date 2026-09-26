@@ -801,3 +801,43 @@ def compare_latest_agent_eval_reports(
         previous_report=previous_report,
         current_report=current_report,
     )
+
+
+def build_agent_eval_markdown_summary(report: AgentEvalReport) -> str:
+    lines: list[str] = []
+
+    lines.append("## Agent Eval Summary")
+    lines.append("")
+
+    lines.append("| Metric | Passed | Total | Pass rate |")
+    lines.append("|---|---:|---:|---:|")
+
+    summary = report["summary"]
+
+    lines.append(
+        f"| Outcome | "
+        f"{summary['outcome']['passed_cases']} | "
+        f"{summary['outcome']['total_cases']} | "
+        f"{summary['outcome']['pass_rate']:.2%} |"
+    )
+    lines.append(
+        f"| Capability | "
+        f"{summary['capability']['passed_cases']} | "
+        f"{summary['capability']['total_cases']} | "
+        f"{summary['capability']['pass_rate']:.2%} |"
+    )
+    lines.append(
+        f"| Grounding | "
+        f"{summary['grounding']['passed_cases']} | "
+        f"{summary['grounding']['total_cases']} | "
+        f"{summary['grounding']['pass_rate']:.2%} |"
+    )
+
+    lines.append("")
+    lines.append(f"Run ID: `{report['run_id']}`")
+
+    git_commit = report["git_commit"] or "N/A"
+
+    lines.append(f"Git commit: `{git_commit}`")
+
+    return "\n".join(lines)

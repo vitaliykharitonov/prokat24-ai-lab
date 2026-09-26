@@ -18,6 +18,7 @@ from prokat24_ai_lab.evals.agent_evals import (
     AgentOutcomeCaseEvaluation,
     AgentOutcomeEvalCase,
     AgentOutcomeEvalResult,
+    build_agent_eval_markdown_summary,
     build_agent_eval_report,
     build_agent_grounding_context,
     compare_agent_eval_reports,
@@ -1345,3 +1346,54 @@ def test_compare_latest_agent_eval_reports_compares_two_latest_runs(
 
     assert comparison["previous_run_id"] == "20260924T120000Z_bbb2222"
     assert comparison["current_run_id"] == "20260925T120000Z_ccc3333"
+
+
+def test_build_agent_eval_markdown_summary_formats_report() -> None:
+    report = AgentEvalReport(
+        report_type="agent_eval_report",
+        schema_version=1,
+        created_at="2026-09-26T18:00:00+00:00",
+        git_commit="abc1234",
+        git_dirty=False,
+        run_id="20260926T180000Z_abc1234",
+        configuration=AgentEvalConfiguration(
+            agent_model="gpt-5-mini",
+            judge_model="gpt-5.4-mini-2026-03-17",
+            max_agent_steps=5,
+            eval_cases_file="data/agent_outcome_eval_cases.json",
+        ),
+        summary=AgentEvalSummary(
+            outcome=AgentMetricSummary(
+                total_cases=10,
+                passed_cases=9,
+                pass_rate=0.9,
+            ),
+            capability=AgentMetricSummary(
+                total_cases=10,
+                passed_cases=10,
+                pass_rate=1.0,
+            ),
+            grounding=AgentMetricSummary(
+                total_cases=10,
+                passed_cases=8,
+                pass_rate=0.8,
+            ),
+        ),
+        results=[],
+    )
+    expected = (
+        "## Agent Eval Summary\n"
+        "\n"
+        "| Metric | Passed | Total | Pass rate |\n"
+        "|---|---:|---:|---:|\n"
+        "| Outcome | 9 | 10 | 90.00% |\n"
+        "| Capability | 10 | 10 | 100.00% |\n"
+        "| Grounding | 8 | 10 | 80.00% |\n"
+        "\n"
+        "Run ID: `20260926T180000Z_abc1234`\n"
+        "Git commit: `abc1234`"
+    )
+
+    markdown_summary = build_agent_eval_markdown_summary(report)
+
+    assert markdown_summary == expected
