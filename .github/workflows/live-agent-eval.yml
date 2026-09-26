@@ -3,6 +3,10 @@ name: Live Agent Eval
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   live_agent_eval:
     runs-on: ubuntu-latest
@@ -21,6 +25,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
+      - name: Find previous successful eval run
+        id: previous_run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          previous_run_id=$(gh run list \
+            --workflow live-agent-eval.yml \
+            --status success \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId')
+
+          echo "run_id=$previous_run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Download previous agent eval report
+        if: steps.previous_run.outputs.run_id != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run download "${{ steps.previous_run.outputs.run_id }}" \
+            --name agent-eval-reports \
+            --dir previous_agent_eval
+
       - name: Run live agent evals
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -28,6 +55,10 @@ jobs:
 
       - name: Write agent eval summary
         run: python scripts/evals/write_agent_eval_summary.py
+
+      - name: Write agent eval comparison
+        if: steps.previous_run.outputs.run_id != ''
+        run: python scripts/evals/write_agent_eval_comparison.py
 
       - name: Upload agent eval reports
         if: always()
