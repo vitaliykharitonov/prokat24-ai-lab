@@ -10,3 +10,4 @@ data/raw/
 data/private/
 reports/
 *.egg-info/
+.ipynb_checkpoints/
