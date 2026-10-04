@@ -18,6 +18,7 @@ PROJECT_ROOT = find_project_root(Path(__file__))
 DATA_DIR = PROJECT_ROOT / "data"
 REPORTS_DIR = PROJECT_ROOT / "reports"
 AGENT_EVAL_REPORTS_DIR = REPORTS_DIR / "agent"
+GRADER_COMPARISON_REPORTS_DIR = REPORTS_DIR / "grader"
 
 KNOWLEDGE_PAGES_FILE = DATA_DIR / "knowledge_pages.json"
 SEARCH_EVAL_CASES_FILE = DATA_DIR / "search_eval_cases.json"
