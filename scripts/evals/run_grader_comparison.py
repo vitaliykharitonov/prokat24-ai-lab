@@ -1,21 +1,26 @@
+import datetime
 from argparse import ArgumentParser, Namespace
 
 from openai import OpenAI
 
 from prokat24_ai_lab.evals.semantic_grading import (
     GraderComparisonResult,
+    build_grader_comparison_report,
     build_grader_confusion_matrix,
     calculate_grader_classification_metrics,
     load_grader_comparison_cases,
     run_grader_comparison_evals,
+    save_grader_comparison_report,
     summarize_grader_comparison,
     summarize_grader_comparison_by_category,
     summarize_grader_stability,
 )
+from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.judges.openai_judge import create_openai_criterion_judge, create_openai_judge
 from prokat24_ai_lab.project_paths import (
     GRADER_COMPARISON_CASES_FILE,
     GRADER_COMPARISON_HOLDOUT_CASES_FILE,
+    GRADER_COMPARISON_REPORTS_DIR,
 )
 
 RUNS = 3
@@ -50,6 +55,31 @@ def main() -> None:
     for _ in range(RUNS):
         results = run_grader_comparison_evals(cases, judge, criterion_judge)
         all_runs.append(results)
+
+    run_time = datetime.datetime.now(datetime.UTC)
+
+    created_at = run_time.isoformat(timespec="seconds")
+    run_timestamp = run_time.strftime("%Y%m%dT%H%M%SZ")
+
+    git_commit = get_current_git_commit()
+    git_dirty = is_git_worktree_dirty()
+
+    short_commit = git_commit[:7] if git_commit is not None else "no-git"
+    run_id = f"{run_timestamp}_{short_commit}"
+
+    report = build_grader_comparison_report(
+        all_runs=all_runs,
+        split=args.split,
+        run_id=run_id,
+        created_at=created_at,
+        git_commit=git_commit,
+        git_dirty=git_dirty,
+    )
+
+    historical_file, latest_file = save_grader_comparison_report(
+        report=report,
+        output_dir=GRADER_COMPARISON_REPORTS_DIR,
+    )
 
     stability_results = summarize_grader_stability(all_runs)
 
@@ -217,6 +247,10 @@ def main() -> None:
         row += f"{criterion_llm_stable:<8} {result['criterion_llm_match_rate']:.2%}"
 
         print(row)
+
+    print()
+    print(f"Historical report: {historical_file}")
+    print(f"Latest report: {latest_file}")
 
 
 if __name__ == "__main__":
