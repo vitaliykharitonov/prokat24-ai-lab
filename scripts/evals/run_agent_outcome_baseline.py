@@ -21,6 +21,10 @@ from prokat24_ai_lab.evals.agent_evals import (
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.judges.openai_judge import OPENAI_JUDGE_MODEL, create_openai_criterion_judge
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
+from prokat24_ai_lab.observability.tool_instrumentation import (
+    ToolExecutionRecord,
+    create_instrumented_tool_executor,
+)
 from prokat24_ai_lab.products.catalog import load_products
 from prokat24_ai_lab.project_paths import (
     AGENT_EVAL_REPORTS_DIR,
@@ -49,13 +53,21 @@ def main() -> None:
         client,
         openai_tools,
     )
-    execute_tool_call = create_tool_executor(registry)
+
+    tool_latency_records: list[ToolExecutionRecord] = []
+
+    base_tool_executor = create_tool_executor(registry)
+
+    instrumented_executor = create_instrumented_tool_executor(
+        executor=base_tool_executor,
+        on_record=tool_latency_records.append,
+    )
 
     def agent_runner(user_input: str) -> AgentRunResult:
         return run_agent(
             user_input,
             generate_agent_step,
-            execute_tool_call,
+            instrumented_executor,
             max_steps=MAX_AGENT_STEPS,
         )
 
@@ -179,6 +191,14 @@ def main() -> None:
     print()
     print(f"Historical report saved to {historical_file}")
     print(f"Latest report saved to {latest_file}")
+
+    print()
+    print("=" * 80)
+    print("TOOL LATENCY")
+    print()
+
+    for record in tool_latency_records:
+        print(f"{record['tool_name']}: {record['duration_ms']:.2f} ms")
 
 
 if __name__ == "__main__":
