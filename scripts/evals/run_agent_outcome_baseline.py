@@ -1,4 +1,5 @@
 import datetime
+from uuid import uuid4
 
 from openai import OpenAI
 
@@ -21,6 +22,11 @@ from prokat24_ai_lab.evals.agent_evals import (
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.judges.openai_judge import OPENAI_JUDGE_MODEL, create_openai_criterion_judge
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
+from prokat24_ai_lab.observability.agent_step_instrumentation import (
+    AgentStepExecutionRecord,
+    create_instrumented_agent_step_generator,
+)
+from prokat24_ai_lab.observability.context import current_sequence_number, current_trace_id
 from prokat24_ai_lab.observability.tool_instrumentation import (
     ToolExecutionRecord,
     create_instrumented_tool_executor,
@@ -49,9 +55,16 @@ def main() -> None:
     registry = create_tool_registry(products, pages)
     openai_tools = create_openai_tools(registry)
 
-    generate_agent_step = create_openai_agent_step_generator(
+    agent_step_records: list[AgentStepExecutionRecord] = []
+
+    base_agent_step_generator = create_openai_agent_step_generator(
         client,
         openai_tools,
+    )
+
+    instrumented_agent_step_generator = create_instrumented_agent_step_generator(
+        generator=base_agent_step_generator,
+        on_record=agent_step_records.append,
     )
 
     tool_latency_records: list[ToolExecutionRecord] = []
@@ -64,12 +77,21 @@ def main() -> None:
     )
 
     def agent_runner(user_input: str) -> AgentRunResult:
-        return run_agent(
-            user_input,
-            generate_agent_step,
-            instrumented_executor,
-            max_steps=MAX_AGENT_STEPS,
-        )
+        trace_id = str(uuid4())
+        trace_token = current_trace_id.set(trace_id)
+        sequence_token = current_sequence_number.set(0)
+
+        try:
+            return run_agent(
+                user_input,
+                instrumented_agent_step_generator,
+                instrumented_executor,
+                max_steps=MAX_AGENT_STEPS,
+            )
+
+        finally:
+            current_sequence_number.reset(sequence_token)
+            current_trace_id.reset(trace_token)
 
     results = run_agent_outcome_evals(cases, agent_runner)
 
@@ -198,7 +220,25 @@ def main() -> None:
     print()
 
     for record in tool_latency_records:
-        print(f"{record['tool_name']}: {record['duration_ms']:.2f} ms")
+        print(
+            f"trace={record['trace_id']} | "
+            f"{record['tool_name']}: "
+            f"{record['duration_ms']:.2f} ms | "
+            f"{record['status']}"
+        )
+
+    print()
+    print("=" * 80)
+    print("AGENT STEP LATENCY")
+    print()
+
+    for record in agent_step_records:
+        print(
+            f"trace={record['trace_id']} | "
+            f"{record['decision']}: "
+            f"{record['duration_ms']:.2f} ms | "
+            f"{record['status']}"
+        )
 
 
 if __name__ == "__main__":

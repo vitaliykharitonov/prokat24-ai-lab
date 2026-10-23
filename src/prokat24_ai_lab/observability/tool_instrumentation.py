@@ -1,11 +1,16 @@
+import datetime
 from collections.abc import Callable
 from time import perf_counter
 from typing import Literal, TypedDict
 
 from prokat24_ai_lab.agents.types import ToolCall, ToolExecutor
+from prokat24_ai_lab.observability.context import current_trace_id, next_sequence_number
 
 
 class ToolExecutionRecord(TypedDict):
+    trace_id: str | None
+    sequence_number: int
+    started_at: str
     tool_name: str
     duration_ms: float
     status: Literal["success", "error"]
@@ -18,6 +23,7 @@ def create_instrumented_tool_executor(
     on_record: Callable[[ToolExecutionRecord], None],
 ) -> ToolExecutor:
     def instrumented_executor(tool_call: ToolCall) -> str:
+        started_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="milliseconds")
         start = perf_counter()
 
         status: Literal["success", "error"] = "success"
@@ -38,6 +44,9 @@ def create_instrumented_tool_executor(
             duration_ms = (perf_counter() - start) * 1000
 
             record = ToolExecutionRecord(
+                trace_id=current_trace_id.get(),
+                sequence_number=next_sequence_number(),
+                started_at=started_at,
                 tool_name=tool_call["tool_name"],
                 duration_ms=duration_ms,
                 status=status,
