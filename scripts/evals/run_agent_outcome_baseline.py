@@ -1,4 +1,5 @@
 import datetime
+import logging
 from uuid import uuid4
 
 from openai import OpenAI
@@ -34,6 +35,12 @@ from prokat24_ai_lab.observability.cost_estimation import (
     estimate_openai_model_cost,
 )
 from prokat24_ai_lab.observability.openai_usage import OpenAIModelUsageRecord
+from prokat24_ai_lab.observability.structured_logging import (
+    build_agent_step_log_event,
+    build_model_usage_log_event,
+    build_tool_execution_log_event,
+    log_observability_event,
+)
 from prokat24_ai_lab.observability.tool_instrumentation import (
     ToolExecutionRecord,
     create_instrumented_tool_executor,
@@ -62,18 +69,45 @@ def main() -> None:
     registry = create_tool_registry(products, pages)
     openai_tools = create_openai_tools(registry)
 
+    observability_logger = logging.getLogger("prokat24_ai_lab.observability")
+    observability_logger.setLevel(logging.INFO)
+
+    observability_handler = logging.StreamHandler()
+    observability_handler.setFormatter(logging.Formatter("%(message)s"))
+
+    observability_logger.addHandler(observability_handler)
+    observability_logger.propagate = False
+
+    def on_agent_step_record(record: AgentStepExecutionRecord) -> None:
+        agent_step_records.append(record)
+
+        log_event = build_agent_step_log_event(record)
+        log_observability_event(observability_logger, log_event)
+
+    def on_model_usage_record(record: OpenAIModelUsageRecord) -> None:
+        model_usage_records.append(record)
+
+        log_event = build_model_usage_log_event(record)
+        log_observability_event(observability_logger, log_event)
+
+    def on_tool_execution_record(record: ToolExecutionRecord) -> None:
+        tool_execution_records.append(record)
+
+        log_event = build_tool_execution_log_event(record)
+        log_observability_event(observability_logger, log_event)
+
     agent_step_records: list[AgentStepExecutionRecord] = []
     model_usage_records: list[OpenAIModelUsageRecord] = []
 
     base_agent_step_generator = create_openai_agent_step_generator(
         client,
         openai_tools,
-        on_usage=model_usage_records.append,
+        on_usage=on_model_usage_record,
     )
 
     instrumented_agent_step_generator = create_instrumented_agent_step_generator(
         generator=base_agent_step_generator,
-        on_record=agent_step_records.append,
+        on_record=on_agent_step_record,
     )
 
     tool_execution_records: list[ToolExecutionRecord] = []
@@ -82,7 +116,7 @@ def main() -> None:
 
     instrumented_executor = create_instrumented_tool_executor(
         executor=base_tool_executor,
-        on_record=tool_execution_records.append,
+        on_record=on_tool_execution_record,
     )
 
     def agent_runner(user_input: str) -> AgentRunResult:
