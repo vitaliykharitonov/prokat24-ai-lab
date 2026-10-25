@@ -12,12 +12,42 @@ class OutputItemProtocol(Protocol):
     def type(self) -> str: ...
 
 
+class InputTokensDetailsProtocol(Protocol):
+    @property
+    def cached_tokens(self) -> int: ...
+
+
+class OutputTokensDetailsProtocol(Protocol):
+    @property
+    def reasoning_tokens(self) -> int: ...
+
+
+class ResponseUsageProtocol(Protocol):
+    @property
+    def input_tokens(self) -> int: ...
+
+    @property
+    def input_tokens_details(self) -> InputTokensDetailsProtocol: ...
+
+    @property
+    def output_tokens(self) -> int: ...
+
+    @property
+    def output_tokens_details(self) -> OutputTokensDetailsProtocol: ...
+
+    @property
+    def total_tokens(self) -> int: ...
+
+
 class ResponseProtocol(Protocol):
     @property
     def output(self) -> Sequence[OutputItemProtocol]: ...
 
     @property
     def output_text(self) -> str: ...
+
+    @property
+    def usage(self) -> ResponseUsageProtocol | None: ...
 
 
 class FunctionCallProtocol(OutputItemProtocol, Protocol):

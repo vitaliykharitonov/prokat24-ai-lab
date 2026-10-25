@@ -27,6 +27,13 @@ from prokat24_ai_lab.observability.agent_step_instrumentation import (
     create_instrumented_agent_step_generator,
 )
 from prokat24_ai_lab.observability.context import current_sequence_number, current_trace_id
+from prokat24_ai_lab.observability.cost_estimation import (
+    OpenAIModelCostRecord,
+    OpenAITraceCostRecord,
+    aggregate_openai_costs_by_trace,
+    estimate_openai_model_cost,
+)
+from prokat24_ai_lab.observability.openai_usage import OpenAIModelUsageRecord
 from prokat24_ai_lab.observability.tool_instrumentation import (
     ToolExecutionRecord,
     create_instrumented_tool_executor,
@@ -56,10 +63,12 @@ def main() -> None:
     openai_tools = create_openai_tools(registry)
 
     agent_step_records: list[AgentStepExecutionRecord] = []
+    model_usage_records: list[OpenAIModelUsageRecord] = []
 
     base_agent_step_generator = create_openai_agent_step_generator(
         client,
         openai_tools,
+        on_usage=model_usage_records.append,
     )
 
     instrumented_agent_step_generator = create_instrumented_agent_step_generator(
@@ -67,13 +76,13 @@ def main() -> None:
         on_record=agent_step_records.append,
     )
 
-    tool_latency_records: list[ToolExecutionRecord] = []
+    tool_execution_records: list[ToolExecutionRecord] = []
 
     base_tool_executor = create_tool_executor(registry)
 
     instrumented_executor = create_instrumented_tool_executor(
         executor=base_tool_executor,
-        on_record=tool_latency_records.append,
+        on_record=tool_execution_records.append,
     )
 
     def agent_runner(user_input: str) -> AgentRunResult:
@@ -94,6 +103,14 @@ def main() -> None:
             current_trace_id.reset(trace_token)
 
     results = run_agent_outcome_evals(cases, agent_runner)
+
+    model_cost_records: list[OpenAIModelCostRecord] = [
+        estimate_openai_model_cost(record) for record in model_usage_records
+    ]
+
+    trace_cost_records: list[OpenAITraceCostRecord] = aggregate_openai_costs_by_trace(
+        model_cost_records
+    )
 
     capability_results = []
 
@@ -216,29 +233,92 @@ def main() -> None:
 
     print()
     print("=" * 80)
-    print("TOOL LATENCY")
+    print("TOOL EXECUTIONS")
     print()
 
-    for record in tool_latency_records:
+    for record in tool_execution_records:
         print(
             f"trace={record['trace_id']} | "
-            f"{record['tool_name']}: "
+            f"seq={record['sequence_number']} | "
+            f"started={record['started_at']} | "
+            f"tool={record['tool_name']} | "
             f"{record['duration_ms']:.2f} ms | "
             f"{record['status']}"
         )
 
     print()
     print("=" * 80)
-    print("AGENT STEP LATENCY")
+    print("AGENT STEPS")
     print()
 
     for record in agent_step_records:
         print(
             f"trace={record['trace_id']} | "
-            f"{record['decision']}: "
+            f"seq={record['sequence_number']} | "
+            f"step={record['step_number']} | "
+            f"started={record['started_at']} | "
+            f"decision={record['decision']} | "
             f"{record['duration_ms']:.2f} ms | "
             f"{record['status']}"
         )
+
+    print()
+    print("=" * 80)
+    print("MODEL USAGE")
+    print()
+
+    for record in model_usage_records:
+        print(
+            f"trace={record['trace_id']} | "
+            f"step={record['step_number']} | "
+            f"model={record['model']} | "
+            f"input={record['input_tokens']} | "
+            f"cached={record['cached_input_tokens']} | "
+            f"output={record['output_tokens']} | "
+            f"reasoning={record['reasoning_tokens']} | "
+            f"total={record['total_tokens']}"
+        )
+
+    print()
+    print("=" * 80)
+    print("MODEL COST")
+    print()
+
+    for record in model_cost_records:
+        print(
+            f"trace={record['trace_id']} | "
+            f"step={record['step_number']} | "
+            f"model={record['model']} | "
+            f"input=${record['input_cost_usd']:.6f} | "
+            f"cached=${record['cached_input_cost_usd']:.6f} | "
+            f"output=${record['output_cost_usd']:.6f} | "
+            f"total=${record['total_cost_usd']:.6f}"
+        )
+
+    print()
+    print("=" * 80)
+    print("TRACE COST")
+    print()
+
+    for record in trace_cost_records:
+        print(
+            f"trace={record['trace_id']} | "
+            f"calls={record['model_call_count']} | "
+            f"input=${record['input_cost_usd']:.6f} | "
+            f"cached=${record['cached_input_cost_usd']:.6f} | "
+            f"output=${record['output_cost_usd']:.6f} | "
+            f"total=${record['total_cost_usd']:.6f}"
+        )
+
+    total_agent_cost_usd = sum(record["total_cost_usd"] for record in trace_cost_records)
+
+    average_trace_cost_usd = (
+        total_agent_cost_usd / len(trace_cost_records) if trace_cost_records else 0.0
+    )
+
+    print()
+    print(f"Total agent model cost: ${total_agent_cost_usd:.6f}")
+    print(f"Average cost per trace: ${average_trace_cost_usd:.6f}")
 
 
 if __name__ == "__main__":

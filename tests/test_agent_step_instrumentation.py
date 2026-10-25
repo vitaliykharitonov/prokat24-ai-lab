@@ -44,6 +44,7 @@ def test_instrumented_agent_step_generator_records_tool_call_decision() -> None:
     assert len(records) == 1
     assert records[0]["trace_id"] is None
     assert records[0]["sequence_number"] == 1
+    assert records[0]["step_number"] == 1
     assert records[0]["duration_ms"] >= 0
     assert records[0]["status"] == "success"
     assert records[0]["decision"] == "tool_call"
@@ -81,6 +82,7 @@ def test_instrumented_agent_step_generator_records_final_answer_decision() -> No
     assert len(records) == 1
     assert records[0]["trace_id"] is None
     assert records[0]["sequence_number"] == 1
+    assert records[0]["step_number"] == 1
     assert records[0]["duration_ms"] >= 0
     assert records[0]["status"] == "success"
     assert records[0]["decision"] == "final_answer"

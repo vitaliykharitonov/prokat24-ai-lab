@@ -10,6 +10,7 @@ from prokat24_ai_lab.observability.context import current_trace_id, next_sequenc
 class AgentStepExecutionRecord(TypedDict):
     trace_id: str | None
     sequence_number: int
+    step_number: int
     started_at: str
     status: Literal["success", "error"]
     duration_ms: float
@@ -48,6 +49,7 @@ def create_instrumented_agent_step_generator(
             record = AgentStepExecutionRecord(
                 trace_id=current_trace_id.get(),
                 sequence_number=next_sequence_number(),
+                step_number=len(tool_executions) + 1,
                 started_at=started_at,
                 duration_ms=duration_ms,
                 status=status,

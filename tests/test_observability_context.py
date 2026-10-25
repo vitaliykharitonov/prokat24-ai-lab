@@ -87,6 +87,8 @@ def test_observability_records_share_trace_and_sequence() -> None:
 
     assert tool_records[0]["trace_id"] == "test-trace"
     assert tool_records[0]["sequence_number"] == 2
+    assert agent_step_records[0]["step_number"] == 1
+    assert agent_step_records[1]["step_number"] == 2
     assert tool_records[0]["tool_name"] == "search_products"
 
     assert agent_step_records[1]["trace_id"] == "test-trace"

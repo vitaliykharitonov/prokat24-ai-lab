@@ -1,4 +1,5 @@
 import json
+from collections.abc import Callable
 from typing import cast
 
 from openai.types.responses import FunctionToolParam
@@ -9,6 +10,8 @@ from prokat24_ai_lab.agents.openai_tool_call import (
     ToolCallClientProtocol,
 )
 from prokat24_ai_lab.agents.types import AgentStep, AgentStepGenerator, ToolCall, ToolExecution
+from prokat24_ai_lab.observability.context import current_trace_id
+from prokat24_ai_lab.observability.openai_usage import OpenAIModelUsageRecord
 
 AGENT_STEP_INSTRUCTIONS = (
     "You are an assistant for the Prokat24 equipment rental service.\n"
@@ -91,6 +94,7 @@ def create_openai_agent_step_generator(
     client: ToolCallClientProtocol,
     tools: list[FunctionToolParam],
     model: str = OPENAI_TOOL_CALL_MODEL,
+    on_usage: Callable[[OpenAIModelUsageRecord], None] | None = None,
 ) -> AgentStepGenerator:
     def generate_agent_step(user_input: str, tool_executions: list[ToolExecution]) -> AgentStep:
         input_text = build_agent_step_input(user_input, tool_executions)
@@ -101,6 +105,20 @@ def create_openai_agent_step_generator(
             tools=tools,
             tool_choice="auto",
         )
+
+        if response.usage is not None and on_usage is not None:
+            record = OpenAIModelUsageRecord(
+                trace_id=current_trace_id.get(),
+                step_number=len(tool_executions) + 1,
+                model=model,
+                input_tokens=response.usage.input_tokens,
+                cached_input_tokens=response.usage.input_tokens_details.cached_tokens,
+                output_tokens=response.usage.output_tokens,
+                reasoning_tokens=response.usage.output_tokens_details.reasoning_tokens,
+                total_tokens=response.usage.total_tokens,
+            )
+
+            on_usage(record)
 
         for output_item in response.output:
             if output_item.type == "function_call":
