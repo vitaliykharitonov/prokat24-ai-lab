@@ -3,6 +3,9 @@ import logging
 from uuid import uuid4
 
 from openai import OpenAI
+from openinference.instrumentation import suppress_tracing
+from openinference.instrumentation.openai import OpenAIInstrumentor
+from phoenix.otel import register
 
 from prokat24_ai_lab.agents.agent_loop import run_agent
 from prokat24_ai_lab.agents.openai_agent_step import create_openai_agent_step_generator
@@ -35,6 +38,10 @@ from prokat24_ai_lab.observability.cost_estimation import (
     estimate_openai_model_cost,
 )
 from prokat24_ai_lab.observability.openai_usage import OpenAIModelUsageRecord
+from prokat24_ai_lab.observability.otel_instrumentation import (
+    create_traced_agent_step_generator,
+    create_traced_tool_executor,
+)
 from prokat24_ai_lab.observability.structured_logging import (
     build_agent_step_log_event,
     build_model_usage_log_event,
@@ -61,6 +68,17 @@ def main() -> None:
     cases = load_agent_outcome_eval_cases(AGENT_OUTCOME_EVAL_CASES_FILE)
     products = load_products(PRODUCTS_FILE)
     pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
+
+    tracer_provider = register(
+        project_name="prokat24-ai-lab",
+        endpoint="http://localhost:6006/v1/traces",
+        auto_instrument=False,
+    )
+    OpenAIInstrumentor().instrument(
+        tracer_provider=tracer_provider,
+    )
+
+    tracer = tracer_provider.get_tracer(__name__)
 
     client = OpenAI()
 
@@ -105,8 +123,13 @@ def main() -> None:
         on_usage=on_model_usage_record,
     )
 
-    instrumented_agent_step_generator = create_instrumented_agent_step_generator(
+    traced_agent_step_generator = create_traced_agent_step_generator(
         generator=base_agent_step_generator,
+        tracer=tracer,
+    )
+
+    instrumented_agent_step_generator = create_instrumented_agent_step_generator(
+        generator=traced_agent_step_generator,
         on_record=on_agent_step_record,
     )
 
@@ -114,8 +137,13 @@ def main() -> None:
 
     base_tool_executor = create_tool_executor(registry)
 
-    instrumented_executor = create_instrumented_tool_executor(
+    traced_tool_executor = create_traced_tool_executor(
         executor=base_tool_executor,
+        tracer=tracer,
+    )
+
+    instrumented_executor = create_instrumented_tool_executor(
+        executor=traced_tool_executor,
         on_record=on_tool_execution_record,
     )
 
@@ -125,12 +153,16 @@ def main() -> None:
         sequence_token = current_sequence_number.set(0)
 
         try:
-            return run_agent(
-                user_input,
-                instrumented_agent_step_generator,
-                instrumented_executor,
-                max_steps=MAX_AGENT_STEPS,
-            )
+            with tracer.start_as_current_span("agent.run") as span:
+                span.set_attribute("openinference.span.kind", "AGENT")
+                span.set_attribute("prokat24.trace_id", trace_id)
+
+                return run_agent(
+                    user_input,
+                    instrumented_agent_step_generator,
+                    instrumented_executor,
+                    max_steps=MAX_AGENT_STEPS,
+                )
 
         finally:
             current_sequence_number.reset(sequence_token)
@@ -146,17 +178,18 @@ def main() -> None:
         model_cost_records
     )
 
-    capability_results = []
+    with suppress_tracing():
+        capability_results = []
 
-    for result in results:
-        capability_result = evaluate_agent_capability(result, criterion_judge)
-        capability_results.append(capability_result)
+        for result in results:
+            capability_result = evaluate_agent_capability(result, criterion_judge)
+            capability_results.append(capability_result)
 
-    grounding_results = []
+        grounding_results = []
 
-    for result in results:
-        grounding_result = evaluate_agent_grounding(result, criterion_judge)
-        grounding_results.append(grounding_result)
+        for result in results:
+            grounding_result = evaluate_agent_grounding(result, criterion_judge)
+            grounding_results.append(grounding_result)
 
     run_time = datetime.datetime.now(datetime.UTC)
 
