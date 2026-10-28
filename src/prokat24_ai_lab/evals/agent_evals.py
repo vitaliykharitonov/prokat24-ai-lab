@@ -15,6 +15,7 @@ from prokat24_ai_lab.evals.semantic_grading import (
     Rubric,
     summarize_criterion_judge_result,
 )
+from prokat24_ai_lab.observability.context import current_eval_case_id
 
 
 class AgentOutcomeEvalCase(TypedDict):
@@ -27,6 +28,7 @@ class AgentOutcomeEvalCase(TypedDict):
 
 class AgentOutcomeEvalResult(TypedDict):
     id: str
+    trace_id: str | None
     user_input: str
     final_answer: str
     missing_fragments: list[str]
@@ -125,6 +127,7 @@ class AgentCriterionCaseEvaluation(TypedDict):
 
 class AgentEvalCaseResult(TypedDict):
     id: str
+    trace_id: str | None
     user_input: str
     final_answer: str
     tool_calls: list[ToolCall]
@@ -318,6 +321,7 @@ def evaluate_agent_outcome_case(
 
     return AgentOutcomeEvalResult(
         id=case["id"],
+        trace_id=None,
         user_input=user_input,
         final_answer=final_answer,
         missing_fragments=missing_fragments,
@@ -336,8 +340,14 @@ def run_agent_outcome_evals(
     agent_results = []
 
     for case in cases:
-        agent_result = agent_runner(case["user_input"])
-        agent_results.append(evaluate_agent_outcome_case(case, agent_result))
+        case_id_token = current_eval_case_id.set(case["id"])
+
+        try:
+            agent_result = agent_runner(case["user_input"])
+            agent_results.append(evaluate_agent_outcome_case(case, agent_result))
+
+        finally:
+            current_eval_case_id.reset(case_id_token)
 
     return agent_results
 
@@ -544,6 +554,7 @@ def build_agent_eval_case_results(
         eval_results.append(
             AgentEvalCaseResult(
                 id=result["id"],
+                trace_id=result["trace_id"],
                 user_input=result["user_input"],
                 final_answer=result["final_answer"],
                 tool_calls=result["tool_calls"],

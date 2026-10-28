@@ -10,6 +10,11 @@ current_sequence_number: ContextVar[int] = ContextVar(
     default=0,
 )
 
+current_eval_case_id: ContextVar[str | None] = ContextVar(
+    "current_eval_case_id",
+    default=None,
+)
+
 
 def next_sequence_number() -> int:
     number = current_sequence_number.get() + 1

@@ -1,6 +1,5 @@
 import datetime
 import logging
-from uuid import uuid4
 
 from openai import OpenAI
 from openinference.instrumentation import suppress_tracing
@@ -30,7 +29,11 @@ from prokat24_ai_lab.observability.agent_step_instrumentation import (
     AgentStepExecutionRecord,
     create_instrumented_agent_step_generator,
 )
-from prokat24_ai_lab.observability.context import current_sequence_number, current_trace_id
+from prokat24_ai_lab.observability.context import (
+    current_eval_case_id,
+    current_sequence_number,
+    current_trace_id,
+)
 from prokat24_ai_lab.observability.cost_estimation import (
     OpenAIModelCostRecord,
     OpenAITraceCostRecord,
@@ -116,6 +119,7 @@ def main() -> None:
 
     agent_step_records: list[AgentStepExecutionRecord] = []
     model_usage_records: list[OpenAIModelUsageRecord] = []
+    eval_trace_ids: dict[str, str] = {}
 
     base_agent_step_generator = create_openai_agent_step_generator(
         client,
@@ -148,27 +152,42 @@ def main() -> None:
     )
 
     def agent_runner(user_input: str) -> AgentRunResult:
-        trace_id = str(uuid4())
-        trace_token = current_trace_id.set(trace_id)
+        case_id = current_eval_case_id.get()
         sequence_token = current_sequence_number.set(0)
 
         try:
             with tracer.start_as_current_span("agent.run") as span:
                 span.set_attribute("openinference.span.kind", "AGENT")
-                span.set_attribute("prokat24.trace_id", trace_id)
 
-                return run_agent(
-                    user_input,
-                    instrumented_agent_step_generator,
-                    instrumented_executor,
-                    max_steps=MAX_AGENT_STEPS,
+                trace_id = format(
+                    span.get_span_context().trace_id,
+                    "032x",
                 )
+
+                trace_token = current_trace_id.set(trace_id)
+
+                try:
+                    if case_id is not None:
+                        span.set_attribute("eval.case_id", case_id)
+                        eval_trace_ids[case_id] = trace_id
+
+                    return run_agent(
+                        user_input,
+                        instrumented_agent_step_generator,
+                        instrumented_executor,
+                        max_steps=MAX_AGENT_STEPS,
+                    )
+
+                finally:
+                    current_trace_id.reset(trace_token)
 
         finally:
             current_sequence_number.reset(sequence_token)
-            current_trace_id.reset(trace_token)
 
     results = run_agent_outcome_evals(cases, agent_runner)
+
+    for result in results:
+        result["trace_id"] = eval_trace_ids.get(result["id"])
 
     model_cost_records: list[OpenAIModelCostRecord] = [
         estimate_openai_model_cost(record) for record in model_usage_records
