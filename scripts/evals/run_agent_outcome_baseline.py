@@ -4,6 +4,7 @@ import logging
 from openai import OpenAI
 from openinference.instrumentation import suppress_tracing
 from openinference.instrumentation.openai import OpenAIInstrumentor
+from phoenix.client import Client
 from phoenix.otel import register
 
 from prokat24_ai_lab.agents.agent_loop import run_agent
@@ -45,6 +46,11 @@ from prokat24_ai_lab.observability.otel_instrumentation import (
     create_traced_agent_step_generator,
     create_traced_tool_executor,
 )
+from prokat24_ai_lab.observability.phoenix_annotations import (
+    build_criteria_explanation,
+    build_llm_annotation,
+    build_outcome_annotation,
+)
 from prokat24_ai_lab.observability.structured_logging import (
     build_agent_step_log_event,
     build_model_usage_log_event,
@@ -82,6 +88,10 @@ def main() -> None:
     )
 
     tracer = tracer_provider.get_tracer(__name__)
+
+    phoenix_client = Client(
+        base_url="http://localhost:6006",
+    )
 
     client = OpenAI()
 
@@ -246,6 +256,50 @@ def main() -> None:
         git_commit=git_commit,
         git_dirty=git_dirty,
     )
+
+    for result in report["results"]:
+        trace_id = result["trace_id"]
+
+        if trace_id is None:
+            continue
+
+        outcome_annotation = build_outcome_annotation(
+            trace_id=trace_id,
+            passed=result["outcome"]["passed"],
+        )
+
+        phoenix_client.traces.add_trace_annotation(
+            **outcome_annotation,
+            sync=True,
+        )
+
+        capability_explanation = build_criteria_explanation(result["capability"]["criteria"])
+
+        capability_annotation = build_llm_annotation(
+            trace_id=trace_id,
+            annotation_name="capability",
+            passed=result["capability"]["passed"],
+            explanation=capability_explanation,
+        )
+
+        phoenix_client.traces.add_trace_annotation(
+            **capability_annotation,
+            sync=True,
+        )
+
+        grounding_explanation = build_criteria_explanation(result["grounding"]["criteria"])
+
+        grounding_annotation = build_llm_annotation(
+            trace_id=trace_id,
+            annotation_name="grounding",
+            passed=result["grounding"]["passed"],
+            explanation=grounding_explanation,
+        )
+
+        phoenix_client.traces.add_trace_annotation(
+            **grounding_annotation,
+            sync=True,
+        )
 
     summary = report["summary"]
 
