@@ -1,5 +1,9 @@
 from opentelemetry.trace import INVALID_SPAN_CONTEXT, SpanContext, TraceFlags
-from scripts.evals.run_agent_outcome_baseline import get_phoenix_base_url, get_trace_id
+from scripts.evals.run_agent_outcome_baseline import (
+    get_correlation_id,
+    get_phoenix_base_url,
+    get_trace_id,
+)
 
 
 def test_get_phoenix_base_url_returns_none_when_not_configured(
@@ -35,3 +39,14 @@ def test_get_trace_id_returns_formatted_id_for_valid_span_context() -> None:
     )
 
     assert get_trace_id(span_context) == "1234567890abcdef1234567890abcdef"
+
+
+def test_get_correlation_id_reuses_trace_id() -> None:
+    assert get_correlation_id("trace-123") == "trace-123"
+
+
+def test_get_correlation_id_generates_id_when_trace_id_is_missing() -> None:
+    correlation_id = get_correlation_id(None)
+
+    assert len(correlation_id) == 32
+    int(correlation_id, 16)

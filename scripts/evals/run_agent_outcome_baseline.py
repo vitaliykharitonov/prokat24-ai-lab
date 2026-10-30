@@ -1,11 +1,12 @@
 import datetime
 import logging
 import os
-import trace
+from uuid import uuid4
 
 from openai import OpenAI
 from openinference.instrumentation import suppress_tracing
 from openinference.instrumentation.openai import OpenAIInstrumentor
+from opentelemetry import trace
 from opentelemetry.trace import SpanContext
 from phoenix.client import Client
 from phoenix.otel import register
@@ -85,6 +86,13 @@ def get_trace_id(span_context: SpanContext) -> str | None:
         return None
 
     return format(span_context.trace_id, "032x")
+
+
+def get_correlation_id(trace_id: str | None) -> str:
+    if trace_id is not None:
+        return trace_id
+
+    return uuid4().hex
 
 
 def main() -> None:
@@ -191,8 +199,9 @@ def main() -> None:
                 span.set_attribute("openinference.span.kind", "AGENT")
 
                 trace_id = get_trace_id(span.get_span_context())
+                correlation_id = get_correlation_id(trace_id)
 
-                trace_token = current_trace_id.set(trace_id)
+                trace_token = current_trace_id.set(correlation_id)
 
                 try:
                     if case_id is not None:
