@@ -171,12 +171,20 @@ def main() -> None:
                         span.set_attribute("eval.case_id", case_id)
                         eval_trace_ids[case_id] = trace_id
 
-                    return run_agent(
+                    span.set_attribute("input.value", user_input)
+                    span.set_attribute("input.mime_type", "text/plain")
+
+                    agent_result = run_agent(
                         user_input,
                         instrumented_agent_step_generator,
                         instrumented_executor,
                         max_steps=MAX_AGENT_STEPS,
                     )
+
+                    span.set_attribute("output.value", agent_result["final_answer"])
+                    span.set_attribute("output.mime_type", "text/plain")
+
+                    return agent_result
 
                 finally:
                     current_trace_id.reset(trace_token)
