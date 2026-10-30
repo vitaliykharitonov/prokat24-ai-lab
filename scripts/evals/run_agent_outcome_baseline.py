@@ -1,9 +1,12 @@
 import datetime
 import logging
+import os
+import trace
 
 from openai import OpenAI
 from openinference.instrumentation import suppress_tracing
 from openinference.instrumentation.openai import OpenAIInstrumentor
+from opentelemetry.trace import SpanContext
 from phoenix.client import Client
 from phoenix.otel import register
 
@@ -73,25 +76,43 @@ from prokat24_ai_lab.project_paths import (
 MAX_AGENT_STEPS = 5
 
 
+def get_phoenix_base_url() -> str | None:
+    return os.getenv("PHOENIX_BASE_URL")
+
+
+def get_trace_id(span_context: SpanContext) -> str | None:
+    if not span_context.is_valid:
+        return None
+
+    return format(span_context.trace_id, "032x")
+
+
 def main() -> None:
     cases = load_agent_outcome_eval_cases(AGENT_OUTCOME_EVAL_CASES_FILE)
     products = load_products(PRODUCTS_FILE)
     pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
 
-    tracer_provider = register(
-        project_name="prokat24-ai-lab",
-        endpoint="http://localhost:6006/v1/traces",
-        auto_instrument=False,
-    )
-    OpenAIInstrumentor().instrument(
-        tracer_provider=tracer_provider,
-    )
+    phoenix_base_url = get_phoenix_base_url()
 
-    tracer = tracer_provider.get_tracer(__name__)
+    if phoenix_base_url is not None:
+        tracer_provider = register(
+            project_name="prokat24-ai-lab",
+            endpoint=f"{phoenix_base_url.rstrip('/')}/v1/traces",
+            auto_instrument=False,
+        )
 
-    phoenix_client = Client(
-        base_url="http://localhost:6006",
-    )
+        OpenAIInstrumentor().instrument(
+            tracer_provider=tracer_provider,
+        )
+
+        tracer = tracer_provider.get_tracer(__name__)
+        phoenix_client: Client | None = Client(
+            base_url=phoenix_base_url,
+        )
+
+    else:
+        tracer = trace.get_tracer(__name__)
+        phoenix_client = None
 
     client = OpenAI()
 
@@ -169,17 +190,16 @@ def main() -> None:
             with tracer.start_as_current_span("agent.run") as span:
                 span.set_attribute("openinference.span.kind", "AGENT")
 
-                trace_id = format(
-                    span.get_span_context().trace_id,
-                    "032x",
-                )
+                trace_id = get_trace_id(span.get_span_context())
 
                 trace_token = current_trace_id.set(trace_id)
 
                 try:
                     if case_id is not None:
                         span.set_attribute("eval.case_id", case_id)
-                        eval_trace_ids[case_id] = trace_id
+
+                        if trace_id is not None:
+                            eval_trace_ids[case_id] = trace_id
 
                     span.set_attribute("input.value", user_input)
                     span.set_attribute("input.mime_type", "text/plain")
@@ -257,49 +277,50 @@ def main() -> None:
         git_dirty=git_dirty,
     )
 
-    for result in report["results"]:
-        trace_id = result["trace_id"]
+    if phoenix_client is not None:
+        for result in report["results"]:
+            trace_id = result["trace_id"]
 
-        if trace_id is None:
-            continue
+            if trace_id is None:
+                continue
 
-        outcome_annotation = build_outcome_annotation(
-            trace_id=trace_id,
-            passed=result["outcome"]["passed"],
-        )
+            outcome_annotation = build_outcome_annotation(
+                trace_id=trace_id,
+                passed=result["outcome"]["passed"],
+            )
 
-        phoenix_client.traces.add_trace_annotation(
-            **outcome_annotation,
-            sync=True,
-        )
+            phoenix_client.traces.add_trace_annotation(
+                **outcome_annotation,
+                sync=True,
+            )
 
-        capability_explanation = build_criteria_explanation(result["capability"]["criteria"])
+            capability_explanation = build_criteria_explanation(result["capability"]["criteria"])
 
-        capability_annotation = build_llm_annotation(
-            trace_id=trace_id,
-            annotation_name="capability",
-            passed=result["capability"]["passed"],
-            explanation=capability_explanation,
-        )
+            capability_annotation = build_llm_annotation(
+                trace_id=trace_id,
+                annotation_name="capability",
+                passed=result["capability"]["passed"],
+                explanation=capability_explanation,
+            )
 
-        phoenix_client.traces.add_trace_annotation(
-            **capability_annotation,
-            sync=True,
-        )
+            phoenix_client.traces.add_trace_annotation(
+                **capability_annotation,
+                sync=True,
+            )
 
-        grounding_explanation = build_criteria_explanation(result["grounding"]["criteria"])
+            grounding_explanation = build_criteria_explanation(result["grounding"]["criteria"])
 
-        grounding_annotation = build_llm_annotation(
-            trace_id=trace_id,
-            annotation_name="grounding",
-            passed=result["grounding"]["passed"],
-            explanation=grounding_explanation,
-        )
+            grounding_annotation = build_llm_annotation(
+                trace_id=trace_id,
+                annotation_name="grounding",
+                passed=result["grounding"]["passed"],
+                explanation=grounding_explanation,
+            )
 
-        phoenix_client.traces.add_trace_annotation(
-            **grounding_annotation,
-            sync=True,
-        )
+            phoenix_client.traces.add_trace_annotation(
+                **grounding_annotation,
+                sync=True,
+            )
 
     summary = report["summary"]
 
