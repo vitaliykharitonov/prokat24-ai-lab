@@ -796,6 +796,7 @@ def test_build_agent_eval_report() -> None:
     outcome_results: list[AgentOutcomeEvalResult] = [
         AgentOutcomeEvalResult(
             id="kyiv_delivery",
+            trace_id="trace-123",
             user_input="Скільки коштує доставка по Києву?",
             final_answer="Доставка по Києву — від 200 грн.",
             missing_fragments=[],
@@ -870,6 +871,7 @@ def test_build_agent_eval_report() -> None:
         git_dirty=False,
     )
 
+    assert report["results"][0]["trace_id"] == "trace-123"
     assert report["report_type"] == "agent_eval_report"
     assert report["schema_version"] == 1
     assert report["created_at"] == "2026-09-23T12:00:00+00:00"

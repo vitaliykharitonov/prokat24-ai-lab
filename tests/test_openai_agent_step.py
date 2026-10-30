@@ -7,6 +7,7 @@ from prokat24_ai_lab.agents.openai_agent_step import (
 )
 from prokat24_ai_lab.agents.openai_tool_call import ResponseProtocol
 from prokat24_ai_lab.agents.types import ToolCall, ToolExecution
+from prokat24_ai_lab.observability.openai_usage import OpenAIModelUsageRecord
 
 
 class FakeOutputItem:
@@ -15,16 +16,41 @@ class FakeOutputItem:
     arguments = '{"query": "2-місний намет"}'
 
 
+class FakeInputTokensDetails:
+    cached_tokens = 40
+
+
+class FakeOutputTokensDetails:
+    reasoning_tokens = 10
+
+
+class FakeUsage:
+    input_tokens = 100
+    input_tokens_details = FakeInputTokensDetails
+    output_tokens = 30
+    output_tokens_details = FakeOutputTokensDetails()
+    total_tokens = 130
+
+
+class FakeResponseWithUsage:
+    def __init__(self) -> None:
+        self.output = []
+        self.output_text = "Привіт!"
+        self.usage = FakeUsage()
+
+
 class FakeResponse:
     def __init__(self) -> None:
         self.output = [FakeOutputItem()]
         self.output_text = ""
+        self.usage = None
 
 
 class FakeResponseWithoutCall:
     def __init__(self) -> None:
         self.output = []
         self.output_text = "Привіт! Чим можу допомогти?"
+        self.usage = None
 
 
 class FakeResponses:
@@ -122,3 +148,54 @@ def test_openai_agent_step_generator_returns_final_answer() -> None:
         "final_answer": "Привіт! Чим можу допомогти?",
         "tool_call": None,
     }
+
+
+def test_openai_agent_step_generator_records_model_usage() -> None:
+    usage_records: list[OpenAIModelUsageRecord] = []
+
+    fake_client = FakeClient(FakeResponseWithUsage())
+
+    generator = create_openai_agent_step_generator(
+        client=fake_client,
+        tools=[],
+        model="test-model",
+        on_usage=usage_records.append,
+    )
+
+    generator(
+        "Привіт",
+        [],
+    )
+
+    assert len(usage_records) == 1
+
+    record = usage_records[0]
+
+    assert record["trace_id"] is None
+    assert record["step_number"] == 1
+    assert record["model"] == "test-model"
+    assert record["input_tokens"] == 100
+    assert record["cached_input_tokens"] == 40
+    assert record["output_tokens"] == 30
+    assert record["reasoning_tokens"] == 10
+    assert record["total_tokens"] == 130
+
+
+def test_openai_agent_step_generator_skips_usage_when_missing() -> None:
+    usage_records: list[OpenAIModelUsageRecord] = []
+
+    fake_client = FakeClient(FakeResponseWithoutCall())
+
+    generator = create_openai_agent_step_generator(
+        client=fake_client,
+        tools=[],
+        model="test-model",
+        on_usage=usage_records.append,
+    )
+
+    generator(
+        "Привіт",
+        [],
+    )
+
+    assert usage_records == []
