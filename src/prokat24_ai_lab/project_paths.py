@@ -33,6 +33,18 @@ AGENT_OUTCOME_EVAL_CASES_FILE = DATA_DIR / "agent_outcome_eval_cases.json"
 AGENT_CAPABILITY_JUDGE_CASES_FILE = DATA_DIR / "agent_capability_judge_cases.json"
 GRADER_COMPARISON_CASES_FILE = DATA_DIR / "grader_comparison_cases.json"
 GRADER_COMPARISON_HOLDOUT_CASES_FILE = DATA_DIR / "grader_comparison_holdout_cases.json"
+
+AGENT_SAFETY_EVAL_CASES_FILE = DATA_DIR / "agent_safety_eval_cases.json"
+AGENT_SAFETY_MALICIOUS_KNOWLEDGE_PAGES_FILE = (
+    DATA_DIR / "agent_safety_malicious_knowledge_pages.json"
+)
+AGENT_SAFETY_MALICIOUS_CONTACTS_KNOWLEDGE_PAGES_FILE = (
+    DATA_DIR / "agent_safety_malicious_contacts_knowledge_pages.json"
+)
+AGENT_SAFETY_MALICIOUS_BOOKING_KNOWLEDGE_PAGES_FILE = (
+    DATA_DIR / "agent_safety_malicious_booking_knowledge_pages.json"
+)
+
 DOCUMENT_EMBEDDING_INDEX_FILE = DATA_DIR / "document_embedding_index.json"
 QUERY_EMBEDDING_INDEX_FILE = DATA_DIR / "query_embedding_index.json"
 PRODUCTS_FILE = DATA_DIR / "products.json"
