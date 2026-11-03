@@ -80,9 +80,6 @@ def create_openai_judge(
 
         output_text = cast(OutputTextProtocol[JudgeResult], content_item)
 
-        if output_text.type != "output_text":
-            raise ValueError("Wrong output text type")
-
         parsed_result = output_text.parsed
 
         if parsed_result is None:
@@ -118,9 +115,6 @@ def create_openai_criterion_judge(
             raise ValueError("Wrong output text type")
 
         output_text = cast(OutputTextProtocol[CriterionJudgeResult], content_item)
-
-        if output_text.type != "output_text":
-            raise ValueError("Wrong output text type")
 
         parsed_result = output_text.parsed
 

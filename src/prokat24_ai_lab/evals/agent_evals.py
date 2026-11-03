@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Literal, TypedDict, cast
 
-from openai import BaseModel
+from pydantic import BaseModel
 
 from prokat24_ai_lab.agents.types import AgentRunner, AgentRunResult, ToolCall, ToolExecution
 from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata

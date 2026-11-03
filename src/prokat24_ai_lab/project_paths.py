@@ -8,7 +8,7 @@ def find_project_root(start_path: Path) -> Path:
         current_path = current_path.parent
 
     for parent in [current_path, *current_path.parents]:
-        if (parent / ".git").exists():
+        if (parent / "pyproject.toml").is_file():
             return parent
 
     raise FileNotFoundError("Project root was not found")
@@ -28,7 +28,6 @@ RAG_ANSWER_EVAL_CASES_FILE = DATA_DIR / "rag_answer_eval_cases.json"
 RAGAS_EVAL_CASES_FILE = DATA_DIR / "ragas_eval_cases.json"
 JUDGE_EVAL_CASES_FILE = DATA_DIR / "judge_eval_cases.json"
 TOOL_USE_EVAL_CASES_FILE = DATA_DIR / "tool_use_eval_cases.json"
-TOOL_SEQUENCE_EVAL_CASES_FILE = DATA_DIR / "tool_sequence_eval_cases.json"
 AGENT_OUTCOME_EVAL_CASES_FILE = DATA_DIR / "agent_outcome_eval_cases.json"
 AGENT_CAPABILITY_JUDGE_CASES_FILE = DATA_DIR / "agent_capability_judge_cases.json"
 GRADER_COMPARISON_CASES_FILE = DATA_DIR / "grader_comparison_cases.json"
