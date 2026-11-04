@@ -8,7 +8,7 @@ def test_print_failed_search_eval_results_prints_nothing_when_all_results_pass(
     results = [
         {
             "query": "доставка",
-            "expected_url": "https://example.com/delivery",
+            "expected_document_id": "https://example.com/delivery",
             "top_results": [
                 "https://example.com/delivery",
                 "https://example.com/payment",
@@ -29,7 +29,7 @@ def test_print_failed_search_eval_results_prints_failed_result_details(
     results = [
         {
             "query": "доставка",
-            "expected_url": "https://example.com/delivery",
+            "expected_document_id": "https://example.com/delivery",
             "top_results": [
                 {
                     "url": "https://example.com/payment",
@@ -59,7 +59,7 @@ def test_print_failed_search_eval_results_prints_failed_result_details(
     assert "Failed search evals:" in captured.out
     assert "Query:" in captured.out
     assert "доставка" in captured.out
-    assert "Expected URL:" in captured.out
+    assert "Expected document:" in captured.out
     assert "https://example.com/delivery" in captured.out
     assert "Top results:" in captured.out
     assert "1. https://example.com/payment" in captured.out
@@ -76,7 +76,7 @@ def test_print_failed_search_eval_results_does_not_print_passed_results(
     results = [
         {
             "query": "поганий запит",
-            "expected_url": "https://example.com/expected",
+            "expected_document_id": "https://example.com/expected",
             "top_results": [
                 {
                     "url": "https://example.com/wrong",
@@ -91,7 +91,7 @@ def test_print_failed_search_eval_results_does_not_print_passed_results(
         },
         {
             "query": "успішний запит",
-            "expected_url": "https://example.com/correct",
+            "expected_document_id": "https://example.com/correct",
             "top_results": [
                 {
                     "url": "https://example.com/correct",

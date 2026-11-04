@@ -3,12 +3,12 @@ from argparse import ArgumentParser, Namespace
 
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
-from prokat24_ai_lab.evals.embedding_evals import load_embedding_search_eval_cases
 from prokat24_ai_lab.evals.hybrid_search_evals import (
     build_hybrid_search_eval_report,
     run_hybrid_search_evals,
     save_hybrid_search_eval_report,
 )
+from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
 from prokat24_ai_lab.evals.retrieval_metrics import (
     RetrievalEvalSummary,
     build_grouped_retrieval_eval_summaries,
@@ -17,10 +17,10 @@ from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.project_paths import (
     DOCUMENT_EMBEDDING_INDEX_FILE,
-    EMBEDDING_SEARCH_EVAL_CASES_FILE,
     HYBRID_SEARCH_EVAL_REPORT_FILE,
     KNOWLEDGE_PAGES_FILE,
     QUERY_EMBEDDING_INDEX_FILE,
+    RETRIEVAL_EVAL_CASES_FILE,
 )
 
 RANK_CONSTANT = 60
@@ -58,7 +58,7 @@ def parse_args() -> Namespace:
 def main() -> int:
     args = parse_args()
     knowledge_pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
-    cases = load_embedding_search_eval_cases(EMBEDDING_SEARCH_EVAL_CASES_FILE)
+    cases = load_retrieval_eval_cases(RETRIEVAL_EVAL_CASES_FILE)
 
     if args.split != "all":
         cases = [case for case in cases if case["split"] == args.split]

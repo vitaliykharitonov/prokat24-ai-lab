@@ -3,7 +3,7 @@ from typing import TypedDict
 from prokat24_ai_lab.embeddings.search import (
     rank_query_embedding_by_document_embeddings,
 )
-from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalCase
+from prokat24_ai_lab.evals.retrieval_cases import RetrievalEvalCase
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.knowledge.keyword_search import search_knowledge_base
 
@@ -39,7 +39,7 @@ class RetrievalComparisonSummary(TypedDict):
 
 
 def build_retrieval_comparison_result(
-    case: EmbeddingSearchEvalCase,
+    case: RetrievalEvalCase,
     keyword_document_ids: list[str],
     embedding_document_ids: list[str],
 ) -> RetrievalComparisonResult:
@@ -82,7 +82,7 @@ def build_retrieval_comparison_result(
 
 
 def evaluate_retrieval_comparison_case(
-    case: EmbeddingSearchEvalCase,
+    case: RetrievalEvalCase,
     pages: list[KnowledgePage],
     document_embeddings: dict[str, list[float]],
     query_embedding: list[float],
@@ -103,7 +103,7 @@ def evaluate_retrieval_comparison_case(
 
 
 def run_retrieval_comparison_evals(
-    cases: list[EmbeddingSearchEvalCase],
+    cases: list[RetrievalEvalCase],
     pages: list[KnowledgePage],
     document_embeddings: dict[str, list[float]],
     query_embeddings: dict[str, list[float]],

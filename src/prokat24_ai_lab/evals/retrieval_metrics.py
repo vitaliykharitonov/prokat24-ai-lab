@@ -3,8 +3,9 @@ from typing import Literal, TypedDict
 
 from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalResult
 from prokat24_ai_lab.evals.hybrid_search_evals import HybridSearchEvalResult
+from prokat24_ai_lab.evals.search_evals import SearchEvalResult
 
-RetrievalEvalResult = EmbeddingSearchEvalResult | HybridSearchEvalResult
+RetrievalEvalResult = SearchEvalResult | EmbeddingSearchEvalResult | HybridSearchEvalResult
 RetrievalGroupBy = Literal["split", "category", "difficulty"]
 
 

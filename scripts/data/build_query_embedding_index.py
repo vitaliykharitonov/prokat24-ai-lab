@@ -8,15 +8,15 @@ from prokat24_ai_lab.embeddings.query_index import (
     build_query_embedding_index,
     save_query_embedding_index,
 )
-from prokat24_ai_lab.evals.embedding_evals import load_embedding_search_eval_cases
+from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
 from prokat24_ai_lab.project_paths import (
-    EMBEDDING_SEARCH_EVAL_CASES_FILE,
     QUERY_EMBEDDING_INDEX_FILE,
+    RETRIEVAL_EVAL_CASES_FILE,
 )
 
 
 def main() -> None:
-    eval_cases = load_embedding_search_eval_cases(EMBEDDING_SEARCH_EVAL_CASES_FILE)
+    eval_cases = load_retrieval_eval_cases(RETRIEVAL_EVAL_CASES_FILE)
     queries: list[str] = []
 
     for case in eval_cases:

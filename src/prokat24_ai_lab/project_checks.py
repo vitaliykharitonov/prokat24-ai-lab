@@ -22,7 +22,12 @@ def get_quality_checks() -> list[tuple[str, list[str]]]:
         ),
         (
             "KEYWORD SEARCH EVALS",
-            [sys.executable, "scripts/evals/run_search_evals.py"],
+            [
+                sys.executable,
+                "scripts/evals/run_search_evals.py",
+                "--split",
+                "dev",
+            ],
         ),
         (
             "KNOWLEDGE ANSWER EVALS",

@@ -3,6 +3,12 @@ from pathlib import Path
 from typing import TypedDict
 
 from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
+from prokat24_ai_lab.evals.retrieval_cases import (
+    RetrievalCategory,
+    RetrievalDifficulty,
+    RetrievalEvalCase,
+    RetrievalSplit,
+)
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.knowledge.keyword_search import (
     KnowledgeSearchResult,
@@ -11,18 +17,18 @@ from prokat24_ai_lab.knowledge.keyword_search import (
 )
 
 
-class SearchEvalCase(TypedDict):
-    query: str
-    expected_url: str
-
-
 class SearchEvalResult(TypedDict):
+    id: str
+    category: RetrievalCategory
+    difficulty: RetrievalDifficulty
+    split: RetrievalSplit
     query: str
     query_words: list[str]
-    expected_url: str
-    actual_url: str | None
+    expected_document_id: str
+    actual_document_id: str | None
     actual_title: str | None
     actual_score: float | None
+    expected_rank: int | None
     passed: bool
     top_results: list[KnowledgeSearchResult]
 
@@ -40,45 +46,54 @@ class SearchEvalReport(TypedDict):
     results: list[SearchEvalResult]
 
 
-def load_search_eval_cases(input_file: Path) -> list[SearchEvalCase]:
-    with open(input_file, encoding="utf-8") as file:
-        loaded_data: list[SearchEvalCase] = json.load(file)
-        return loaded_data
-
-
-def evaluate_search_case(case: SearchEvalCase, pages: list[KnowledgePage]) -> SearchEvalResult:
+def evaluate_search_case(
+    case: RetrievalEvalCase,
+    pages: list[KnowledgePage],
+) -> SearchEvalResult:
     query = case["query"]
     query_words = get_query_words(query)
-    expected_url = case["expected_url"]
-    actual_url = None
+    expected_document_id = case["expected_document_id"]
+
+    actual_document_id = None
     actual_title = None
     actual_score = None
+    expected_rank = None
 
     search_results = search_knowledge_base(query, pages)
     top_results = search_results[:3]
 
     if search_results:
         top_result = search_results[0]
-        actual_url = top_result["url"]
+        actual_document_id = top_result["url"]
         actual_title = top_result["title"]
         actual_score = top_result["score"]
 
-    passed = actual_url == expected_url
+    for index, search_result in enumerate(search_results, start=1):
+        if search_result["url"] == expected_document_id:
+            expected_rank = index
+            break
+
+    passed = actual_document_id == expected_document_id
 
     return {
+        "id": case["id"],
+        "category": case["category"],
+        "difficulty": case["difficulty"],
+        "split": case["split"],
         "query": query,
         "query_words": query_words,
-        "expected_url": expected_url,
-        "actual_url": actual_url,
+        "expected_document_id": expected_document_id,
+        "actual_document_id": actual_document_id,
         "actual_title": actual_title,
         "actual_score": actual_score,
+        "expected_rank": expected_rank,
         "passed": passed,
         "top_results": top_results,
     }
 
 
 def run_search_evals(
-    cases: list[SearchEvalCase],
+    cases: list[RetrievalEvalCase],
     pages: list[KnowledgePage],
 ) -> list[SearchEvalResult]:
     results: list[SearchEvalResult] = []
@@ -150,11 +165,9 @@ def calculate_top_k_accuracy(
     passed_count = 0
 
     for result in results:
-        top_results = result["top_results"][:k]
+        expected_rank = result["expected_rank"]
 
-        for top_result in top_results:
-            if top_result["url"] == result["expected_url"]:
-                passed_count += 1
-                break
+        if expected_rank is not None and expected_rank <= k:
+            passed_count += 1
 
     return passed_count / len(results)
