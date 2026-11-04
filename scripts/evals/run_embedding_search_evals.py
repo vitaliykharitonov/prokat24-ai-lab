@@ -6,21 +6,21 @@ from prokat24_ai_lab.embeddings.document_index import load_document_embedding_in
 from prokat24_ai_lab.embeddings.openai_client import create_openai_embed_text
 from prokat24_ai_lab.evals.embedding_evals import (
     build_embedding_search_eval_report,
-    load_embedding_search_eval_cases,
     run_embedding_search_evals,
     save_embedding_search_eval_report,
 )
+from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.project_paths import (
     DOCUMENT_EMBEDDING_INDEX_FILE,
-    EMBEDDING_SEARCH_EVAL_CASES_FILE,
     EMBEDDING_SEARCH_EVAL_REPORT_FILE,
+    RETRIEVAL_EVAL_CASES_FILE,
 )
 
 
 def main() -> None:
     document_embedding_index = load_document_embedding_index(DOCUMENT_EMBEDDING_INDEX_FILE)
-    eval_cases = load_embedding_search_eval_cases(EMBEDDING_SEARCH_EVAL_CASES_FILE)
+    eval_cases = load_retrieval_eval_cases(RETRIEVAL_EVAL_CASES_FILE)
     client = OpenAI()
 
     embed_text = create_openai_embed_text(client, document_embedding_index["model"])

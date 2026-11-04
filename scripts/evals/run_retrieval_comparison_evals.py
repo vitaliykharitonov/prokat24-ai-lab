@@ -1,6 +1,8 @@
+from argparse import ArgumentParser, Namespace
+
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
-from prokat24_ai_lab.evals.embedding_evals import load_embedding_search_eval_cases
+from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
 from prokat24_ai_lab.evals.retrieval_comparison import (
     build_retrieval_comparison_summary,
     run_retrieval_comparison_evals,
@@ -8,15 +10,32 @@ from prokat24_ai_lab.evals.retrieval_comparison import (
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.project_paths import (
     DOCUMENT_EMBEDDING_INDEX_FILE,
-    EMBEDDING_SEARCH_EVAL_CASES_FILE,
     KNOWLEDGE_PAGES_FILE,
     QUERY_EMBEDDING_INDEX_FILE,
+    RETRIEVAL_EVAL_CASES_FILE,
 )
 
 
+def parse_args() -> Namespace:
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--split",
+        choices=("all", "dev", "holdout"),
+        default="all",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
+
     pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
-    cases = load_embedding_search_eval_cases(EMBEDDING_SEARCH_EVAL_CASES_FILE)
+    cases = load_retrieval_eval_cases(RETRIEVAL_EVAL_CASES_FILE)
+
+    if args.split != "all":
+        cases = [case for case in cases if case["split"] == args.split]
+
     document_embedding_index = load_document_embedding_index(DOCUMENT_EMBEDDING_INDEX_FILE)
     query_embedding_index = load_query_embedding_index(QUERY_EMBEDDING_INDEX_FILE)
 

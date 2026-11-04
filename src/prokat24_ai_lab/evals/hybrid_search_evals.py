@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import TypedDict
 
 from prokat24_ai_lab.evals.embedding_evals import (
-    EmbeddingSearchEvalCase,
     RetrievalCategory,
     RetrievalDifficulty,
     RetrievalSplit,
 )
 from prokat24_ai_lab.evals.report_metadata import build_eval_report_metadata
+from prokat24_ai_lab.evals.retrieval_cases import RetrievalEvalCase
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 from prokat24_ai_lab.retrieval.hybrid_search import (
     rank_query_with_reciprocal_rank_fusion,
@@ -55,7 +55,7 @@ class HybridSearchEvalReport(TypedDict):
 
 
 def build_hybrid_search_eval_result(
-    case: EmbeddingSearchEvalCase,
+    case: RetrievalEvalCase,
     search_results: list[tuple[str, float]],
 ) -> HybridSearchEvalResult:
     query = case["query"]
@@ -89,7 +89,7 @@ def build_hybrid_search_eval_result(
 
 
 def evaluate_hybrid_search_case(
-    case: EmbeddingSearchEvalCase,
+    case: RetrievalEvalCase,
     pages: list[KnowledgePage],
     document_embeddings: dict[str, list[float]],
     query_embedding: list[float],
@@ -109,7 +109,7 @@ def evaluate_hybrid_search_case(
 
 
 def evaluate_weighted_hybrid_search_case(
-    case: EmbeddingSearchEvalCase,
+    case: RetrievalEvalCase,
     pages: list[KnowledgePage],
     document_embeddings: dict[str, list[float]],
     query_embedding: list[float],
@@ -133,7 +133,7 @@ def evaluate_weighted_hybrid_search_case(
 
 
 def run_hybrid_search_evals(
-    cases: list[EmbeddingSearchEvalCase],
+    cases: list[RetrievalEvalCase],
     pages: list[KnowledgePage],
     document_embeddings: dict[str, list[float]],
     query_embeddings: dict[str, list[float]],
@@ -161,7 +161,7 @@ def run_hybrid_search_evals(
 
 
 def run_weighted_hybrid_search_evals(
-    cases: list[EmbeddingSearchEvalCase],
+    cases: list[RetrievalEvalCase],
     pages: list[KnowledgePage],
     document_embeddings: dict[str, list[float]],
     query_embeddings: dict[str, list[float]],

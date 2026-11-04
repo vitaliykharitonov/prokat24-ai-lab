@@ -1,17 +1,17 @@
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
-from prokat24_ai_lab.evals.embedding_evals import load_embedding_search_eval_cases
 from prokat24_ai_lab.evals.hybrid_search_evals import (
     HybridSearchEvalResult,
     build_hybrid_search_eval_summary,
     run_weighted_hybrid_search_evals,
 )
+from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.project_paths import (
     DOCUMENT_EMBEDDING_INDEX_FILE,
-    EMBEDDING_SEARCH_EVAL_CASES_FILE,
     KNOWLEDGE_PAGES_FILE,
     QUERY_EMBEDDING_INDEX_FILE,
+    RETRIEVAL_EVAL_CASES_FILE,
 )
 
 RANK_CONSTANT = 60
@@ -30,7 +30,7 @@ WEIGHT_CONFIGURATIONS = [
 
 def main() -> int:
     knowledge_pages = load_knowledge_base(KNOWLEDGE_PAGES_FILE)
-    cases = load_embedding_search_eval_cases(EMBEDDING_SEARCH_EVAL_CASES_FILE)
+    cases = load_retrieval_eval_cases(RETRIEVAL_EVAL_CASES_FILE)
     document_embedding_index = load_document_embedding_index(DOCUMENT_EMBEDDING_INDEX_FILE)
     query_embedding_index = load_query_embedding_index(QUERY_EMBEDDING_INDEX_FILE)
 

@@ -4,19 +4,19 @@ from pathlib import Path
 import pytest
 
 from prokat24_ai_lab.evals.embedding_evals import (
-    EmbeddingSearchEvalCase,
     EmbeddingSearchEvalResult,
+    RetrievalEvalCase,
     build_embedding_search_eval_report,
     calculate_accuracy,
     calculate_top_k_accuracy,
     count_passed_results,
     evaluate_embedding_search_case,
     evaluate_precomputed_embedding_search_case,
-    load_embedding_search_eval_cases,
     run_embedding_search_evals,
     run_precomputed_embedding_search_evals,
     save_embedding_search_eval_report,
 )
+from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
 
 TEST_EMBEDDING_EVAL_RESULTS: list[EmbeddingSearchEvalResult] = [
     {
@@ -84,7 +84,7 @@ TEST_EMBEDDING_EVAL_REPORT = {
 
 
 def test_evaluate_embedding_search_case_passes_when_expected_document_is_first() -> None:
-    case: EmbeddingSearchEvalCase = {
+    case: RetrievalEvalCase = {
         "id": "test_case_001",
         "query": "привезти спорядження додому",
         "expected_document_id": "delivery",
@@ -118,7 +118,7 @@ def test_evaluate_embedding_search_case_passes_when_expected_document_is_first()
 
 
 def test_evaluate_embedding_search_case_fails_when_another_document_is_first() -> None:
-    case: EmbeddingSearchEvalCase = {
+    case: RetrievalEvalCase = {
         "id": "test_case_001",
         "query": "де вас знайти",
         "expected_document_id": "delivery",
@@ -152,7 +152,7 @@ def test_evaluate_embedding_search_case_fails_when_another_document_is_first() -
 
 
 def test_evaluate_embedding_search_case_handles_empty_document_embeddings() -> None:
-    case: EmbeddingSearchEvalCase = {
+    case: RetrievalEvalCase = {
         "id": "test_case_001",
         "query": "привезти спорядження додому",
         "expected_document_id": "delivery",
@@ -179,7 +179,7 @@ def test_evaluate_embedding_search_case_handles_empty_document_embeddings() -> N
 
 
 def test_evaluate_precomputed_embedding_search_case_uses_query_embedding() -> None:
-    case: EmbeddingSearchEvalCase = {
+    case: RetrievalEvalCase = {
         "id": "test_case_001",
         "query": "привезти додому",
         "expected_document_id": "delivery",
@@ -209,7 +209,7 @@ def test_evaluate_precomputed_embedding_search_case_uses_query_embedding() -> No
 
 
 def test_run_embedding_search_evals_returns_results_for_all_cases() -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "привезти додому",
@@ -250,7 +250,7 @@ def test_run_embedding_search_evals_returns_results_for_all_cases() -> None:
 
 
 def test_run_precomputed_embedding_search_evals_evaluates_all_cases() -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "привезти додому",
@@ -288,7 +288,7 @@ def test_run_precomputed_embedding_search_evals_evaluates_all_cases() -> None:
 
 
 def test_run_precomputed_embedding_search_evals_raises_for_missing_query_embedding() -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "привезти додому",
@@ -369,8 +369,8 @@ def test_save_embedding_search_eval_report_writes_json(tmp_path: Path) -> None:
     assert loaded_report == json.loads(json.dumps(TEST_EMBEDDING_EVAL_REPORT, ensure_ascii=False))
 
 
-def test_load_embedding_search_eval_cases_returns_cases_from_json(tmp_path: Path) -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+def test_load_retrieval_eval_cases_returns_cases_from_json(tmp_path: Path) -> None:
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "привезти спорядження додому",
@@ -388,18 +388,18 @@ def test_load_embedding_search_eval_cases_returns_cases_from_json(tmp_path: Path
             "split": "dev",
         },
     ]
-    input_file = tmp_path / "embedding_search_eval_cases.json"
+    input_file = tmp_path / "retrieval_eval_cases.json.json"
 
     with open(input_file, "w", encoding="utf-8") as file:
         json.dump(cases, file, ensure_ascii=False, indent=2)
 
-    loaded_cases = load_embedding_search_eval_cases(input_file)
+    loaded_cases = load_retrieval_eval_cases(input_file)
 
     assert loaded_cases == cases
 
 
-def test_load_embedding_search_eval_cases_rejects_duplicate_ids(tmp_path: Path) -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+def test_load_retrieval_eval_cases_rejects_duplicate_ids(tmp_path: Path) -> None:
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "привезти спорядження додому",
@@ -417,17 +417,17 @@ def test_load_embedding_search_eval_cases_rejects_duplicate_ids(tmp_path: Path) 
             "split": "dev",
         },
     ]
-    input_file = tmp_path / "embedding_search_eval_cases.json"
+    input_file = tmp_path / "retrieval_eval_cases.json"
 
     with open(input_file, "w", encoding="utf-8") as file:
         json.dump(cases, file, ensure_ascii=False, indent=2)
 
     with pytest.raises(ValueError, match="Duplicate eval case id: test_case_001"):
-        load_embedding_search_eval_cases(input_file)
+        load_retrieval_eval_cases(input_file)
 
 
-def test_load_embedding_search_eval_cases_rejects_invalid_category(tmp_path: Path) -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+def test_load_retrieval_eval_cases_rejects_invalid_category(tmp_path: Path) -> None:
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "привезти спорядження додому",
@@ -437,17 +437,17 @@ def test_load_embedding_search_eval_cases_rejects_invalid_category(tmp_path: Pat
             "split": "dev",
         },
     ]
-    input_file = tmp_path / "embedding_search_eval_cases.json"
+    input_file = tmp_path / "retrieval_eval_cases.json"
 
     with open(input_file, "w", encoding="utf-8") as file:
         json.dump(cases, file, ensure_ascii=False, indent=2)
 
     with pytest.raises(ValueError, match="Unknown eval category: wrong_category"):
-        load_embedding_search_eval_cases(input_file)
+        load_retrieval_eval_cases(input_file)
 
 
-def test_load_embedding_search_eval_cases_rejects_invalid_difficulty(tmp_path: Path) -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+def test_load_retrieval_eval_cases_rejects_invalid_difficulty(tmp_path: Path) -> None:
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "привезти спорядження додому",
@@ -457,17 +457,17 @@ def test_load_embedding_search_eval_cases_rejects_invalid_difficulty(tmp_path: P
             "split": "dev",
         },
     ]
-    input_file = tmp_path / "embedding_search_eval_cases.json"
+    input_file = tmp_path / "retrieval_eval_cases.json"
 
     with open(input_file, "w", encoding="utf-8") as file:
         json.dump(cases, file, ensure_ascii=False, indent=2)
 
     with pytest.raises(ValueError, match="Unknown eval difficulty: wrong_difficulty"):
-        load_embedding_search_eval_cases(input_file)
+        load_retrieval_eval_cases(input_file)
 
 
-def test_load_embedding_search_eval_cases_rejects_invalid_split(tmp_path: Path) -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+def test_load_retrieval_eval_cases_rejects_invalid_split(tmp_path: Path) -> None:
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "привезти спорядження додому",
@@ -477,10 +477,10 @@ def test_load_embedding_search_eval_cases_rejects_invalid_split(tmp_path: Path) 
             "split": "wrong_split",
         },
     ]
-    input_file = tmp_path / "embedding_search_eval_cases.json"
+    input_file = tmp_path / "retrieval_eval_cases.json"
 
     with open(input_file, "w", encoding="utf-8") as file:
         json.dump(cases, file, ensure_ascii=False, indent=2)
 
     with pytest.raises(ValueError, match="Unknown eval split: wrong_split"):
-        load_embedding_search_eval_cases(input_file)
+        load_retrieval_eval_cases(input_file)

@@ -24,7 +24,7 @@ def test_get_quality_check_commands_returns_project_checks() -> None:
     assert commands[1][1:] == ["-m", "ruff", "check", "."]
     assert commands[2][1:] == ["-m", "ruff", "format", "--check", "."]
     assert commands[3][1:] == ["-m", "mypy", "src/prokat24_ai_lab"]
-    assert commands[4][1:] == ["scripts/evals/run_search_evals.py"]
+    assert commands[4][1:] == ["scripts/evals/run_search_evals.py", "--split", "dev"]
     assert commands[5][1:] == ["scripts/evals/run_answer_evals.py"]
     assert commands[6][1:] == ["scripts/evals/run_product_answer_evals.py"]
     assert commands[7][1:] == [

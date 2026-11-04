@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 
-from prokat24_ai_lab.evals.embedding_evals import EmbeddingSearchEvalCase
 from prokat24_ai_lab.evals.hybrid_search_evals import (
     HybridSearchEvalReport,
     HybridSearchEvalResult,
@@ -15,6 +14,7 @@ from prokat24_ai_lab.evals.hybrid_search_evals import (
     run_weighted_hybrid_search_evals,
     save_hybrid_search_eval_report,
 )
+from prokat24_ai_lab.evals.retrieval_cases import RetrievalEvalCase
 from prokat24_ai_lab.knowledge.base import KnowledgePage
 
 
@@ -99,7 +99,7 @@ def results() -> list[HybridSearchEvalResult]:
 def test_evaluate_hybrid_search_case_returns_passed_result(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
-    case: EmbeddingSearchEvalCase = {
+    case: RetrievalEvalCase = {
         "id": "test_case_001",
         "query": "де вас знайти",
         "expected_document_id": "contact-us",
@@ -132,7 +132,7 @@ def test_evaluate_hybrid_search_case_returns_passed_result(
 def test_evaluate_hybrid_search_case_returns_expected_document_rank(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
-    case: EmbeddingSearchEvalCase = {
+    case: RetrievalEvalCase = {
         "id": "test_case_001",
         "query": "доставка спорядження",
         "expected_document_id": "contact-us",
@@ -160,7 +160,7 @@ def test_evaluate_hybrid_search_case_returns_expected_document_rank(
 
 
 def test_evaluate_hybrid_search_case_returns_empty_result() -> None:
-    case: EmbeddingSearchEvalCase = {
+    case: RetrievalEvalCase = {
         "id": "test_case_001",
         "query": "невідомий запит",
         "expected_document_id": "missing-document",
@@ -185,7 +185,7 @@ def test_evaluate_hybrid_search_case_returns_empty_result() -> None:
 def test_evaluate_weighted_hybrid_search_case_applies_source_weights(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
-    case: EmbeddingSearchEvalCase = {
+    case: RetrievalEvalCase = {
         "id": "test_case_001",
         "query": "підкажіть контакти, щоб отримати спорядження з доставкою по Києву",
         "expected_document_id": "dostavka",
@@ -220,7 +220,7 @@ def test_evaluate_weighted_hybrid_search_case_applies_source_weights(
 def test_run_hybrid_search_evals_returns_results_for_all_cases(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "доставка спорядження",
@@ -267,7 +267,7 @@ def test_run_hybrid_search_evals_returns_results_for_all_cases(
 
 
 def test_run_hybrid_search_evals_raises_error_for_missing_query_embedding() -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "доставка спорядження",
@@ -290,7 +290,7 @@ def test_run_hybrid_search_evals_raises_error_for_missing_query_embedding() -> N
 def test_run_weighted_hybrid_search_evals_returns_all_results(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "доставка спорядження",
@@ -337,7 +337,7 @@ def test_run_weighted_hybrid_search_evals_returns_all_results(
 def test_run_weighted_hybrid_search_evals_rejects_missing_query_embedding(
     knowledge_pages: list[KnowledgePage],
 ) -> None:
-    cases: list[EmbeddingSearchEvalCase] = [
+    cases: list[RetrievalEvalCase] = [
         {
             "id": "test_case_001",
             "query": "доставка спорядження",
