@@ -1,11 +1,11 @@
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
-from prokat24_ai_lab.evals.hybrid_search_evals import (
+from prokat24_ai_lab.evals.retrieval.cases import load_retrieval_eval_cases
+from prokat24_ai_lab.evals.retrieval.hybrid import (
     HybridSearchEvalResult,
     build_hybrid_search_eval_summary,
     run_weighted_hybrid_search_evals,
 )
-from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
 from prokat24_ai_lab.knowledge.base import load_knowledge_base
 from prokat24_ai_lab.project_paths import (
     DOCUMENT_EMBEDDING_INDEX_FILE,

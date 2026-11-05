@@ -1,7 +1,7 @@
 import datetime
 
 from prokat24_ai_lab.eval_exit_codes import get_eval_exit_code
-from prokat24_ai_lab.evals.answer_evals import (
+from prokat24_ai_lab.evals.answers.knowledge import (
     AnswerEvalResult,
     build_answer_eval_report,
     load_answer_eval_cases,

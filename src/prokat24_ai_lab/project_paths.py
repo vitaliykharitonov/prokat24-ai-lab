@@ -16,36 +16,48 @@ def find_project_root(start_path: Path) -> Path:
 
 PROJECT_ROOT = find_project_root(Path(__file__))
 DATA_DIR = PROJECT_ROOT / "data"
+
+INDEXES_DIR = DATA_DIR / "indexes"
+SNAPSHOTS_DIR = DATA_DIR / "snapshots"
+EVALS_DATA_DIR = DATA_DIR / "evals"
+RETRIEVAL_EVALS_DATA_DIR = EVALS_DATA_DIR / "retrieval"
+ANSWER_EVALS_DATA_DIR = EVALS_DATA_DIR / "answers"
+GRADING_EVALS_DATA_DIR = EVALS_DATA_DIR / "grading"
+AGENT_EVALS_DATA_DIR = EVALS_DATA_DIR / "agent"
+SAFETY_EVALS_DATA_DIR = EVALS_DATA_DIR / "safety"
+
 REPORTS_DIR = PROJECT_ROOT / "reports"
 AGENT_EVAL_REPORTS_DIR = REPORTS_DIR / "agent"
 GRADER_COMPARISON_REPORTS_DIR = REPORTS_DIR / "grader"
 
-KNOWLEDGE_PAGES_FILE = DATA_DIR / "knowledge_pages.json"
-ANSWER_EVAL_CASES_FILE = DATA_DIR / "answer_eval_cases.json"
-RETRIEVAL_EVAL_CASES_FILE = DATA_DIR / "retrieval_eval_cases.json"
-RAG_ANSWER_EVAL_CASES_FILE = DATA_DIR / "rag_answer_eval_cases.json"
-RAGAS_EVAL_CASES_FILE = DATA_DIR / "ragas_eval_cases.json"
-JUDGE_EVAL_CASES_FILE = DATA_DIR / "judge_eval_cases.json"
-TOOL_USE_EVAL_CASES_FILE = DATA_DIR / "tool_use_eval_cases.json"
-AGENT_OUTCOME_EVAL_CASES_FILE = DATA_DIR / "agent_outcome_eval_cases.json"
-AGENT_CAPABILITY_JUDGE_CASES_FILE = DATA_DIR / "agent_capability_judge_cases.json"
-GRADER_COMPARISON_CASES_FILE = DATA_DIR / "grader_comparison_cases.json"
-GRADER_COMPARISON_HOLDOUT_CASES_FILE = DATA_DIR / "grader_comparison_holdout_cases.json"
+KNOWLEDGE_PAGES_FILE = SNAPSHOTS_DIR / "knowledge_pages.json"
+ANSWER_EVAL_CASES_FILE = ANSWER_EVALS_DATA_DIR / "answer_eval_cases.json"
+RETRIEVAL_EVAL_CASES_FILE = RETRIEVAL_EVALS_DATA_DIR / "retrieval_eval_cases.json"
+RAG_ANSWER_EVAL_CASES_FILE = ANSWER_EVALS_DATA_DIR / "rag_answer_eval_cases.json"
+RAGAS_EVAL_CASES_FILE = ANSWER_EVALS_DATA_DIR / "ragas_eval_cases.json"
+JUDGE_EVAL_CASES_FILE = GRADING_EVALS_DATA_DIR / "judge_eval_cases.json"
+TOOL_USE_EVAL_CASES_FILE = AGENT_EVALS_DATA_DIR / "tool_use_eval_cases.json"
+AGENT_OUTCOME_EVAL_CASES_FILE = AGENT_EVALS_DATA_DIR / "agent_outcome_eval_cases.json"
+AGENT_CAPABILITY_JUDGE_CASES_FILE = AGENT_EVALS_DATA_DIR / "agent_capability_judge_cases.json"
+GRADER_COMPARISON_CASES_FILE = GRADING_EVALS_DATA_DIR / "grader_comparison_cases.json"
+GRADER_COMPARISON_HOLDOUT_CASES_FILE = (
+    GRADING_EVALS_DATA_DIR / "grader_comparison_holdout_cases.json"
+)
 
-AGENT_SAFETY_EVAL_CASES_FILE = DATA_DIR / "agent_safety_eval_cases.json"
+AGENT_SAFETY_EVAL_CASES_FILE = SAFETY_EVALS_DATA_DIR / "agent_safety_eval_cases.json"
 AGENT_SAFETY_MALICIOUS_KNOWLEDGE_PAGES_FILE = (
-    DATA_DIR / "agent_safety_malicious_knowledge_pages.json"
+    SAFETY_EVALS_DATA_DIR / "agent_safety_malicious_knowledge_pages.json"
 )
 AGENT_SAFETY_MALICIOUS_CONTACTS_KNOWLEDGE_PAGES_FILE = (
-    DATA_DIR / "agent_safety_malicious_contacts_knowledge_pages.json"
+    SAFETY_EVALS_DATA_DIR / "agent_safety_malicious_contacts_knowledge_pages.json"
 )
 AGENT_SAFETY_MALICIOUS_BOOKING_KNOWLEDGE_PAGES_FILE = (
-    DATA_DIR / "agent_safety_malicious_booking_knowledge_pages.json"
+    SAFETY_EVALS_DATA_DIR / "agent_safety_malicious_booking_knowledge_pages.json"
 )
 
-DOCUMENT_EMBEDDING_INDEX_FILE = DATA_DIR / "document_embedding_index.json"
-QUERY_EMBEDDING_INDEX_FILE = DATA_DIR / "query_embedding_index.json"
-PRODUCTS_FILE = DATA_DIR / "products.json"
+DOCUMENT_EMBEDDING_INDEX_FILE = INDEXES_DIR / "document_embedding_index.json"
+QUERY_EMBEDDING_INDEX_FILE = INDEXES_DIR / "query_embedding_index.json"
+PRODUCTS_FILE = SNAPSHOTS_DIR / "products.json"
 
 SEARCH_EVAL_REPORT_FILE = REPORTS_DIR / "search_eval_report.json"
 ANSWER_EVAL_REPORT_FILE = REPORTS_DIR / "answer_eval_report.json"

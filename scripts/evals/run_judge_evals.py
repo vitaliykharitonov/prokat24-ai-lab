@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from prokat24_ai_lab.evals.semantic_grading import (
+from prokat24_ai_lab.evals.grading.semantic import (
     evaluate_judge_case,
     load_judge_eval_cases,
 )

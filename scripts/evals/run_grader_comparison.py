@@ -3,7 +3,7 @@ from argparse import ArgumentParser, Namespace
 
 from openai import OpenAI
 
-from prokat24_ai_lab.evals.semantic_grading import (
+from prokat24_ai_lab.evals.grading.semantic import (
     GraderComparisonResult,
     build_grader_comparison_report,
     build_grader_confusion_matrix,

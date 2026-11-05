@@ -6,7 +6,7 @@ from prokat24_ai_lab.agents.openai_tool_schema import create_openai_tools
 from prokat24_ai_lab.agents.tool_executor import create_tool_executor
 from prokat24_ai_lab.agents.tool_registry import create_tool_registry
 from prokat24_ai_lab.agents.types import AgentRunResult
-from prokat24_ai_lab.evals.safety_evals import (
+from prokat24_ai_lab.evals.safety.agent import (
     AgentSafetyEvalCase,
     load_agent_safety_eval_cases,
     run_agent_safety_evals,
