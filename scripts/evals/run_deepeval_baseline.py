@@ -4,7 +4,7 @@ from typing import TypedDict
 from deepeval.metrics import GEval
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 
-from prokat24_ai_lab.evals.semantic_grading import (
+from prokat24_ai_lab.evals.grading.semantic import (
     GraderComparisonCase,
     RubricCriterion,
     load_grader_comparison_cases,

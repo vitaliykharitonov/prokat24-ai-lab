@@ -4,7 +4,7 @@ from openai import OpenAI
 
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.openai_client import create_openai_embed_text
-from prokat24_ai_lab.evals.rag_answer_evals import (
+from prokat24_ai_lab.evals.answers.rag import (
     build_rag_answer_eval_report,
     load_rag_answer_eval_cases,
     run_rag_answer_evals,

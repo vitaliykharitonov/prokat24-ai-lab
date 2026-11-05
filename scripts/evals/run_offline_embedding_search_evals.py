@@ -3,12 +3,12 @@ from argparse import ArgumentParser, Namespace
 
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
-from prokat24_ai_lab.evals.embedding_evals import (
+from prokat24_ai_lab.evals.retrieval.cases import load_retrieval_eval_cases
+from prokat24_ai_lab.evals.retrieval.embedding import (
     build_embedding_search_eval_report,
     run_precomputed_embedding_search_evals,
     save_embedding_search_eval_report,
 )
-from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.project_paths import (
     DOCUMENT_EMBEDDING_INDEX_FILE,

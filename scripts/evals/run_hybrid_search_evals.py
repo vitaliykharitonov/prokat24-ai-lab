@@ -3,13 +3,13 @@ from argparse import ArgumentParser, Namespace
 
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
-from prokat24_ai_lab.evals.hybrid_search_evals import (
+from prokat24_ai_lab.evals.retrieval.cases import load_retrieval_eval_cases
+from prokat24_ai_lab.evals.retrieval.hybrid import (
     build_hybrid_search_eval_report,
     run_hybrid_search_evals,
     save_hybrid_search_eval_report,
 )
-from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
-from prokat24_ai_lab.evals.retrieval_metrics import (
+from prokat24_ai_lab.evals.retrieval.metrics import (
     RetrievalEvalSummary,
     build_grouped_retrieval_eval_summaries,
 )

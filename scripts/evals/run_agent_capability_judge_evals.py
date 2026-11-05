@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from prokat24_ai_lab.evals.agent_evals import (
+from prokat24_ai_lab.evals.agent.outcome import (
     load_agent_capability_judge_cases,
     run_agent_capability_judge_evals,
     summarize_agent_capability_judge_results,

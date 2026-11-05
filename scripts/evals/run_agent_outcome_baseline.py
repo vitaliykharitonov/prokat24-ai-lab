@@ -18,7 +18,7 @@ from prokat24_ai_lab.agents.openai_tool_schema import create_openai_tools
 from prokat24_ai_lab.agents.tool_executor import create_tool_executor
 from prokat24_ai_lab.agents.tool_registry import create_tool_registry
 from prokat24_ai_lab.agents.types import AgentRunResult
-from prokat24_ai_lab.evals.agent_evals import (
+from prokat24_ai_lab.evals.agent.outcome import (
     AgentEvalConfiguration,
     build_agent_eval_report,
     evaluate_agent_capability,

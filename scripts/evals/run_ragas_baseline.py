@@ -13,7 +13,7 @@ from ragas.metrics.collections import (
 
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.openai_client import create_openai_embed_text
-from prokat24_ai_lab.evals.ragas_evals import (
+from prokat24_ai_lab.evals.answers.ragas import (
     RagasEvalCase,
     RagasEvalResult,
     build_ragas_eval_result,

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Protocol, TypeVar, cast
 
-from prokat24_ai_lab.evals.semantic_grading import (
+from prokat24_ai_lab.evals.grading.semantic import (
     CriterionJudge,
     CriterionJudgeResult,
     Judge,

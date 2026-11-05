@@ -2,8 +2,8 @@ from argparse import ArgumentParser, Namespace
 
 from prokat24_ai_lab.embeddings.document_index import load_document_embedding_index
 from prokat24_ai_lab.embeddings.query_index import load_query_embedding_index
-from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
-from prokat24_ai_lab.evals.retrieval_comparison import (
+from prokat24_ai_lab.evals.retrieval.cases import load_retrieval_eval_cases
+from prokat24_ai_lab.evals.retrieval.comparison import (
     build_retrieval_comparison_summary,
     run_retrieval_comparison_evals,
 )

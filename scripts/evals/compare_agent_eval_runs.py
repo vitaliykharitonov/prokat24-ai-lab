@@ -1,4 +1,4 @@
-from prokat24_ai_lab.evals.agent_evals import (
+from prokat24_ai_lab.evals.agent.outcome import (
     AgentMetricComparison,
     AgentMetricName,
     compare_latest_agent_eval_reports,

@@ -8,7 +8,7 @@ from prokat24_ai_lab.embeddings.query_index import (
     build_query_embedding_index,
     save_query_embedding_index,
 )
-from prokat24_ai_lab.evals.retrieval_cases import load_retrieval_eval_cases
+from prokat24_ai_lab.evals.retrieval.cases import load_retrieval_eval_cases
 from prokat24_ai_lab.project_paths import (
     QUERY_EMBEDDING_INDEX_FILE,
     RETRIEVAL_EVAL_CASES_FILE,

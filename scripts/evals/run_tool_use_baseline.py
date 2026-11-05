@@ -7,7 +7,7 @@ from prokat24_ai_lab.agents.openai_tool_call import create_openai_tool_call_gene
 from prokat24_ai_lab.agents.openai_tool_schema import create_openai_tools
 from prokat24_ai_lab.agents.tool_registry import create_tool_registry
 from prokat24_ai_lab.agents.types import ToolCall, ToolCallGenerator
-from prokat24_ai_lab.evals.tool_use import (
+from prokat24_ai_lab.evals.agent.tool_use import (
     RepeatedToolUseEvalResult,
     ToolUseEvalResult,
     load_tool_use_eval_cases,

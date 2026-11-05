@@ -1,5 +1,5 @@
 from prokat24_ai_lab.eval_exit_codes import get_eval_exit_code
-from prokat24_ai_lab.evals.product_answer_evals import (
+from prokat24_ai_lab.evals.answers.product import (
     ProductAnswerEvalFailure,
     build_product_answer_eval_report_for_products,
     save_product_answer_eval_report,
