@@ -7,10 +7,9 @@ from pydantic import TypeAdapter
 
 from prokat24_ai_lab.agents.types import AgentRunResult, ToolCall, ToolExecution
 from prokat24_ai_lab.evals.agent.outcome import (
-    AgentCriterionEvalResult,
-    AgentCriterionResult,
     normalize_eval_text,
 )
+from prokat24_ai_lab.evals.agent.types import AgentCriterionEvalResult, AgentCriterionResult
 from prokat24_ai_lab.evals.grading.semantic import (
     CriterionJudge,
     JudgeInput,

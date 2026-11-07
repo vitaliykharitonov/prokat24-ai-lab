@@ -18,13 +18,15 @@ from prokat24_ai_lab.agents.openai_tool_schema import create_openai_tools
 from prokat24_ai_lab.agents.tool_executor import create_tool_executor
 from prokat24_ai_lab.agents.tool_registry import create_tool_registry
 from prokat24_ai_lab.agents.types import AgentRunResult
+from prokat24_ai_lab.evals.agent.capability import evaluate_agent_capability
+from prokat24_ai_lab.evals.agent.grounding import evaluate_agent_grounding
 from prokat24_ai_lab.evals.agent.outcome import (
-    AgentEvalConfiguration,
-    build_agent_eval_report,
-    evaluate_agent_capability,
-    evaluate_agent_grounding,
     load_agent_outcome_eval_cases,
     run_agent_outcome_evals,
+)
+from prokat24_ai_lab.evals.agent.report import (
+    AgentEvalConfiguration,
+    build_agent_eval_report,
     save_agent_eval_report,
 )
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
