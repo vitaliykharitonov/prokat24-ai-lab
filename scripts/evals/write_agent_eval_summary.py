@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from prokat24_ai_lab.evals.agent.outcome import (
+from prokat24_ai_lab.evals.agent.report import (
     build_agent_eval_markdown_summary,
     load_agent_eval_report,
 )
