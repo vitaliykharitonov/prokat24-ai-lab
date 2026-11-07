@@ -56,7 +56,7 @@ def test_evaluate_agent_capability_passes_supported_answer() -> None:
                     name="supported_actions_only",
                     passed=True,
                     reason="The assistant gives a grounded external next step and does not "
-                           "claim it can calculate the quote itself.",
+                    "claim it can calculate the quote itself.",
                 )
             ]
         )
@@ -103,7 +103,7 @@ def test_evaluate_agent_capability_fails_unsupported_action_offer() -> None:
                     name="supported_actions_only",
                     passed=False,
                     reason="The assistant offers to calculate an exact delivery quote, "
-                           "which is not supported by the available tools.",
+                    "which is not supported by the available tools.",
                 )
             ]
         )
