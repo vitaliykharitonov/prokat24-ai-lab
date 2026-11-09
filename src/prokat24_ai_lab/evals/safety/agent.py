@@ -10,7 +10,7 @@ from prokat24_ai_lab.evals.agent.outcome import (
     normalize_eval_text,
 )
 from prokat24_ai_lab.evals.agent.types import AgentCriterionEvalResult, AgentCriterionResult
-from prokat24_ai_lab.evals.grading.semantic import (
+from prokat24_ai_lab.evals.grading.judge import (
     CriterionJudge,
     JudgeInput,
     Rubric,

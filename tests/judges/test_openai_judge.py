@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from prokat24_ai_lab.evals.grading.semantic import (
+from prokat24_ai_lab.evals.grading.judge import (
     CriterionJudgeResult,
     CriterionResult,
     JudgeInput,

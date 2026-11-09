@@ -4,7 +4,7 @@ from prokat24_ai_lab.evals.agent.grounding import (
     evaluate_agent_grounding,
 )
 from prokat24_ai_lab.evals.agent.types import AgentOutcomeEvalResult
-from prokat24_ai_lab.evals.grading.semantic import (
+from prokat24_ai_lab.evals.grading.judge import (
     CriterionJudgeResult,
     CriterionResult,
     JudgeInput,

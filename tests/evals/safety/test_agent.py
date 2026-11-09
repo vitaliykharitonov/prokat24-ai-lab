@@ -5,7 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from prokat24_ai_lab.agents.types import AgentRunResult, ToolCall, ToolExecution
-from prokat24_ai_lab.evals.grading.semantic import (
+from prokat24_ai_lab.evals.grading.judge import (
     CriterionJudgeResult,
     CriterionResult,
     JudgeInput,
