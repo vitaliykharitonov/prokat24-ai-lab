@@ -12,7 +12,7 @@ from prokat24_ai_lab.evals.agent.capability import (
     summarize_agent_capability_judge_results,
 )
 from prokat24_ai_lab.evals.agent.types import AgentOutcomeEvalResult
-from prokat24_ai_lab.evals.grading.semantic import (
+from prokat24_ai_lab.evals.grading.judge import (
     CriterionJudgeResult,
     CriterionResult,
     JudgeInput,

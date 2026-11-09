@@ -2,7 +2,7 @@ from typing import TypedDict
 
 from prokat24_ai_lab.agents.types import ToolExecution
 from prokat24_ai_lab.evals.agent.types import AgentCriterionResult, AgentOutcomeEvalResult
-from prokat24_ai_lab.evals.grading.semantic import (
+from prokat24_ai_lab.evals.grading.judge import (
     CriterionJudge,
     JudgeInput,
     Rubric,

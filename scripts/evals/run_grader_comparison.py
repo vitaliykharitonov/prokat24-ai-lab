@@ -3,17 +3,21 @@ from argparse import ArgumentParser, Namespace
 
 from openai import OpenAI
 
-from prokat24_ai_lab.evals.grading.semantic import (
+from prokat24_ai_lab.evals.grading.comparison import (
     GraderComparisonResult,
-    build_grader_comparison_report,
     build_grader_confusion_matrix,
     calculate_grader_classification_metrics,
-    load_grader_comparison_cases,
-    run_grader_comparison_evals,
-    save_grader_comparison_report,
     summarize_grader_comparison,
     summarize_grader_comparison_by_category,
     summarize_grader_stability,
+)
+from prokat24_ai_lab.evals.grading.comparison_runner import (
+    load_grader_comparison_cases,
+    run_grader_comparison_evals,
+)
+from prokat24_ai_lab.evals.grading.report import (
+    build_grader_comparison_report,
+    save_grader_comparison_report,
 )
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.judges.openai_judge import create_openai_criterion_judge, create_openai_judge
