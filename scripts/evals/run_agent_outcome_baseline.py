@@ -10,6 +10,9 @@ from prokat24_ai_lab.evals.agent.outcome import (
     load_agent_outcome_eval_cases,
     run_agent_outcome_evals,
 )
+from prokat24_ai_lab.evals.agent.phoenix import (
+    publish_agent_eval_annotations,
+)
 from prokat24_ai_lab.evals.agent.presentation import (
     print_agent_eval_results,
     print_agent_eval_summary,
@@ -29,9 +32,6 @@ from prokat24_ai_lab.observability.cost_estimation import (
     OpenAITraceCostRecord,
     aggregate_openai_costs_by_trace,
     estimate_openai_model_cost,
-)
-from prokat24_ai_lab.observability.phoenix_annotations import (
-    publish_agent_eval_annotations,
 )
 from prokat24_ai_lab.observability.runtime import create_observability_runtime
 from prokat24_ai_lab.products.catalog import load_products
