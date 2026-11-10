@@ -23,6 +23,20 @@ human-labelled datasets, holdout evaluation, adversarial testing, statistical an
 ## System overview
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "18px",
+    "fontFamily": "Inter, Segoe UI, Arial, sans-serif",
+    "primaryTextColor": "#ffffff",
+    "lineColor": "#c9d1d9",
+    "textColor": "#ffffff",
+    "clusterBkg": "#161b22",
+    "clusterBorder": "#8b949e",
+    "edgeLabelBackground": "#0d1117"
+  }
+}}%%
+
 flowchart LR
     U["User query"]
 
@@ -56,6 +70,9 @@ flowchart LR
         EJ["LLM-as-a-Judge"]
         EG["Agent: outcome / capability / grounding"]
         ES["Safety / adversarial"]
+
+        EJ --> EG
+        EJ --> ES
     end
 
     H -.-> ER
@@ -74,6 +91,27 @@ flowchart LR
     OT --> PH
     OT --> LG
     OT --> CO
+
+    classDef user fill:#0f766e,color:#ffffff,stroke:#5eead4,stroke-width:2px;
+    classDef retrieval fill:#1e3a5f,color:#ffffff,stroke:#60a5fa,stroke-width:2px;
+    classDef runtime fill:#5a3518,color:#ffffff,stroke:#fb923c,stroke-width:2px;
+    classDef evaluation fill:#4a3b08,color:#ffffff,stroke:#f2cc60,stroke-width:2px;
+    classDef judge fill:#3b2452,color:#ffffff,stroke:#d2a8ff,stroke-width:2px;
+    classDef observability fill:#173d2a,color:#ffffff,stroke:#3fb950,stroke-width:2px;
+
+    class U user;
+    class K,E,H retrieval;
+    class R,A,P,N runtime;
+    class ER,EA,EG,ES evaluation;
+    class EJ judge;
+    class OT,PH,LG,CO observability;
+
+    style Retrieval fill:#0f2238,stroke:#60a5fa,stroke-width:2px,color:#ffffff
+    style Runtime fill:#3a2414,stroke:#fb923c,stroke-width:2px,color:#ffffff
+    style Evaluation fill:#302907,stroke:#f2cc60,stroke-width:2px,color:#ffffff
+    style Observability fill:#102b1f,stroke:#3fb950,stroke-width:2px,color:#ffffff
+
+    linkStyle default stroke:#c9d1d9,stroke-width:2px
 ```
 
 The project separates **runtime logic**, **evaluation datasets**, **evaluation logic**, and **reporting/observability**,
