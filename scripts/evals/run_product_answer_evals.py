@@ -2,11 +2,16 @@ from prokat24_ai_lab.eval_exit_codes import get_eval_exit_code
 from prokat24_ai_lab.evals.answers.product import (
     ProductAnswerEvalFailure,
     build_product_answer_eval_report_for_products,
+    load_product_answer_eval_cases,
     save_product_answer_eval_report,
 )
 from prokat24_ai_lab.git_metadata import get_current_git_commit, is_git_worktree_dirty
 from prokat24_ai_lab.products.catalog import load_products
-from prokat24_ai_lab.project_paths import PRODUCT_ANSWER_EVAL_REPORT_FILE, PRODUCTS_FILE
+from prokat24_ai_lab.project_paths import (
+    PRODUCT_ANSWER_EVAL_CASES_FILE,
+    PRODUCT_ANSWER_EVAL_REPORT_FILE,
+    PRODUCTS_FILE,
+)
 
 
 def format_product_answer_eval_summary(passed_count: int, total_count: int) -> str:
@@ -30,10 +35,12 @@ def format_product_answer_eval_failure(failure: ProductAnswerEvalFailure) -> str
 
 def main() -> int:
     loaded_products = load_products(PRODUCTS_FILE)
+    eval_cases = load_product_answer_eval_cases(PRODUCT_ANSWER_EVAL_CASES_FILE)
     git_commit = get_current_git_commit()
     git_dirty = is_git_worktree_dirty()
     report = build_product_answer_eval_report_for_products(
         loaded_products,
+        eval_cases,
         git_commit=git_commit,
         git_dirty=git_dirty,
     )

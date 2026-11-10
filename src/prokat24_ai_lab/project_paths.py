@@ -32,6 +32,7 @@ GRADER_COMPARISON_REPORTS_DIR = REPORTS_DIR / "grader"
 
 KNOWLEDGE_PAGES_FILE = SNAPSHOTS_DIR / "knowledge_pages.json"
 ANSWER_EVAL_CASES_FILE = ANSWER_EVALS_DATA_DIR / "answer_eval_cases.json"
+PRODUCT_ANSWER_EVAL_CASES_FILE = ANSWER_EVALS_DATA_DIR / "product_answer_eval_cases.json"
 RETRIEVAL_EVAL_CASES_FILE = RETRIEVAL_EVALS_DATA_DIR / "retrieval_eval_cases.json"
 RAG_ANSWER_EVAL_CASES_FILE = ANSWER_EVALS_DATA_DIR / "rag_answer_eval_cases.json"
 RAGAS_EVAL_CASES_FILE = ANSWER_EVALS_DATA_DIR / "ragas_eval_cases.json"

@@ -32,174 +32,11 @@ class ProductAnswerEvalReport(TypedDict):
     failures: list[ProductAnswerEvalFailure]
 
 
-PRODUCT_ANSWER_EVAL_CASES: list[ProductAnswerEvalCase] = [
-    {
-        "query": "скільки коштує 2 місний намет на тиждень",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "Тиждень: 1200 грн",
-        ],
-    },
-    {
-        "query": "скільки коштує 2 місний намет на 2 тижні",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "2 тижні: 2300 грн",
-        ],
-    },
-    {
-        "query": "яка застава за 2 місний намет",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "Застава: 4000 грн",
-        ],
-    },
-    {
-        "query": "прокат спальника на 2 тижні",
-        "expected_fragments": [
-            "спальників",
-            "2 тижні:",
-        ],
-    },
-    {
-        "query": "прокат човна на тиждень",
-        "expected_fragments": [
-            "човн",
-            "Тиждень:",
-        ],
-    },
-    {
-        "query": "скільки коштує спальник на тиждень",
-        "expected_fragments": [
-            "Прокат осінніх спальників Asleep",
-            "Тиждень: 650 грн",
-        ],
-    },
-    {
-        "query": "яка застава за спальник",
-        "expected_fragments": [
-            "Прокат осінніх спальників Asleep",
-            "Застава: 2000 грн",
-        ],
-    },
-    {
-        "query": "прокат човна",
-        "expected_fragments": [
-            "Прокат 2-місних човнів",
-            "Ціни:",
-            "Тиждень: 2000 грн",
-        ],
-    },
-    {
-        "query": "скільки коштує 2 місний човен на тиждень",
-        "expected_fragments": [
-            "Прокат 2-місних човнів",
-            "Тиждень: 2000 грн",
-        ],
-    },
-    {
-        "query": "скільки коштує 3 місний човен на тиждень",
-        "expected_fragments": [
-            "Прокат 3-місних човнів",
-            "Тиждень: 2700 грн",
-        ],
-    },
-    {
-        "query": "яка застава за 2 місний човен",
-        "expected_fragments": [
-            "Прокат 2-місних човнів",
-            "Застава: 8000 грн",
-        ],
-    },
-    {
-        "query": "яка застава за 3 місний човен",
-        "expected_fragments": [
-            "Прокат 3-місних човнів",
-            "Застава: 10000 грн",
-        ],
-    },
-    {
-        "query": "скільки коштує 2 місний намет на 5 днів",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "5 днів: 980 грн",
-        ],
-    },
-    {
-        "query": "скільки коштує спальник на 5 днів",
-        "expected_fragments": [
-            "Прокат осінніх спальників Asleep",
-            "5 днів: 520 грн",
-        ],
-    },
-    {
-        "query": "скільки коштує 2 місний човен на 5 днів",
-        "expected_fragments": [
-            "Прокат 2-місних човнів",
-            "5 днів: 1550 грн",
-        ],
-    },
-    {
-        "query": "скільки буде коштувати на 5 днів 2 місний намет",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "5 днів: 980 грн",
-        ],
-    },
-    {
-        "query": "чи є в наявності 2 місний намет",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "Актуальну наявність краще уточнити у менеджера",
-        ],
-    },
-    {
-        "query": "які характеристики у 2 місний намет",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "Прокат легких двомісних наметів",
-            "Характеристики:",
-            "Розмір: 205 х 240 см",
-            "Вага: 3.31 кг",
-            "Комплектація: Намет, зовнішній тент",
-        ],
-    },
-    {
-        "query": "яка вага 2 місний намет",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "Вага: 3.31 кг",
-        ],
-    },
-    {
-        "query": "якого розміру 2 місний намет",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "Розмір: 205 х 240 см",
-        ],
-    },
-    {
-        "query": "2 місний намет комплектація",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "Комплектація: Намет, зовнішній тент, набір кілочків (10 шт), дуги (2 шт), чохли",
-        ],
-    },
-    {
-        "query": "яка вага 2 місного намету",
-        "expected_fragments": [
-            "Прокат 2-місних наметів",
-            "Вага: 3.31 кг",
-        ],
-    },
-    {
-        "query": "яка вага лижних черевиків",
-        "expected_fragments": [
-            "Прокат лижних черевиків",
-            "Характеристику Вага не знайдено",
-        ],
-    },
-]
+def load_product_answer_eval_cases(input_file: Path) -> list[ProductAnswerEvalCase]:
+    with open(input_file, encoding="utf-8") as file:
+        loaded_data: list[ProductAnswerEvalCase] = json.load(file)
+
+    return loaded_data
 
 
 def product_answer_eval_passed(products: list[Product], eval_case: ProductAnswerEvalCase) -> bool:
@@ -218,10 +55,13 @@ def find_missing_fragments(answer: str, expected_fragments: list[str]) -> list[s
     return missing_fragments
 
 
-def find_failed_product_answer_evals(products: list[Product]) -> list[ProductAnswerEvalFailure]:
+def find_failed_product_answer_evals(
+    products: list[Product],
+    cases: list[ProductAnswerEvalCase],
+) -> list[ProductAnswerEvalFailure]:
     failures: list[ProductAnswerEvalFailure] = []
 
-    for eval_case in PRODUCT_ANSWER_EVAL_CASES:
+    for eval_case in cases:
         query = eval_case["query"]
         answer = answer_product_query(products, query)
         missing_fragments = find_missing_fragments(answer, eval_case["expected_fragments"])
@@ -270,12 +110,13 @@ def build_product_answer_eval_report(
 
 def build_product_answer_eval_report_for_products(
     products: list[Product],
+    cases: list[ProductAnswerEvalCase],
     created_at: str | None = None,
     git_commit: str | None = None,
     git_dirty: bool | None = None,
 ) -> ProductAnswerEvalReport:
-    failures = find_failed_product_answer_evals(products)
-    total_count = len(PRODUCT_ANSWER_EVAL_CASES)
+    failures = find_failed_product_answer_evals(products, cases)
+    total_count = len(cases)
     passed_count = total_count - len(failures)
 
     return build_product_answer_eval_report(
