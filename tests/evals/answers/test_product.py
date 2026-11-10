@@ -1,10 +1,39 @@
 import json
 from pathlib import Path
 
-import pytest
-
 import prokat24_ai_lab.evals.answers.product as product_answer_evals
 from prokat24_ai_lab.products.catalog import Product
+
+
+def test_load_product_answer_eval_cases_reads_json(tmp_path: Path) -> None:
+    input_file = tmp_path / "product_answer_eval_cases.json"
+    input_file.write_text(
+        json.dumps(
+            [
+                {
+                    "query": "яка вага 2 місний намет",
+                    "expected_fragments": [
+                        "Прокат 2-місних наметів",
+                        "Вага: 3.31 кг",
+                    ],
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    cases = product_answer_evals.load_product_answer_eval_cases(input_file)
+
+    assert cases == [
+        {
+            "query": "яка вага 2 місний намет",
+            "expected_fragments": [
+                "Прокат 2-місних наметів",
+                "Вага: 3.31 кг",
+            ],
+        }
+    ]
 
 
 def test_find_missing_fragments_returns_missing_fragments() -> None:
@@ -45,7 +74,7 @@ def test_find_missing_fragments_returns_empty_list_when_all_fragments_present() 
 def test_build_product_answer_eval_report_returns_summary_and_results() -> None:
     passed_count = 23
     total_count = 23
-    failures = []
+    failures: list[product_answer_evals.ProductAnswerEvalFailure] = []
 
     report = product_answer_evals.build_product_answer_eval_report(
         passed_count,
@@ -71,7 +100,7 @@ def test_build_product_answer_eval_report_returns_summary_and_results() -> None:
 def test_build_product_answer_eval_report_with_failures() -> None:
     passed_count = 22
     total_count = 23
-    failures = [
+    failures: list[product_answer_evals.ProductAnswerEvalFailure] = [
         {
             "query": "test query",
             "missing_fragments": ["fragment"],
@@ -100,9 +129,7 @@ def test_build_product_answer_eval_report_with_failures() -> None:
     assert report["failures"] == failures
 
 
-def test_build_product_answer_eval_report_for_products_returns_passing_report(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_build_product_answer_eval_report_for_products_returns_passing_report() -> None:
     product: Product = {
         "name": "Прокат 2-місних наметів",
         "description": "Опис 2-місного намету.",
@@ -117,22 +144,19 @@ def test_build_product_answer_eval_report_for_products_returns_passing_report(
         "url": "https://prokat24.com.ua/ua/test-tent/",
     }
 
-    monkeypatch.setattr(
-        product_answer_evals,
-        "PRODUCT_ANSWER_EVAL_CASES",
-        [
-            {
-                "query": "яка вага 2 місний намет",
-                "expected_fragments": [
-                    "Прокат 2-місних наметів",
-                    "Вага: 3.31 кг",
-                ],
-            },
-        ],
-    )
+    eval_cases: list[product_answer_evals.ProductAnswerEvalCase] = [
+        {
+            "query": "яка вага 2 місний намет",
+            "expected_fragments": [
+                "Прокат 2-місних наметів",
+                "Вага: 3.31 кг",
+            ],
+        },
+    ]
 
     report = product_answer_evals.build_product_answer_eval_report_for_products(
         [product],
+        eval_cases,
         created_at="2026-01-01T00:00:00+00:00",
         git_commit="abc1234",
         git_dirty=False,
