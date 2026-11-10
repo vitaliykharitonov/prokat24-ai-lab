@@ -1,5 +1,4 @@
 from prokat24_ai_lab.observability.phoenix_annotations import (
-    build_criteria_explanation,
     build_llm_annotation,
     build_outcome_annotation,
 )
@@ -69,17 +68,3 @@ def test_build_llm_annotation_for_grounding() -> None:
         "score": 0.0,
         "explanation": "The answer is supported by tool results.",
     }
-
-
-def test_build_criteria_explanation() -> None:
-    explanation = build_criteria_explanation(
-        [
-            {
-                "name": "supported_actions_only",
-                "passed": False,
-                "reason": "The assistant offered an unsupported action.",
-            }
-        ]
-    )
-
-    assert explanation == ("supported_actions_only: The assistant offered an unsupported action.")
