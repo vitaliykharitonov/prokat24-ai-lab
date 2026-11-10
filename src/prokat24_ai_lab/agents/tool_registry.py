@@ -1,11 +1,11 @@
 from prokat24_ai_lab.agents.types import ToolArguments, ToolDefinition, ToolHandler, ToolRegistry
 from prokat24_ai_lab.knowledge.base import KnowledgePage
-from prokat24_ai_lab.products.answers import (
+from prokat24_ai_lab.products.catalog import Product
+from prokat24_ai_lab.products.catalog_search import search_products
+from prokat24_ai_lab.products.presentation import (
     format_product_day_count_rental_price_answer,
     format_product_search_results,
 )
-from prokat24_ai_lab.products.catalog import Product
-from prokat24_ai_lab.products.catalog_search import search_products
 
 SEARCH_PRODUCTS_DEFINITION: ToolDefinition = {
     "name": "search_products",
