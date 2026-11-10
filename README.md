@@ -22,8 +22,9 @@ human-labelled datasets, holdout evaluation, adversarial testing, statistical an
 
 ## System overview
 
+```mermaid
 flowchart LR
-U["User query"]
+    U["User query"]
 
     subgraph Retrieval
         K["Keyword"]
@@ -73,6 +74,7 @@ U["User query"]
     OT --> PH
     OT --> LG
     OT --> CO
+```
 
 The project separates **runtime logic**, **evaluation datasets**, **evaluation logic**, and **reporting/observability**,
 allowing both system behavior and evaluator behavior to be tested independently.
