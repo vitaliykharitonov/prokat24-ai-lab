@@ -2,186 +2,77 @@
 
 [![Check](https://github.com/vitaliykharitonov/prokat24-ai-lab/actions/workflows/check.yml/badge.svg)](https://github.com/vitaliykharitonov/prokat24-ai-lab/actions/workflows/check.yml)
 
-Python AI/Evals project built around a real equipment rental website.
+**AI evaluation and observability project built around a real equipment-rental website.**
 
-The project covers data collection, keyword and embedding search, rule-based answers, regression evals, and an automated
-quality gate.
+The project evaluates retrieval, RAG answers, LLM-as-a-Judge systems, and a tool-using agent using deterministic checks,
+human-labelled datasets, holdout evaluation, adversarial testing, statistical analysis, and trace-level observability.
 
-## Features
+## What this project demonstrates
 
-- Knowledge base and product catalog export
-- Keyword search with normalization and aliases
-- Product search and rule-based answers
-- OpenAI embeddings and vector search
-- Offline embedding evaluation
-- Hybrid retrieval with Reciprocal Rank Fusion
-- Keyword, embedding, and hybrid retrieval benchmarks
-- Retrieval failure diagnostics and weighted RRF experiments
-- JSON eval reports with Git metadata
-- Automated checks with pytest, Ruff, mypy, and GitHub Actions
+| Area                                  | What is demonstrated                                                                                                                                    |
+|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Retrieval**                         | Keyword search, OpenAI embeddings, hybrid Reciprocal Rank Fusion, Top-1/Top-3 evaluation, dev/holdout datasets                                          |
+| **RAG**                               | Grounded answer generation, required/forbidden content checks, retrieved context handling, citation validation                                          |
+| **LLM-as-a-Judge**                    | Holistic and criterion-level judges, human-labelled benchmarks, grader comparison, confusion matrices, precision/recall, stability across repeated runs |
+| **Agents**                            | Tool selection and arguments, multi-step execution, outcome evaluation, capability evaluation, grounding against tool results                           |
+| **Safety**                            | Direct and indirect prompt injection, system-prompt extraction attempts, malicious retrieved content, unauthorized tool behavior                        |
+| **Observability**                     | OpenTelemetry tracing, Phoenix annotations, structured logging, eval-to-trace correlation, token usage and cost estimation                              |
+| **Evaluation analysis & reliability** | pandas, Jupyter, matplotlib, case-level diagnostics, historical run analysis, confidence intervals, paired comparisons, judge stability                 |
+| **Engineering**                       | pytest, Ruff, mypy, GitHub Actions, reproducible datasets, JSON reports, Git metadata, automated quality gates                                          |
 
-## Architecture
+## System overview
 
-```text
-src/prokat24_ai_lab/
-├── knowledge/   # Knowledge base, search, and answers
-├── products/    # Product catalog, search, and answers
-├── embeddings/  # Embedding indexes and vector search
-├── evals/       # Evaluation logic and reports
-├── retrieval/   # Hybrid search and Reciprocal Rank Fusion
-└── *.py         # Shared infrastructure and utilities
-```
+flowchart LR
+U["User query"]
 
-## Development setup
+    subgraph Retrieval
+        K["Keyword"]
+        E["Embeddings"]
+        H["Hybrid RRF"]
 
-Create virtual environment:
+        K --> H
+        E --> H
+    end
 
-```powershell
-python -m venv .venv
-```
+    subgraph Runtime
+        R["RAG"]
+        A["Tool-using agent"]
+        P["Product tools"]
+        N["Knowledge tools"]
 
-Activate virtual environment:
+        A --> P
+        A --> N
+    end
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
+    U --> K
+    U --> E
+    H --> R
+    U --> A
 
-Install project and dependencies:
+    subgraph Evaluation
+        ER["Retrieval"]
+        EA["Answer / RAG"]
+        EJ["LLM-as-a-Judge"]
+        EG["Agent: outcome / capability / grounding"]
+        ES["Safety / adversarial"]
+    end
 
-```powershell
-pip install -e ".[dev]"
-```
+    H -.-> ER
+    R -.-> EA
+    A -.-> EG
+    A -.-> ES
 
-Run full project check:
+    subgraph Observability
+        OT["OpenTelemetry traces"]
+        PH["Phoenix annotations"]
+        LG["Structured logs"]
+        CO["Token / cost tracking"]
+    end
 
-```powershell
-python scripts/check_project.py
-```
+    A -.-> OT
+    OT --> PH
+    OT --> LG
+    OT --> CO
 
-## Usage
-
-Search the knowledge base:
-
-```powershell
-python scripts/cli/search_knowledge_base.py "як отримати спорядження?"
-```
-
-Generate an answer from the knowledge base:
-
-```powershell
-python scripts/cli/answer_question.py "де ви знаходитесь?"
-```
-
-Search the product catalog:
-
-```powershell
-python scripts/cli/search_products.py "скільки коштує 2 місний намет на тиждень"
-```
-
-## Data export
-
-Export the knowledge base:
-
-```powershell
-python scripts/data/export_knowledge_base.py
-```
-
-Export the product catalog:
-
-```powershell
-python scripts/data/export_product_catalog.py
-```
-
-Generated JSON files are saved in the `data/` directory.
-
-## Embeddings
-
-Build document and query embedding indexes:
-
-```powershell
-python scripts/data/build_document_embedding_index.py
-python scripts/data/build_query_embedding_index.py
-```
-
-These commands require an OpenAI API key.
-
-## Evals
-
-Run individual evaluation suites:
-
-```powershell
-python scripts/evals/run_search_evals.py
-python scripts/evals/run_answer_evals.py
-python scripts/evals/run_product_answer_evals.py
-python scripts/evals/run_offline_embedding_search_evals.py
-python scripts/evals/run_hybrid_search_evals.py
-```
-
-Run retrieval evals for a specific benchmark split:
-
-```powershell
-python scripts/evals/run_offline_embedding_search_evals.py --split dev
-python scripts/evals/run_offline_embedding_search_evals.py --split holdout
-python scripts/evals/run_hybrid_search_evals.py --split dev
-python scripts/evals/run_hybrid_search_evals.py --split holdout
-```
-
-Run embedding search evals with the OpenAI API:
-
-```powershell
-python scripts/evals/run_embedding_search_evals.py
-```
-
-JSON reports are saved in the `reports/` directory.
-
-## Retrieval benchmark
-
-Retrieval Benchmark v2 contains 27 Ukrainian-language queries:
-
-- 15 development cases used for regression checks and retrieval improvements
-- 12 holdout cases used to measure generalization on previously unseen formulations
-
-Each case includes an ID, category, difficulty level, and dataset split.
-
-### Development split
-
-| Retrieval method |           Top-1 |           Top-3 |
-|------------------|----------------:|----------------:|
-| Keyword search   |  14/15 (93.33%) | 15/15 (100.00%) |
-| Embedding search |  12/15 (80.00%) | 15/15 (100.00%) |
-| Hybrid RRF       | 15/15 (100.00%) | 15/15 (100.00%) |
-
-Equal keyword and embedding weights provide the best tested hybrid configuration.
-
-### Holdout split
-
-| Retrieval method |         Top-1 |          Top-3 |
-|------------------|--------------:|---------------:|
-| Keyword search   | 5/12 (41.67%) |  8/12 (66.67%) |
-| Embedding search | 6/12 (50.00%) | 10/12 (83.33%) |
-| Hybrid RRF       | 7/12 (58.33%) |  9/12 (75.00%) |
-
-The development split is part of the automated quality gate. Its established
-retrieval metrics are protected against regressions.
-
-The holdout split is evaluated separately and does not block regular development.
-Its results represent the first observed generalization baseline and should not be
-used for direct tuning against individual queries.
-
-Running either retrieval script without `--split` evaluates all benchmark cases.
-The automated project check runs retrieval quality gates only against the stable
-development split.
-
-## Development workflow
-
-1. Create a feature branch.
-2. Make code and test changes.
-3. Run the full project check:
-
-```powershell
-python scripts/check_project.py
-```
-
-4. Commit and push the changes.
-5. Open a pull request.
-6. Merge after the GitHub Actions check passes.
+The project separates **runtime logic**, **evaluation datasets**, **evaluation logic**, and **reporting/observability**,
+allowing both system behavior and evaluator behavior to be tested independently.
