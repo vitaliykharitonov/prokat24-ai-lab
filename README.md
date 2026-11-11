@@ -4,7 +4,8 @@
 
 **AI evaluation and observability project built around a real equipment-rental website.**
 
-The project evaluates retrieval, RAG answers, LLM-as-a-Judge systems, and a tool-using agent using deterministic checks,
+The project evaluates retrieval, RAG answers, LLM-as-a-Judge evaluators, and a tool-using agent using deterministic
+checks,
 human-labelled datasets, holdout evaluation, adversarial testing, statistical analysis, and trace-level observability.
 
 ## What this project demonstrates
@@ -124,15 +125,16 @@ allowing both system behavior and evaluator behavior to be tested independently.
 **28 Ukrainian-language queries:** 16 development cases for regression/tuning and 12 holdout cases kept separate from
 tuning.
 
-| Method         |        Dev Top-1 |        Dev Top-3 |
-|----------------|-----------------:|-----------------:|
-| Keyword        |   14/16 (87.50%) |     16/16 (100%) |
-| Embeddings     |   13/16 (81.25%) |     16/16 (100%) |
-| **Hybrid RRF** | **16/16 (100%)** | **16/16 (100%)** |
+| Method         |        Dev Top-1 |     Holdout Top-1 |  Holdout Top-3 |
+|----------------|-----------------:|------------------:|---------------:|
+| Keyword        |   14/16 (87.50%) |     5/12 (41.67%) |  8/12 (66.67%) |
+| Embeddings     |   13/16 (81.25%) |     6/12 (50.00%) | 10/12 (83.33%) |
+| **Hybrid RRF** | **16/16 (100%)** | **7/12 (58.33%)** |  9/12 (75.00%) |
 
-Keyword and embedding retrieval fail on different queries; combining both rankings with Reciprocal Rank Fusion produced
-the strongest development-set result. Holdout evaluation is kept outside the regular regression gate to reduce tuning
-against unseen cases.
+All three methods reach **100% Top-3 on the development set**. Keyword and embedding retrieval fail on different
+queries; combining them with Reciprocal Rank Fusion produced the strongest Top-1 result on both splits.
+
+The holdout gap is kept as a generalization baseline rather than tuned away against individual unseen cases.
 
 ### LLM-as-a-Judge
 
@@ -166,7 +168,7 @@ The project treats evaluation as an engineering system rather than a collection 
   LLM-as-a-Judge.
 - **LLM judges are evaluated against human-labelled cases** instead of being treated as ground truth.
 - **Repeated runs are used to measure stability** and expose non-deterministic grader behavior.
-- **Regression thresholds are automated in CI**, so established quality levels can block regressions.
+- **Selected regression thresholds are enforced in CI**, so established quality gates can block regressions.
 - **Evaluation reports include Git metadata** to make results traceable to the exact code version that produced them.
 
 This design allows failures in the **system under evaluation** and failures in the **evaluator itself** to be
@@ -191,7 +193,7 @@ Observability includes:
 - **Phoenix** annotations linked to eval results
 - structured logs with correlation IDs
 - token usage and estimated model cost
-- trace-level comparison between eval runs
+- run-to-run comparison of agent eval metrics
 
 This makes it possible to move from “the eval failed” to **why it failed and where the failure occurred**.
 
@@ -241,6 +243,8 @@ The repository keeps **runtime code, evaluation logic, datasets, and analysis ar
 parts of the system easier to test, replace, and evaluate independently.
 
 ## Run locally
+
+Requires **Python 3.12+**.
 
 Install the project with development dependencies:
 
