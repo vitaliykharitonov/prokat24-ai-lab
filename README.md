@@ -116,3 +116,162 @@ flowchart LR
 
 The project separates **runtime logic**, **evaluation datasets**, **evaluation logic**, and **reporting/observability**,
 allowing both system behavior and evaluator behavior to be tested independently.
+
+## Selected evaluation results
+
+### Retrieval
+
+**28 Ukrainian-language queries:** 16 development cases for regression/tuning and 12 holdout cases kept separate from
+tuning.
+
+| Method         |        Dev Top-1 |        Dev Top-3 |
+|----------------|-----------------:|-----------------:|
+| Keyword        |   14/16 (87.50%) |     16/16 (100%) |
+| Embeddings     |   13/16 (81.25%) |     16/16 (100%) |
+| **Hybrid RRF** | **16/16 (100%)** | **16/16 (100%)** |
+
+Keyword and embedding retrieval fail on different queries; combining both rankings with Reciprocal Rank Fusion produced
+the strongest development-set result. Holdout evaluation is kept outside the regular regression gate to reduce tuning
+against unseen cases.
+
+### LLM-as-a-Judge
+
+Evaluators are benchmarked against **human-labelled examples** rather than assumed to be correct.
+
+| Evaluator                     |      Development |          Holdout |
+|-------------------------------|-----------------:|-----------------:|
+| Deterministic checks          |    2/11 (18.18%) |    4/12 (33.33%) |
+| Holistic LLM judge            |    9/11 (81.82%) |   11/12 (91.67%) |
+| **Criterion-level LLM judge** | **11/11 (100%)** | **12/12 (100%)** |
+
+Criterion-level evaluation handled semantic cases such as paraphrases, negation, unsupported claims, incomplete answers,
+and irrelevant but grounded information more reliably. Repeated runs are used to detect judge instability.
+
+### Additional regression baselines
+
+- **Product answers:** 23/23 cases passing
+- **Agent safety:** 10/10 adversarial cases passing, including direct/indirect prompt injection, prompt extraction
+  attempts, malicious retrieved content, and tool hijacking
+
+These are **project-specific regression baselines**, not claims of general model accuracy.
+
+## Evaluation design
+
+The project treats evaluation as an engineering system rather than a collection of one-off tests:
+
+- **Datasets are separated from evaluation logic** and stored as versioned JSON fixtures.
+- **Development and holdout sets are kept separate** where generalization matters; holdout cases are not used for direct
+  tuning.
+- **Deterministic checks are preferred for objective conditions**, while semantic properties are evaluated with
+  LLM-as-a-Judge.
+- **LLM judges are evaluated against human-labelled cases** instead of being treated as ground truth.
+- **Repeated runs are used to measure stability** and expose non-deterministic grader behavior.
+- **Regression thresholds are automated in CI**, so established quality levels can block regressions.
+- **Evaluation reports include Git metadata** to make results traceable to the exact code version that produced them.
+
+This design allows failures in the **system under evaluation** and failures in the **evaluator itself** to be
+investigated separately.
+
+## Agent evaluation & observability
+
+Agent behavior is evaluated across three complementary dimensions:
+
+| Dimension      | What it checks                                                                                           |
+|----------------|----------------------------------------------------------------------------------------------------------|
+| **Outcome**    | Whether the final result matches the expected task outcome and required tool behavior                    |
+| **Capability** | Whether the response actually demonstrates the intended capability, not just superficial keyword overlap |
+| **Grounding**  | Whether the final answer is supported by tool results and retrieved evidence                             |
+
+Each eval case is correlated with its execution trace, allowing failures to be inspected at the level of **agent steps,
+tool calls, model usage, and final verdicts**.
+
+Observability includes:
+
+- **OpenTelemetry** traces for agent and tool execution
+- **Phoenix** annotations linked to eval results
+- structured logs with correlation IDs
+- token usage and estimated model cost
+- trace-level comparison between eval runs
+
+This makes it possible to move from “the eval failed” to **why it failed and where the failure occurred**.
+
+## Safety & adversarial evaluation
+
+The agent is evaluated against adversarial scenarios, including:
+
+- direct prompt injection
+- system-prompt extraction attempts
+- indirect prompt injection through retrieved content
+- malicious instructions embedded in knowledge documents
+- unauthorized or hijacked tool behavior
+
+Safety evaluation combines **deterministic checks** with **criterion-level LLM-as-a-Judge** evaluation.
+
+The evaluator considers both the **final answer** and the **agent's tool-call behavior**, because a safe-looking
+response can still hide unsafe intermediate actions.
+
+## Repository structure
+
+```text
+data/
+  evals/          Evaluation datasets
+  indexes/        Precomputed embedding indexes
+  snapshots/      Stable source-data snapshots
+
+src/prokat24_ai_lab/
+  agents/         Tool-using agent runtime and tools
+  embeddings/     Embedding generation and semantic retrieval
+  evals/          Evaluation logic, graders, reports, and metrics
+  knowledge/      Knowledge-base loading and search
+  observability/  Tracing, logging, Phoenix integration, and cost tracking
+  products/       Product search, pricing, and answer generation
+  rag/            Retrieval-augmented answer pipeline
+  retrieval/      Keyword and hybrid retrieval
+
+scripts/
+  evals/          Runnable evaluation suites
+  data/           Dataset and index preparation
+  experiments/    Analysis and experimental workflows
+
+notebooks/
+  Agent evaluation analysis with pandas, Jupyter, matplotlib, and statistical diagnostics
+```
+
+The repository keeps **runtime code, evaluation logic, datasets, and analysis artifacts separated**, making individual
+parts of the system easier to test, replace, and evaluate independently.
+
+## Run locally
+
+Install the project with development dependencies:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Run the complete local quality gate:
+
+```bash
+python scripts/check_project.py
+```
+
+Selected evaluation suites:
+
+```bash
+python scripts/evals/run_hybrid_search_evals.py --split dev
+python scripts/evals/run_grader_comparison.py
+python scripts/evals/run_agent_outcome_baseline.py
+python scripts/evals/run_agent_safety_baseline.py
+```
+
+Some evaluation suites use external LLM APIs and require the corresponding environment variables or service
+configuration.
+
+## Limitations
+
+- Evaluation datasets are intentionally small and domain-specific; current scores should be treated as **regression
+  baselines**, not universal model-quality claims.
+- LLM-based evaluation is inherently non-deterministic, so repeated runs and stability checks are used where relevant.
+- Some evaluation suites depend on external APIs and model availability, which can affect latency, cost, and
+  reproducibility.
+- The project focuses on a controlled equipment-rental domain; broader domains and larger datasets would be required to
+  validate generalization.
